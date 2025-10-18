@@ -27,6 +27,7 @@ export interface IStorage {
   getTileset(id: string): Promise<TilesetData | undefined>;
   getAllTilesets(): Promise<TilesetData[]>;
   createTileset(tileset: InsertTileset): Promise<TilesetData>;
+  updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined>;
   deleteTileset(id: string): Promise<boolean>;
 }
 
@@ -45,17 +46,39 @@ export class MemStorage implements IStorage {
   }
 
   private initializeDemoData() {
-    // Create a demo tileset
-    const demoTileset: TilesetData = {
+    // Create 3x3 demo tilesets from attached assets
+    const dirtTileset: TilesetData = {
       id: randomUUID(),
-      name: 'Demo Terrain',
-      tileSize: 32,
-      imageUrl: '/demo-tileset.png',
-      columns: 8,
-      rows: 4,
+      name: 'Dirt Terrain',
+      tileSize: 16,
+      imageUrl: '/attached_assets/dirt_3x3_1760825550695.png',
+      columns: 3,
+      rows: 3,
       createdAt: new Date(),
     };
-    this.tilesets.set(demoTileset.id, demoTileset);
+    this.tilesets.set(dirtTileset.id, dirtTileset);
+
+    const grassTileset: TilesetData = {
+      id: randomUUID(),
+      name: 'Grass Terrain',
+      tileSize: 16,
+      imageUrl: '/attached_assets/grass_3x3_kenney_1760825550695.png',
+      columns: 3,
+      rows: 3,
+      createdAt: new Date(),
+    };
+    this.tilesets.set(grassTileset.id, grassTileset);
+
+    const waterTileset: TilesetData = {
+      id: randomUUID(),
+      name: 'Water Terrain',
+      tileSize: 16,
+      imageUrl: '/attached_assets/water_3x3_1760825550696.png',
+      columns: 3,
+      rows: 3,
+      createdAt: new Date(),
+    };
+    this.tilesets.set(waterTileset.id, waterTileset);
   }
 
   // User methods
@@ -136,6 +159,21 @@ export class MemStorage implements IStorage {
     };
     this.tilesets.set(id, tileset);
     return tileset;
+  }
+
+  async updateTileset(
+    id: string,
+    updates: Partial<InsertTileset>
+  ): Promise<TilesetData | undefined> {
+    const tileset = this.tilesets.get(id);
+    if (!tileset) return undefined;
+
+    const updatedTileset: TilesetData = {
+      ...tileset,
+      ...updates,
+    };
+    this.tilesets.set(id, updatedTileset);
+    return updatedTileset;
   }
 
   async deleteTileset(id: string): Promise<boolean> {

@@ -4,6 +4,7 @@ import { useCanvasStore } from '@/store/useCanvasStore';
 import type { Shape } from '@shared/schema';
 import Konva from 'konva';
 import { v4 as uuidv4 } from 'uuid';
+import { getTilesToUpdate } from '@/utils/autoTiling';
 
 export function Canvas() {
   const stageRef = useRef<Konva.Stage>(null);
@@ -71,23 +72,76 @@ export function Canvas() {
       y: (pos.y - pan.y) / zoom,
     });
 
-    // Handle tile tools
+    // Handle tile tools with auto-tiling
     if (tool === 'tile-paint' && selectedTileset) {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
+      
+      // Add the new tile first (temporarily with selected index)
       addTile({
         x: gridX,
         y: gridY,
         tilesetId: selectedTileset.id,
         tileIndex: selectedTileIndex,
       });
+
+      // Get updated tiles array after adding
+      const updatedTiles = useCanvasStore.getState().tiles;
+      
+      // Calculate auto-tiling for this tile and its neighbors
+      const tilesToUpdate = getTilesToUpdate(
+        gridX,
+        gridY,
+        selectedTileset.id,
+        updatedTiles,
+        true // include self
+      );
+
+      // Update all affected tiles with correct auto-tiling indices
+      tilesToUpdate.forEach((update) => {
+        addTile({
+          x: update.x,
+          y: update.y,
+          tilesetId: selectedTileset.id,
+          tileIndex: update.tileIndex,
+        });
+      });
+
       return;
     }
 
     if (tool === 'tile-erase') {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
+      
+      // Get the tile to be removed to know its tileset
+      const tileToRemove = tiles.find((t) => t.x === gridX && t.y === gridY);
+      
+      // Remove the tile
       removeTile(gridX, gridY);
+
+      // If there was a tile, update surrounding tiles
+      if (tileToRemove) {
+        const updatedTiles = useCanvasStore.getState().tiles;
+        const tilesToUpdate = getTilesToUpdate(
+          gridX,
+          gridY,
+          tileToRemove.tilesetId,
+          updatedTiles,
+          false // don't include self since we just removed it
+        );
+
+        // Update all affected tiles with correct auto-tiling indices
+        tilesToUpdate.forEach((update) => {
+          addTile({
+            x: update.x,
+            y: update.y,
+            tilesetId: tileToRemove.tilesetId,
+            tileIndex: update.tileIndex,
+          });
+        });
+      }
+
       return;
     }
 

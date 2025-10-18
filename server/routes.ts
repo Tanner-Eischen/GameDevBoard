@@ -6,6 +6,7 @@ import express from "express";
 import * as Y from "yjs";
 import { insertProjectSchema, insertTilesetSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Projects API
@@ -118,6 +119,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete tileset" });
+    }
+  });
+
+  // Object Storage routes for tileset uploads
+  // Get upload URL for a tileset image
+  app.post("/api/objects/upload", async (req, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ error: "Failed to get upload URL" });
+    }
+  });
+
+  // Serve uploaded tileset images (public access)
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(
+        req.path,
+      );
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Update tileset with uploaded image URL
+  app.put("/api/tilesets/:id/image", express.json(), async (req, res) => {
+    try {
+      if (!req.body.imageURL) {
+        return res.status(400).json({ error: "imageURL is required" });
+      }
+
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = objectStorageService.normalizeObjectEntityPath(
+        req.body.imageURL,
+      );
+
+      // Update the tileset with the image URL
+      const tileset = await storage.getTileset(req.params.id);
+      if (!tileset) {
+        return res.status(404).json({ error: "Tileset not found" });
+      }
+
+      const updatedTileset = await storage.updateTileset(req.params.id, {
+        imageUrl: objectPath,
+      });
+
+      res.status(200).json(updatedTileset);
+    } catch (error) {
+      console.error("Error updating tileset image:", error);
+      res.status(500).json({ error: "Failed to update tileset image" });
     }
   });
 
