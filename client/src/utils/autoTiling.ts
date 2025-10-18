@@ -48,15 +48,15 @@ export function calculateAutoTileIndex(neighbors: NeighborConfig): number {
   if (top && right && !bottom && !left) return 6; // Bottom-left corner
   if (top && left && !bottom && !right) return 8; // Bottom-right corner
 
-  // Two neighbors (opposite sides) - use center or edges
+  // Two neighbors (opposite sides) - use center
   if (top && bottom && !left && !right) return 4; // Vertical center
   if (left && right && !top && !bottom) return 4; // Horizontal center
 
-  // One neighbor
-  if (bottom && !top && !left && !right) return 0; // Top-left (arbitrary choice for single neighbors)
-  if (top && !bottom && !left && !right) return 6; // Bottom-left
-  if (right && !top && !bottom && !left) return 0; // Top-left
-  if (left && !top && !bottom && !right) return 2; // Top-right
+  // One neighbor - use appropriate edge tile facing the neighbor
+  if (bottom && !top && !left && !right) return 1; // Top edge (neighbor below)
+  if (top && !bottom && !left && !right) return 7; // Bottom edge (neighbor above)
+  if (right && !top && !bottom && !left) return 3; // Left edge (neighbor to right)
+  if (left && !top && !bottom && !right) return 5; // Right edge (neighbor to left)
 
   // No neighbors = isolated tile, use center
   return 4;

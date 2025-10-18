@@ -117,30 +117,34 @@ export function Canvas() {
       // Get the tile to be removed to know its tileset
       const tileToRemove = tiles.find((t) => t.x === gridX && t.y === gridY);
       
-      // Remove the tile
+      if (!tileToRemove) return;
+
+      // Calculate what tiles array will look like after removal
+      const tilesAfterRemoval = tiles.filter(
+        (t) => !(t.x === gridX && t.y === gridY)
+      );
+
+      // Calculate auto-tiling for surrounding tiles based on the state after removal
+      const tilesToUpdate = getTilesToUpdate(
+        gridX,
+        gridY,
+        tileToRemove.tilesetId,
+        tilesAfterRemoval,
+        false // don't include self since we're removing it
+      );
+
+      // Remove the tile first
       removeTile(gridX, gridY);
 
-      // If there was a tile, update surrounding tiles
-      if (tileToRemove) {
-        const updatedTiles = useCanvasStore.getState().tiles;
-        const tilesToUpdate = getTilesToUpdate(
-          gridX,
-          gridY,
-          tileToRemove.tilesetId,
-          updatedTiles,
-          false // don't include self since we just removed it
-        );
-
-        // Update all affected tiles with correct auto-tiling indices
-        tilesToUpdate.forEach((update) => {
-          addTile({
-            x: update.x,
-            y: update.y,
-            tilesetId: tileToRemove.tilesetId,
-            tileIndex: update.tileIndex,
-          });
+      // Then update all affected neighbor tiles with correct auto-tiling indices
+      tilesToUpdate.forEach((update) => {
+        addTile({
+          x: update.x,
+          y: update.y,
+          tilesetId: tileToRemove.tilesetId,
+          tileIndex: update.tileIndex,
         });
-      }
+      });
 
       return;
     }
