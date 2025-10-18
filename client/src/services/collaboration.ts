@@ -1,14 +1,14 @@
 import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
+import { Awareness } from 'y-protocols/awareness';
 import type { Shape, UserPresence } from '@shared/schema';
 import { useCanvasStore } from '@/store/useCanvasStore';
 
 export class CollaborationService {
   private doc: Y.Doc;
-  private provider: WebsocketProvider | null = null;
+  private ws: WebSocket | null = null;
   private shapesArray: Y.Array<any>;
   private tilesArray: Y.Array<any>;
-  private awareness: any;
+  private awareness: Awareness;
   private roomId: string;
 
   constructor(roomId: string = 'default') {
@@ -16,25 +16,46 @@ export class CollaborationService {
     this.doc = new Y.Doc();
     this.shapesArray = this.doc.getArray('shapes');
     this.tilesArray = this.doc.getArray('tiles');
+    this.awareness = new Awareness(this.doc);
   }
 
   connect() {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws?room=${this.roomId}`;
 
-    this.provider = new WebsocketProvider(
-      wsUrl,
-      this.roomId,
-      this.doc,
-      {
-        connect: true,
-        awareness: {
-          timeout: 30000,
-        },
-      }
-    );
+    this.ws = new WebSocket(wsUrl);
+    this.ws.binaryType = 'arraybuffer';
 
-    this.awareness = this.provider.awareness;
+    this.ws.onopen = () => {
+      console.log('WebSocket connected');
+      // Send initial state
+      const stateVector = Y.encodeStateVector(this.doc);
+      if (this.ws) {
+        this.ws.send(stateVector);
+      }
+    };
+
+    this.ws.onmessage = (event) => {
+      if (event.data instanceof ArrayBuffer) {
+        const update = new Uint8Array(event.data);
+        Y.applyUpdate(this.doc, update);
+      }
+    };
+
+    this.ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    this.ws.onclose = () => {
+      console.log('WebSocket disconnected');
+    };
+
+    // Send updates to the server
+    this.doc.on('update', (update: Uint8Array) => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(update);
+      }
+    });
 
     // Set local user state
     const currentUser = useCanvasStore.getState().currentUser;
@@ -89,10 +110,9 @@ export class CollaborationService {
   }
 
   disconnect() {
-    if (this.provider) {
-      this.provider.disconnect();
-      this.provider.destroy();
-      this.provider = null;
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
     }
   }
 

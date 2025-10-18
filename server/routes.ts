@@ -127,17 +127,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up WebSocket server for Y.js collaboration on a distinct path
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
-  // Store Y.js documents for each room/project
-  const docs = new Map<string, Y.Doc>();
-
-  const getYDoc = (roomName: string): Y.Doc => {
-    let doc = docs.get(roomName);
-    if (!doc) {
-      doc = new Y.Doc();
-      docs.set(roomName, doc);
-    }
-    return doc;
-  };
+  // Store connections per room for simple broadcasting
+  const rooms = new Map<string, Set<WebSocket>>();
 
   wss.on('connection', (conn: WebSocket, req) => {
     // Extract room ID from query params
@@ -146,30 +137,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     console.log(`WebSocket connection established for room: ${roomId}`);
 
-    const doc = getYDoc(roomId);
-    
-    // Send initial state
-    const encoder = Y.encodeStateAsUpdate(doc);
-    conn.send(encoder);
+    // Add connection to room
+    if (!rooms.has(roomId)) {
+      rooms.set(roomId, new Set());
+    }
+    rooms.get(roomId)!.add(conn);
 
-    // Listen for updates from this client
-    const updateHandler = (update: Uint8Array, origin: any) => {
-      if (origin !== conn) {
-        conn.send(update);
-      }
-    };
-
-    doc.on("update", updateHandler);
-
-    // Handle incoming messages
+    // Broadcast incoming messages to all other clients in the same room
     conn.on("message", (message: Buffer) => {
-      Y.applyUpdate(doc, new Uint8Array(message), conn);
+      const roomClients = rooms.get(roomId);
+      if (roomClients) {
+        roomClients.forEach((client) => {
+          if (client !== conn && client.readyState === WebSocket.OPEN) {
+            client.send(message);
+          }
+        });
+      }
     });
 
     // Cleanup on disconnect
     conn.on('close', () => {
       console.log(`WebSocket connection closed for room: ${roomId}`);
-      doc.off("update", updateHandler);
+      const roomClients = rooms.get(roomId);
+      if (roomClients) {
+        roomClients.delete(conn);
+        if (roomClients.size === 0) {
+          rooms.delete(roomId);
+        }
+      }
     });
   });
 
