@@ -4,7 +4,6 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import express from "express";
 import * as Y from "yjs";
-import { setupWSConnection } from "y-websocket/bin/utils";
 import { insertProjectSchema, insertTilesetSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 
@@ -131,39 +130,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Store Y.js documents for each room/project
   const docs = new Map<string, Y.Doc>();
 
-  wss.on('connection', (ws: WebSocket, req) => {
+  const getYDoc = (roomName: string): Y.Doc => {
+    let doc = docs.get(roomName);
+    if (!doc) {
+      doc = new Y.Doc();
+      docs.set(roomName, doc);
+    }
+    return doc;
+  };
+
+  wss.on('connection', (conn: WebSocket, req) => {
     // Extract room ID from query params
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const roomId = url.searchParams.get('room') || 'default';
 
     console.log(`WebSocket connection established for room: ${roomId}`);
 
-    // Get or create Y.js document for this room
-    if (!docs.has(roomId)) {
-      docs.set(roomId, new Y.Doc());
-    }
+    const doc = getYDoc(roomId);
+    
+    // Send initial state
+    const encoder = Y.encodeStateAsUpdate(doc);
+    conn.send(encoder);
 
-    const doc = docs.get(roomId)!;
+    // Listen for updates from this client
+    const updateHandler = (update: Uint8Array, origin: any) => {
+      if (origin !== conn) {
+        conn.send(update);
+      }
+    };
 
-    // Set up Y.js WebSocket connection
-    setupWSConnection(ws, req, {
-      gc: true,
-      docName: roomId,
+    doc.on("update", updateHandler);
+
+    // Handle incoming messages
+    conn.on("message", (message: Buffer) => {
+      Y.applyUpdate(doc, new Uint8Array(message), conn);
     });
 
-    ws.on('close', () => {
+    // Cleanup on disconnect
+    conn.on('close', () => {
       console.log(`WebSocket connection closed for room: ${roomId}`);
+      doc.off("update", updateHandler);
     });
   });
-
-  // Broadcast function for sending updates to all connected clients in a room
-  const broadcastToRoom = (roomId: string, message: any) => {
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
-    });
-  };
 
   return httpServer;
 }

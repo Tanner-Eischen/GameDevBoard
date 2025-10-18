@@ -56,7 +56,8 @@ export default function Board() {
     };
   }, [setCurrentUser]);
 
-    // Keyboard shortcuts
+  // Keyboard shortcuts
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Prevent shortcuts when typing in inputs
       if (
@@ -113,7 +114,7 @@ export default function Board() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setCurrentUser, setTool, undo, redo]);
+  }, [setTool, undo, redo]);
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
