@@ -23,10 +23,13 @@ This is a real-time collaborative game development board built with:
 - Grid system with snap-to-grid functionality
 
 ### Tile Mapping
-- Tile palette system
-- Paint and erase tools
-- Tileset management
-- Grid-based tile placement
+- Tile palette system with visual previews
+- Paint and erase tools with auto-tiling
+- **3x3 Auto-Tiling System**: Automatically selects correct tile variants (corners, edges, center) based on neighbor configuration
+- Tileset upload to Replit object storage
+- Three demo tilesets included (dirt, grass, water)
+- Grid-based tile placement with snap-to-grid
+- Independent auto-tiling per tileset (mixed terrain support)
 
 ### Real-Time Collaboration
 - Live multi-user editing via Y.js CRDT
@@ -58,12 +61,15 @@ client/src/
 │   ├── PropertiesPanel.tsx  # Shape property inspector
 │   ├── LayersPanel.tsx      # Layer management
 │   ├── TilesetPanel.tsx     # Tileset selector and tile picker
+│   ├── ObjectUploader.tsx   # Tileset image upload component
 │   ├── UserPresence.tsx     # Active user indicators
 │   └── ProjectManager.tsx   # Save/Load/Export functionality
 ├── store/
 │   └── useCanvasStore.ts    # Zustand state management
 ├── services/
 │   └── collaboration.ts     # Y.js WebSocket integration
+├── utils/
+│   └── autoTiling.ts        # 3x3 auto-tiling algorithm
 ├── hooks/
 │   ├── useProjects.ts       # Project API hooks
 │   └── useTilesets.ts       # Tileset API hooks
@@ -102,6 +108,16 @@ shared/schema.ts   # Shared TypeScript types and schemas
 
 ## Recent Changes
 
+### 2025-10-18 - 3x3 Auto-Tiling System Complete
+- ✅ Integrated Replit object storage for tileset uploads
+- ✅ Created ObjectUploader component for tileset image management
+- ✅ Implemented 3x3 auto-tiling algorithm with neighbor detection
+- ✅ Fixed auto-tiling logic: single-neighbor cases use edge tiles, not corners
+- ✅ Fixed erase logic: neighbors recalculate correctly after tile removal
+- ✅ Added three demo tilesets (dirt, grass, water) as 16x16 3x3 grids
+- ✅ Tested end-to-end: paint, erase, and mixed terrain all working
+- ✅ Independent auto-tiling per tileset verified
+
 ### 2025-10-18 - MVP Complete & Tested
 - ✅ Implemented complete schema with shapes, tiles, projects, and tilesets
 - ✅ Built full canvas system with React-Konva integration
@@ -134,11 +150,11 @@ The application uses a professional dark-first design system inspired by Figma, 
 ## Future Enhancements
 
 ### Phase 2 Features (Next)
+- Texture-based tile rendering (replace colored rectangles with actual tileset images)
 - Advanced auto-tiling with 47-tile Wang/bitmask system
 - AI-powered terrain generation
 - Bezier curve drawing tool
 - Custom brush system
-- Firebase Storage for cloud tilesets
 - Performance optimizations (chunk-based rendering, WebWorkers)
 
 ### Planned Features
