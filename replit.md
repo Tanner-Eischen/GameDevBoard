@@ -36,6 +36,120 @@ The application is built with a modern web stack, featuring:
 -   **UI Components**: Shadcn UI
 -   **Styling**: Tailwind CSS
 
+## Deployment Options
+
+### GitHub Workflow (Recommended)
+This project supports a seamless Git-based workflow:
+
+1. **Push from Replit** → GitHub repository
+2. **Clone elsewhere** → Make edits locally or on other machines
+3. **Push changes** → Back to GitHub
+4. **Pull into Replit** → Use Git pane or Shell to sync
+5. **Deploy from Replit** → Publish with all integrations intact
+
+**Benefits:**
+- Environment variables and secrets stay in Replit (no need to commit them)
+- Edit locally with your preferred IDE
+- Deploy from Replit's infrastructure with zero reconfiguration
+- Automatic checkpoints created by Replit Agent
+
+**Authentication:**
+- For private repos, use GitHub personal access token
+- Store in Replit Secrets as `GIT_URL`: `https://<username>:<token>@github.com/<user>/<repo>`
+- Use `git push $GIT_URL` to push without re-entering credentials
+
+### Deploying from Replit
+- Use Replit's built-in publishing feature for production deployment
+- Supports custom domains and automatic HTTPS
+- All Replit integrations (database, object storage, AI) remain connected
+- No additional configuration needed
+
+## Environment Variables & Dependencies
+
+### Required Environment Variables
+The following environment variables are used by this application and are automatically provided by Replit integrations:
+
+**Database Integration (Required):**
+- **`DATABASE_URL`**: PostgreSQL connection string (Neon-backed, auto-configured)
+
+**AI Integration (Required):**
+- **`AI_INTEGRATIONS_OPENAI_API_KEY`**: OpenAI API key (auto-managed, rotated automatically)
+- **`AI_INTEGRATIONS_OPENAI_BASE_URL`**: OpenAI API endpoint (Replit proxy for rate limiting)
+
+**Object Storage Integration (Optional):**
+- **`PUBLIC_OBJECT_SEARCH_PATHS`**: Search paths for public assets (defaults to empty if not set)
+- **`PRIVATE_OBJECT_DIR`**: Directory for private objects (defaults to empty if not set)
+
+These variables are automatically set when you add the respective integrations to your Replit project. The database and AI integrations are required for the application to function. Object storage variables have safe defaults.
+
+### Replit-Specific Integrations
+These services are integrated and managed by Replit:
+
+1. **Object Storage** (`server/objectStorage.ts`)
+   - Uses Google Cloud Storage via Replit sidecar endpoint
+   - Automatic credential management
+   - Used for tileset image uploads
+
+2. **AI Integration** (`server/ai/openai.ts`)
+   - OpenAI API access via Replit proxy
+   - Automatic API key rotation
+   - Rate limiting and quota management
+
+3. **PostgreSQL Database** (`server/db.ts`)
+   - Neon-backed PostgreSQL with HTTP driver
+   - Automatic backups and scaling
+   - Migration-free schema updates via `npm run db:push`
+
+## External Deployment Considerations
+
+If deploying outside Replit, you'll need to replace Replit-specific services:
+
+### 1. Object Storage
+**Current:** Replit Object Storage (GCS via sidecar)
+**Replace with:** AWS S3, Google Cloud Storage (direct), or similar
+**Files to modify:** `server/objectStorage.ts`
+**Required:** Storage service credentials, bucket configuration
+
+### 2. AI Integration
+**Current:** OpenAI via Replit AI Integrations
+**Replace with:** Direct OpenAI API access
+**Files to modify:** `server/ai/openai.ts`
+**Required:** `OPENAI_API_KEY` from OpenAI, remove custom `baseURL`
+
+### 3. Database
+**Current:** PostgreSQL (Neon via Replit)
+**Replace with:** Any PostgreSQL provider (Neon, Supabase, Railway, etc.)
+**Required:** Update `DATABASE_URL`, run `npm run db:push` for schema migration
+
+### 4. WebSocket Support
+**Current:** WebSocket server on same Express instance
+**Required for external hosting:**
+- Ensure hosting platform supports WebSocket connections
+- Configure reverse proxy (nginx, etc.) if needed
+- May need sticky sessions for multi-instance deployments
+
+### Files to Update for External Deployment
+- **`server/objectStorage.ts`**: Complete replacement with your storage provider
+- **`server/ai/openai.ts`**: Update to standard OpenAI configuration
+- **`vite.config.ts`**: Replit dev plugins are already conditional (no changes needed)
+- **Environment variables**: Set all required variables in your hosting platform
+
+### Build & Deploy Steps
+1. Download project from Replit or clone from GitHub
+2. Install dependencies: `npm install`
+3. Configure environment variables (`.env` or hosting platform)
+4. Update code for object storage and AI (see files above)
+5. Build for production: `npm run build` (may need to add script)
+6. Run migrations: `npm run db:push`
+7. Start server: `npm start` (production mode)
+
+### Hosting Platform Recommendations
+- **Railway**: Easy deployment, WebSocket support, PostgreSQL included
+- **Render**: Free tier available, managed PostgreSQL
+- **Fly.io**: Global deployment, WebSocket-friendly
+- **DigitalOcean App Platform**: Simple managed hosting
+- **Vercel/Netlify**: Frontend only (requires separate backend hosting)
+
 ## Recent Changes
 
 ### October 19, 2025
