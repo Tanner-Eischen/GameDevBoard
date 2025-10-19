@@ -161,12 +161,12 @@ export function TilesetPanel() {
               <Label htmlFor="pack-select" className="text-xs">
                 Tileset Pack (optional)
               </Label>
-              <Select value={selectedPackId} onValueChange={setSelectedPackId}>
+              <Select value={selectedPackId || 'none'} onValueChange={(val) => setSelectedPackId(val === 'none' ? '' : val)}>
                 <SelectTrigger id="pack-select" data-testid="select-pack">
                   <SelectValue placeholder="No pack" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No pack</SelectItem>
+                  <SelectItem value="none">No pack</SelectItem>
                   {packs?.map((pack) => (
                     <SelectItem key={pack.id} value={pack.id}>
                       {pack.name}
