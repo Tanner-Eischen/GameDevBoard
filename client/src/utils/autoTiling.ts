@@ -100,15 +100,28 @@ export function getNeighborConfig(
 
 /**
  * Get all tiles that need to be updated when a tile is added/removed
+ * For terrain tiles, this also updates neighboring tiles of different terrain types
+ * to create proper edges (e.g., water edges when grass is painted next to water)
  */
 export function getTilesToUpdate(
   x: number,
   y: number,
   tilesetId: string,
   tiles: Tile[],
-  includeSelf: boolean = true
-): Array<{ x: number; y: number; tileIndex: number }> {
-  const updates: Array<{ x: number; y: number; tileIndex: number }> = [];
+  includeSelf: boolean = true,
+  layer?: 'terrain' | 'props'
+): Array<{ x: number; y: number; tileIndex: number; tilesetId: string }> {
+  const updates: Array<{ x: number; y: number; tileIndex: number; tilesetId: string }> = [];
+
+  // Determine if this is a terrain or props tile
+  // Use explicit layer parameter if provided, otherwise try to find the tile in the array
+  let isTerrainLayer: boolean;
+  if (layer !== undefined) {
+    isTerrainLayer = layer === 'terrain';
+  } else {
+    const currentTile = tiles.find(t => t.x === x && t.y === y && t.tilesetId === tilesetId);
+    isTerrainLayer = currentTile?.layer === 'terrain';
+  }
 
   // Update surrounding tiles (N, S, E, W)
   const positions = [
@@ -123,14 +136,35 @@ export function getTilesToUpdate(
   }
 
   for (const pos of positions) {
-    const existingTile = tiles.find(
-      (t) => t.x === pos.x && t.y === pos.y && t.tilesetId === tilesetId
-    );
+    if (isTerrainLayer) {
+      // For terrain tiles: update ALL terrain tiles at neighboring positions (cross-tileset)
+      const tilesAtPosition = tiles.filter(
+        (t) => t.x === pos.x && t.y === pos.y && t.layer === 'terrain'
+      );
+      
+      for (const tile of tilesAtPosition) {
+        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles);
+        const tileIndex = calculateAutoTileIndex(neighbors);
+        updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId: tile.tilesetId });
+      }
+      
+      // If no tile at position but includeSelf and it's the center, add it
+      if (tilesAtPosition.length === 0 && pos.x === x && pos.y === y && includeSelf) {
+        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles);
+        const tileIndex = calculateAutoTileIndex(neighbors);
+        updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId });
+      }
+    } else {
+      // For props tiles: only update tiles from the same tileset (original behavior)
+      const existingTile = tiles.find(
+        (t) => t.x === pos.x && t.y === pos.y && t.tilesetId === tilesetId
+      );
 
-    if (existingTile || (pos.x === x && pos.y === y && includeSelf)) {
-      const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles);
-      const tileIndex = calculateAutoTileIndex(neighbors);
-      updates.push({ x: pos.x, y: pos.y, tileIndex });
+      if (existingTile || (pos.x === x && pos.y === y && includeSelf)) {
+        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles);
+        const tileIndex = calculateAutoTileIndex(neighbors);
+        updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId });
+      }
     }
   }
 

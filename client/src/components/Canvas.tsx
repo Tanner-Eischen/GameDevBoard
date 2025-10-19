@@ -166,11 +166,11 @@ export function Canvas() {
         );
 
         updates.forEach((update) => {
-          const key = `${update.x},${update.y}`;
+          const key = `${update.x},${update.y},${update.tilesetId}`;
           autoTiledTiles.set(key, {
             x: update.x,
             y: update.y,
-            tilesetId: selectedTileset.id,
+            tilesetId: update.tilesetId, // Use tilesetId from update (supports cross-tileset updates)
             tileIndex: update.tileIndex,
             layer: 'terrain', // Auto-tiled tiles are terrain
           });
@@ -184,7 +184,7 @@ export function Canvas() {
     
     // Ensure all original brush tiles are included (in case auto-tiling didn't cover them)
     tilesToAdd.forEach(tile => {
-      const key = `${tile.x},${tile.y}`;
+      const key = `${tile.x},${tile.y},${tile.tilesetId}`;
       if (!finalTiles.has(key)) {
         finalTiles.set(key, tile);
       }
@@ -267,7 +267,8 @@ export function Canvas() {
         gridY,
         tileToRemove.tilesetId,
         tilesAfterRemoval,
-        false // don't include self since we're removing it
+        false, // don't include self since we're removing it
+        tileToRemove.layer // pass layer explicitly since tile will be gone from array
       );
 
       // Remove the tile from its layer
@@ -279,7 +280,7 @@ export function Canvas() {
           addTile({
             x: update.x,
             y: update.y,
-            tilesetId: tileToRemove.tilesetId,
+            tilesetId: update.tilesetId, // Use tilesetId from update (supports cross-tileset updates)
             tileIndex: update.tileIndex,
             layer: 'terrain', // Auto-tiled neighbors are terrain
           });
