@@ -2,26 +2,40 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, Sparkles, X } from 'lucide-react';
+import { Loader2, Send, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
+interface ExecutionResult {
+  success: boolean;
+  message: string;
+  requiresConfirmation?: boolean;
+  confirmationPrompt?: string;
+  canvasUpdates?: {
+    shapes?: any[];
+    tiles?: any[];
+  };
+}
+
 interface AiChatResponse {
   message: string;
-  executionResults: Array<{
-    success: boolean;
-    message: string;
-    canvasUpdates?: {
-      shapes?: any[];
-      tiles?: any[];
-    };
-  }>;
+  executionResults: ExecutionResult[];
   toolCalls: Array<{
     function: string;
     arguments: any;
@@ -32,9 +46,53 @@ export function AiChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
+  const [pendingConfirmation, setPendingConfirmation] = useState<{
+    results: ExecutionResult[];
+    aiMessage: string;
+  } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const { shapes, tiles, addShape, addTiles, clearShapes, clearTiles, zoom, pan, gridSize, gridVisible, snapToGrid, tool, selectedIds } = useCanvasStore();
+
+  // Helper to apply canvas updates
+  const applyCanvasUpdates = (results: ExecutionResult[]) => {
+    results.forEach(result => {
+      if (result.success && result.canvasUpdates) {
+        if (result.canvasUpdates.shapes !== undefined) {
+          if (result.canvasUpdates.shapes.length === 0) {
+            clearShapes();
+          } else {
+            result.canvasUpdates.shapes.forEach(shape => addShape(shape));
+          }
+        }
+        if (result.canvasUpdates.tiles !== undefined) {
+          if (result.canvasUpdates.tiles.length === 0) {
+            clearTiles();
+          } else {
+            addTiles(result.canvasUpdates.tiles);
+          }
+        }
+      }
+    });
+  };
+
+  const handleConfirm = () => {
+    if (pendingConfirmation) {
+      applyCanvasUpdates(pendingConfirmation.results);
+      setMessages(prev => [...prev, { role: 'assistant', content: pendingConfirmation.aiMessage }]);
+      setPendingConfirmation(null);
+    }
+  };
+
+  const handleCancel = () => {
+    if (pendingConfirmation) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Action cancelled. Your canvas remains unchanged.' 
+      }]);
+      setPendingConfirmation(null);
+    }
+  };
 
   const chatMutation = useMutation({
     mutationFn: async (userMessage: string) => {
@@ -54,38 +112,96 @@ export function AiChat() {
         tiles
       };
 
-      const res = await apiRequest('POST', '/api/ai/chat', {
-        messages: [...messages, { role: 'user', content: userMessage }],
-        canvasState,
-        tileMap
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, { role: 'user', content: userMessage }],
+          canvasState,
+          tileMap
+        }),
+        credentials: 'include'
       });
-      
-      return await res.json() as AiChatResponse;
-    },
-    onSuccess: (data) => {
-      // Apply canvas updates from AI
-      if (data.executionResults) {
-        data.executionResults.forEach(result => {
-          if (result.success && result.canvasUpdates) {
-            if (result.canvasUpdates.shapes) {
-              result.canvasUpdates.shapes.forEach(shape => addShape(shape));
-            }
-            if (result.canvasUpdates.tiles) {
-              addTiles(result.canvasUpdates.tiles);
-            }
-            // Handle clear operations
-            if (result.canvasUpdates.shapes && result.canvasUpdates.shapes.length === 0) {
-              clearShapes();
-            }
-            if (result.canvasUpdates.tiles && result.canvasUpdates.tiles.length === 0) {
-              clearTiles();
-            }
-          }
-        });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      // Add AI response to chat
-      setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No response body');
+      }
+
+      const decoder = new TextDecoder();
+      let accumulatedMessage = '';
+      let executionResults: ExecutionResult[] = [];
+      let buffer = ''; // Buffer for incomplete SSE frames
+
+      // Add assistant message placeholder
+      const assistantMessageIndex = messages.length + 1;
+      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // Append chunk to buffer
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Process complete lines
+        const lines = buffer.split('\n');
+        // Keep last incomplete line in buffer
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+
+              if (data.type === 'content') {
+                accumulatedMessage += data.content;
+                // Update message in real-time
+                setMessages(prev => {
+                  const newMessages = [...prev];
+                  newMessages[assistantMessageIndex] = {
+                    role: 'assistant',
+                    content: accumulatedMessage
+                  };
+                  return newMessages;
+                });
+              } else if (data.type === 'execution') {
+                executionResults = data.results;
+              } else if (data.type === 'error') {
+                throw new Error(data.details || data.error);
+              }
+            } catch (parseError) {
+              // Skip malformed JSON
+              console.warn('Failed to parse SSE data:', parseError);
+            }
+          }
+        }
+      }
+
+      return {
+        message: accumulatedMessage,
+        executionResults,
+        toolCalls: []
+      };
+    },
+    onSuccess: (data) => {
+      // Check if any results require confirmation
+      const needsConfirmation = data.executionResults.some(r => r.requiresConfirmation);
+      
+      if (needsConfirmation) {
+        // Hold updates pending user confirmation
+        setPendingConfirmation({
+          results: data.executionResults,
+          aiMessage: data.message
+        });
+      } else {
+        // Apply canvas updates immediately
+        applyCanvasUpdates(data.executionResults);
+      }
     }
   });
 
@@ -206,6 +322,30 @@ export function AiChat() {
           </Button>
         </div>
       </form>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!pendingConfirmation} onOpenChange={(open) => !open && handleCancel()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              Confirm Action
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingConfirmation?.results.find(r => r.requiresConfirmation)?.confirmationPrompt || 
+                'This action will modify your canvas. Are you sure?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-confirm-cancel" onClick={handleCancel}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction data-testid="button-confirm-proceed" onClick={handleConfirm}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 export interface ExecutionResult {
   success: boolean;
   message: string;
+  requiresConfirmation?: boolean;
+  confirmationPrompt?: string;
   canvasUpdates?: {
     shapes?: Shape[];
     tiles?: Tile[];
@@ -216,6 +218,16 @@ export function executeClearCanvas(
   canvasState: CanvasState,
   tileMap: TileMap
 ): ExecutionResult {
+  // Calculate what will be cleared
+  let itemCount = 0;
+  if (params.target === "all") {
+    itemCount = canvasState.shapes.length + tileMap.tiles.length;
+  } else if (params.target === "shapes") {
+    itemCount = canvasState.shapes.length;
+  } else if (params.target === "tiles") {
+    itemCount = tileMap.tiles.length;
+  }
+
   const updates: { shapes?: Shape[]; tiles?: Tile[] } = {};
 
   if (params.target === "all" || params.target === "shapes") {
@@ -229,6 +241,8 @@ export function executeClearCanvas(
   return {
     success: true,
     message: `Cleared ${params.target} from canvas`,
+    requiresConfirmation: true,
+    confirmationPrompt: `This will delete ${itemCount} ${params.target === "all" ? "items" : params.target}. Are you sure?`,
     canvasUpdates: updates
   };
 }
