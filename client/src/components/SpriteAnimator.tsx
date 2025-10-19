@@ -70,7 +70,7 @@ export function SpriteAnimator({
   if (!image) return null;
 
   const animation = definition.animations[sprite.currentAnimation];
-  const frameToShow = animation ? animation.frames[currentFrame] || 0 : 0;
+  const frameToShow = currentFrame;
   
   // Calculate crop position
   const cols = Math.floor(image.width / definition.frameWidth);
@@ -91,9 +91,10 @@ export function SpriteAnimator({
         height: definition.frameHeight,
       }}
       rotation={sprite.rotation}
-      scaleX={sprite.flipX ? -sprite.scale : sprite.scale}
-      scaleY={sprite.flipY ? -sprite.scale : sprite.scale}
-      offsetX={sprite.flipX ? definition.frameWidth : 0}
+      scaleX={sprite.flipX ? -1 : 1}
+      scaleY={sprite.flipY ? -1 : 1}
+      offsetX={sprite.flipX ? definition.frameWidth * sprite.scale : 0}
+      offsetY={sprite.flipY ? definition.frameHeight * sprite.scale : 0}
       draggable={isSelected}
       onClick={onClick}
       onDragEnd={onDragEnd}

@@ -103,6 +103,12 @@ These services are integrated and managed by Replit:
 ## Recent Changes
 
 ### October 19, 2025
+- **Fixed Three Critical Bugs in Sprite Animation System**:
+  - **Bug #1 - Property Name Mismatch**: Fixed demo sprite definitions using `frameRate` instead of `fps` to match SpriteDefinition interface. All 6 animation states (idle, walk, run, attack, hurt, die) now use correct property name.
+  - **Bug #2 - Double Frame Indexing**: Fixed SpriteAnimator incorrectly indexing into frames array twice. `currentFrame` already contains the frame number from `animation.frames[frameIndex]`, so removed redundant array access at line 73.
+  - **Bug #3 - Double Scaling**: Fixed sprite rendering applying scale twice (once via width/height, once via scaleX/scaleY). Changed scaleX/scaleY to only handle flipping (1 or -1), not scaling. Also fixed offsetX/offsetY to account for scale when flipping.
+  - Added missing `defaultAnimation` and `tags` properties to knight sprite definition
+  - Animation system now fully functional with correct frame timing, scaling, and flipping
 - **Enhanced AI Assistant with Advanced Natural Language Understanding**:
   - Added 5 new terrain patterns: `horizontal_path`, `vertical_path`, `diagonal_path`, `winding_path`, `curved_path`
   - Implemented Catmull-Rom spline algorithm for realistic curved/winding paths (rivers, roads)

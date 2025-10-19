@@ -11,35 +11,37 @@ export const knightSpriteDefinition: SpriteDefinition = {
   animations: {
     idle: {
       frames: [0, 1, 2, 3],
-      frameRate: 8,
+      fps: 8,
       loop: true,
     },
     walk: {
       frames: [8, 9, 10, 11, 12, 13, 14, 15],
-      frameRate: 12,
+      fps: 12,
       loop: true,
     },
     run: {
       frames: [16, 17, 18, 19, 20, 21, 22, 23],
-      frameRate: 16,
+      fps: 16,
       loop: true,
     },
     attack: {
       frames: [24, 25, 26, 27, 28, 29, 30, 31],
-      frameRate: 14,
+      fps: 14,
       loop: false,
     },
     hurt: {
       frames: [32, 33],
-      frameRate: 6,
+      fps: 6,
       loop: false,
     },
     die: {
       frames: [34, 35, 36, 37, 38, 39],
-      frameRate: 8,
+      fps: 8,
       loop: false,
     },
   },
+  defaultAnimation: 'idle',
+  tags: ['character', 'player', 'knight'],
 };
 
 // Function to initialize demo sprites in the store
