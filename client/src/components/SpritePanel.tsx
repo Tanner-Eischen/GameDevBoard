@@ -22,6 +22,8 @@ export function SpritePanel() {
     setAnimationPreview,
     addSprite,
     updateSprite,
+    zoom,
+    pan,
   } = useCanvasStore();
 
   const [showEditor, setShowEditor] = useState(false);
@@ -31,11 +33,21 @@ export function SpritePanel() {
   const handleAddSprite = () => {
     if (!selectedDef) return;
 
+    // Calculate viewport center in world coordinates
+    // Get the actual canvas element dimensions
+    const canvasContainer = document.querySelector('.bg-canvas');
+    const screenCenterX = canvasContainer ? canvasContainer.clientWidth / 2 : 400;
+    const screenCenterY = canvasContainer ? canvasContainer.clientHeight / 2 : 300;
+    
+    // Convert screen coordinates to world coordinates accounting for pan and zoom
+    const worldX = (screenCenterX - pan.x) / zoom;
+    const worldY = (screenCenterY - pan.y) / zoom;
+
     const newSprite: SpriteInstance = {
       id: uuidv4(),
       spriteId: selectedDef.id,
-      x: 200,
-      y: 200,
+      x: worldX,
+      y: worldY,
       scale: 1,
       rotation: 0,
       currentAnimation: selectedDef.defaultAnimation,

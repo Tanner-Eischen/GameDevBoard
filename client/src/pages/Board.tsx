@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@/components/Canvas';
 import { Toolbar } from '@/components/Toolbar';
 import { PropertiesPanel } from '@/components/PropertiesPanel';
@@ -11,6 +11,9 @@ import { AiChat } from '@/components/AiChat';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { getCollaborationService } from '@/services/collaboration';
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from '@/components/ui/button';
+import { PanelLeft, PanelRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const USER_COLORS = [
   'hsl(217 91% 60%)',
@@ -27,6 +30,8 @@ export default function Board() {
   const { setCurrentUser, setTool, undo, redo, setCurrentProject, currentProjectId, tiles, shapes } = useCanvasStore();
   const collaborationRef = useRef<ReturnType<typeof getCollaborationService> | null>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   useEffect(() => {
     // Initialize current user
@@ -223,22 +228,55 @@ export default function Board() {
       <Toolbar />
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Panel Toggle Buttons - always visible, higher z-index than panels */}
+        <div className="absolute top-2 left-2 z-30 flex gap-2">
+          <Button
+            size="icon"
+            variant="outline"
+            className="bg-card/80 backdrop-blur-sm shadow-lg"
+            onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+            data-testid="button-toggle-left-panel"
+          >
+            <PanelLeft className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="absolute top-2 right-2 z-30 flex gap-2">
+          <Button
+            size="icon"
+            variant="outline"
+            className="bg-card/80 backdrop-blur-sm shadow-lg"
+            onClick={() => setRightPanelOpen(!rightPanelOpen)}
+            data-testid="button-toggle-right-panel"
+          >
+            <PanelRight className="h-4 w-4" />
+          </Button>
+        </div>
+
         {/* Left Sidebar */}
-        <aside className="w-64 bg-card border-r border-card-border overflow-auto">
-          <div className="p-4 space-y-4">
+        <aside className={cn(
+          "w-64 bg-card border-r border-card-border overflow-auto transition-all duration-300",
+          "absolute md:relative inset-y-0 left-0 z-20 md:z-auto shadow-lg md:shadow-none",
+          leftPanelOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0"
+        )}>
+          <div className="p-4 space-y-4 min-w-64">
             <LayersPanel />
           </div>
         </aside>
 
         {/* Canvas */}
-        <main className="flex-1">
+        <main className="flex-1 min-w-0">
           <Canvas />
         </main>
 
         {/* Right Sidebar */}
-        <aside className="w-80 bg-card border-l border-card-border overflow-auto">
-          <div className="p-4 space-y-4">
+        <aside className={cn(
+          "w-80 bg-card border-l border-card-border overflow-auto transition-all duration-300",
+          "absolute md:relative inset-y-0 right-0 z-20 md:z-auto shadow-lg md:shadow-none",
+          rightPanelOpen ? "translate-x-0" : "translate-x-full md:translate-x-0 md:w-0 md:border-l-0"
+        )}>
+          <div className="p-4 space-y-4 min-w-80">
             <PropertiesPanel />
             <TilesetPanel />
             <SpritePanel />

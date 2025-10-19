@@ -107,6 +107,78 @@ export function Canvas() {
     };
   };
 
+  const eraseTilesAtPosition = (gridX: number, gridY: number) => {
+    // Find tiles at this position, prioritize props layer
+    const tilesAtPosition = tiles.filter((t) => t.x === gridX && t.y === gridY);
+    if (tilesAtPosition.length === 0) return;
+    
+    // Erase from props layer first, then terrain
+    const tileToRemove = tilesAtPosition.find((t) => t.layer === 'props') || tilesAtPosition[0];
+    
+    if (!tileToRemove) return;
+
+    // Get the tileset to check if it's a multi-tile object
+    const tileset = tilesets?.find(ts => ts.id === tileToRemove.tilesetId);
+
+    // Handle multi-tile objects (trees, etc.)
+    if (tileset?.tilesetType === 'multi-tile' && tileset.multiTileConfig) {
+      // Find which tile in the config this is by matching tileIndex
+      const tileIndexToFind = tileToRemove.tileIndex;
+      const configTile = tileset.multiTileConfig.tiles.find((tilePos) => {
+        const calculatedIndex = tilePos.y * tileset.columns + tilePos.x;
+        return calculatedIndex === tileIndexToFind;
+      });
+      
+      if (!configTile) {
+        removeTile(gridX, gridY);
+        return;
+      }
+
+      // Calculate the base position (where the object was placed)
+      const baseX = gridX - configTile.x;
+      const baseY = gridY - configTile.y;
+
+      // Remove all tiles belonging to this multi-tile object (from props layer)
+      tileset.multiTileConfig.tiles.forEach((tilePos) => {
+        removeTile(baseX + tilePos.x, baseY + tilePos.y, 'props');
+      });
+
+      return;
+    }
+
+    // Handle auto-tiling tilesets (existing logic)
+    // Calculate what tiles array will look like after removal
+    const tilesAfterRemoval = tiles.filter(
+      (t) => !(t.x === gridX && t.y === gridY)
+    );
+
+    // Calculate auto-tiling for surrounding tiles based on the state after removal
+    const tilesToUpdate = getTilesToUpdate(
+      gridX,
+      gridY,
+      tileToRemove.tilesetId,
+      tilesAfterRemoval,
+      false, // don't include self since we're removing it
+      tileToRemove.layer // pass layer explicitly since tile will be gone from array
+    );
+
+    // Remove the tile from its layer
+    removeTile(gridX, gridY, tileToRemove.layer);
+
+    // Then update all affected neighbor tiles with correct auto-tiling indices (only for terrain layer)
+    if (tileToRemove.layer === 'terrain') {
+      tilesToUpdate.forEach((update) => {
+        addTile({
+          x: update.x,
+          y: update.y,
+          tilesetId: update.tilesetId, // Use tilesetId from update (supports cross-tileset updates)
+          tileIndex: update.tileIndex,
+          layer: 'terrain', // Auto-tiled neighbors are terrain
+        });
+      });
+    }
+  };
+
   const paintTilesAtPosition = (gridX: number, gridY: number) => {
     if (!selectedTileset) return;
 
@@ -281,72 +353,9 @@ export function Canvas() {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
       
-      // Find tiles at this position, prioritize props layer
-      const tilesAtPosition = tiles.filter((t) => t.x === gridX && t.y === gridY);
-      if (tilesAtPosition.length === 0) return;
-      
-      // Erase from props layer first, then terrain
-      const tileToRemove = tilesAtPosition.find((t) => t.layer === 'props') || tilesAtPosition[0];
-      
-      if (!tileToRemove) return;
-
-      // Get the tileset to check if it's a multi-tile object
-      const tileset = tilesets?.find(ts => ts.id === tileToRemove.tilesetId);
-
-      // Handle multi-tile objects (trees, etc.)
-      if (tileset?.tilesetType === 'multi-tile' && tileset.multiTileConfig) {
-        // Find the root position of this multi-tile object
-        // We need to determine which tile in the configuration this is
-        const configTile = tileset.multiTileConfig.tiles[tileToRemove.tileIndex];
-        if (!configTile) {
-          removeTile(gridX, gridY);
-          return;
-        }
-
-        // Calculate the base position (where the object was placed)
-        const baseX = gridX - configTile.x;
-        const baseY = gridY - configTile.y;
-
-        // Remove all tiles belonging to this multi-tile object (from props layer)
-        tileset.multiTileConfig.tiles.forEach((tilePos) => {
-          removeTile(baseX + tilePos.x, baseY + tilePos.y, 'props');
-        });
-
-        return;
-      }
-
-      // Handle auto-tiling tilesets (existing logic)
-      // Calculate what tiles array will look like after removal
-      const tilesAfterRemoval = tiles.filter(
-        (t) => !(t.x === gridX && t.y === gridY)
-      );
-
-      // Calculate auto-tiling for surrounding tiles based on the state after removal
-      const tilesToUpdate = getTilesToUpdate(
-        gridX,
-        gridY,
-        tileToRemove.tilesetId,
-        tilesAfterRemoval,
-        false, // don't include self since we're removing it
-        tileToRemove.layer // pass layer explicitly since tile will be gone from array
-      );
-
-      // Remove the tile from its layer
-      removeTile(gridX, gridY, tileToRemove.layer);
-
-      // Then update all affected neighbor tiles with correct auto-tiling indices (only for terrain layer)
-      if (tileToRemove.layer === 'terrain') {
-        tilesToUpdate.forEach((update) => {
-          addTile({
-            x: update.x,
-            y: update.y,
-            tilesetId: update.tilesetId, // Use tilesetId from update (supports cross-tileset updates)
-            tileIndex: update.tileIndex,
-            layer: 'terrain', // Auto-tiled neighbors are terrain
-          });
-        });
-      }
-
+      setIsPainting(true);
+      setLastPaintedGrid({ x: gridX, y: gridY });
+      eraseTilesAtPosition(gridX, gridY);
       return;
     }
 
@@ -448,6 +457,64 @@ export function Canvas() {
       return;
     }
 
+    // Handle continuous tile erasing while dragging
+    if (isPainting && tool === 'tile-erase') {
+      const gridX = Math.floor(snappedPos.x / gridSize);
+      const gridY = Math.floor(snappedPos.y / gridSize);
+
+      // Collect all grid cells to erase with brush size
+      const cellsToErase = new Set<string>();
+
+      // Fill in all grid cells between last erased position and current position
+      if (lastPaintedGrid) {
+        const lastX = lastPaintedGrid.x;
+        const lastY = lastPaintedGrid.y;
+        const dx = gridX - lastX;
+        const dy = gridY - lastY;
+        const steps = Math.max(Math.abs(dx), Math.abs(dy));
+        
+        if (steps > 0) {
+          // Interpolate between last and current position to fill gaps
+          for (let i = 1; i <= steps; i++) {
+            const t = i / steps;
+            const interpX = Math.floor(lastX + dx * t);
+            const interpY = Math.floor(lastY + dy * t);
+            
+            // Add brush-sized area around each interpolated point
+            const halfBrushX = Math.floor(brushSize.width / 2);
+            const halfBrushY = Math.floor(brushSize.height / 2);
+            for (let by = -halfBrushY; by <= halfBrushY; by++) {
+              for (let bx = -halfBrushX; bx <= halfBrushX; bx++) {
+                const cellX = interpX + bx;
+                const cellY = interpY + by;
+                cellsToErase.add(`${cellX},${cellY}`);
+              }
+            }
+          }
+        }
+      } else {
+        // First erase - apply brush size
+        const halfBrushX = Math.floor(brushSize.width / 2);
+        const halfBrushY = Math.floor(brushSize.height / 2);
+        for (let by = -halfBrushY; by <= halfBrushY; by++) {
+          for (let bx = -halfBrushX; bx <= halfBrushX; bx++) {
+            const cellX = gridX + bx;
+            const cellY = gridY + by;
+            cellsToErase.add(`${cellX},${cellY}`);
+          }
+        }
+      }
+      
+      // Erase all unique cells
+      cellsToErase.forEach(cell => {
+        const [x, y] = cell.split(',').map(Number);
+        eraseTilesAtPosition(x, y);
+      });
+      
+      setLastPaintedGrid({ x: gridX, y: gridY });
+      return;
+    }
+
     if (!isDrawing || !currentShape) return;
 
     const width = snappedPos.x - currentShape.transform.x;
@@ -500,7 +567,23 @@ export function Canvas() {
     const oldScale = zoom;
     const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
-    useCanvasStore.setState({ zoom: newScale });
+    // Get the center of the viewport
+    const centerX = stageSize.width / 2;
+    const centerY = stageSize.height / 2;
+
+    // Calculate world position of center before zoom
+    const worldPosBeforeZoom = {
+      x: (centerX - pan.x) / oldScale,
+      y: (centerY - pan.y) / oldScale,
+    };
+
+    // Calculate new pan to keep the center point in the same screen position
+    const newPan = {
+      x: centerX - worldPosBeforeZoom.x * newScale,
+      y: centerY - worldPosBeforeZoom.y * newScale,
+    };
+
+    useCanvasStore.setState({ zoom: newScale, pan: newPan });
   };
 
   const handleStageDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
