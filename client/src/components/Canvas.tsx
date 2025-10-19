@@ -112,17 +112,41 @@ export function Canvas() {
       const tilesToAdd: Tile[] = [];
       
       // Place all tiles from the multi-tile configuration
-      selectedTileset.multiTileConfig.tiles.forEach((tilePos, index) => {
+      selectedTileset.multiTileConfig.tiles.forEach((tilePos) => {
+        // Calculate tileIndex based on grid position: row * columns + col
+        const tileIndex = tilePos.y * selectedTileset.columns + tilePos.x;
+        
         tilesToAdd.push({
           x: gridX + tilePos.x,
           y: gridY + tilePos.y,
           tilesetId: selectedTileset.id,
-          tileIndex: index, // Each tile in the configuration gets its own index
+          tileIndex: tileIndex,
           layer: 'props', // Props layer for trees, flowers, etc.
         });
       });
       
       // Add all tiles as a complete unit (no auto-tiling for multi-tile objects)
+      addTiles(tilesToAdd);
+      return;
+    }
+
+    // Handle variant grid tilesets (grass variants) - no auto-tiling, just use selected index
+    if (selectedTileset.tilesetType === 'variant_grid') {
+      const tilesToAdd: Tile[] = [];
+      
+      // Paint with the user's selected tile variant
+      for (let dy = 0; dy < brushSize.height; dy++) {
+        for (let dx = 0; dx < brushSize.width; dx++) {
+          tilesToAdd.push({
+            x: gridX + dx,
+            y: gridY + dy,
+            tilesetId: selectedTileset.id,
+            tileIndex: selectedTileIndex, // Use the exact tile the user selected
+            layer: 'terrain',
+          });
+        }
+      }
+      
       addTiles(tilesToAdd);
       return;
     }

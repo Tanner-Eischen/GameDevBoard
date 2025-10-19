@@ -116,7 +116,7 @@ export interface UserPresence {
 }
 
 // Tileset type enum
-export const tilesetTypeEnum = z.enum(['auto-tiling', 'multi-tile']);
+export const tilesetTypeEnum = z.enum(['auto-tiling', 'multi-tile', 'variant_grid']);
 export type TilesetType = z.infer<typeof tilesetTypeEnum>;
 
 // Multi-tile configuration for objects like trees
@@ -133,7 +133,7 @@ export interface Tileset {
   imageUrl: string;
   columns: number;
   rows: number;
-  tilesetType: TilesetType; // 'auto-tiling' for 3x3 grids, 'multi-tile' for trees
+  tilesetType: TilesetType; // 'auto-tiling' for 3x3 grids with neighbor-based tiling, 'multi-tile' for objects like trees, 'variant_grid' for manual tile variant selection
   multiTileConfig: MultiTileConfig | null; // Only used for multi-tile objects
 }
 

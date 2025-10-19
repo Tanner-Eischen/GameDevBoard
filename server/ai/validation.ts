@@ -44,6 +44,19 @@ export const clearCanvasSchema = z.object({
   target: z.enum(["all", "shapes", "tiles"])
 });
 
+export const placeObjectSchema = z.object({
+  objectName: z.enum(["Tree", "Tent", "Campfire 1", "Campfire 2", "Plateau Stone"]),
+  placement: z.object({
+    mode: z.enum(["single", "scatter", "grid"]),
+    x: z.number(),
+    y: z.number(),
+    width: z.number().positive().optional(),
+    height: z.number().positive().optional(),
+    count: z.number().min(1).max(50).optional()
+  })
+});
+
 export type PaintTerrainArgs = z.infer<typeof paintTerrainSchema>;
 export type CreateShapesArgs = z.infer<typeof createShapesSchema>;
 export type ClearCanvasArgs = z.infer<typeof clearCanvasSchema>;
+export type PlaceObjectArgs = z.infer<typeof placeObjectSchema>;

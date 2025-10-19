@@ -394,6 +394,110 @@ export function executeAnalyzeCanvas(
   };
 }
 
+// Place objects on the canvas
+export function executePlaceObject(
+  params: {
+    objectName: string;
+    placement: {
+      mode: string;
+      x: number;
+      y: number;
+      width?: number;
+      height?: number;
+      count?: number;
+    };
+  },
+  canvasState: CanvasState,
+  tileMap: TileMap,
+  availableTilesets: any[]
+): ExecutionResult {
+  // Find the tileset by name
+  const tileset = availableTilesets.find(t => t.name === params.objectName);
+  
+  if (!tileset) {
+    return {
+      success: false,
+      message: `Object "${params.objectName}" not found. Available objects: ${availableTilesets.filter(t => t.tilesetType === 'multi-tile').map(t => t.name).join(', ')}`
+    };
+  }
+
+  if (tileset.tilesetType !== 'multi-tile' || !tileset.multiTileConfig) {
+    return {
+      success: false,
+      message: `"${params.objectName}" is not a placeable object`
+    };
+  }
+
+  const newTiles: Tile[] = [];
+  const positions: Array<{ x: number; y: number }> = [];
+
+  // Determine positions based on placement mode
+  if (params.placement.mode === 'single') {
+    positions.push({ x: params.placement.x, y: params.placement.y });
+  } else if (params.placement.mode === 'scatter' || params.placement.mode === 'grid') {
+    const count = params.placement.count || 5;
+    const width = params.placement.width || 20;
+    const height = params.placement.height || 20;
+    const startX = params.placement.x;
+    const startY = params.placement.y;
+
+    if (params.placement.mode === 'scatter') {
+      // Random positions within area
+      for (let i = 0; i < count; i++) {
+        positions.push({
+          x: startX + Math.floor(Math.random() * width),
+          y: startY + Math.floor(Math.random() * height)
+        });
+      }
+    } else if (params.placement.mode === 'grid') {
+      // Grid layout
+      const cols = Math.ceil(Math.sqrt(count));
+      const rows = Math.ceil(count / cols);
+      const spacingX = Math.floor(width / cols);
+      const spacingY = Math.floor(height / rows);
+
+      for (let i = 0; i < count; i++) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        positions.push({
+          x: startX + col * spacingX,
+          y: startY + row * spacingY
+        });
+      }
+    }
+  }
+
+  // Place objects at each position
+  for (const pos of positions) {
+    // Add all tiles from the multi-tile configuration
+    tileset.multiTileConfig.tiles.forEach((tilePos: { x: number; y: number }) => {
+      // Validate tile position is within tileset bounds
+      if (tilePos.x < 0 || tilePos.x >= tileset.columns || 
+          tilePos.y < 0 || tilePos.y >= tileset.rows) {
+        console.warn(`Invalid tile position (${tilePos.x}, ${tilePos.y}) for tileset ${tileset.name} (${tileset.columns}x${tileset.rows})`);
+        return;
+      }
+      
+      // Calculate tileIndex based on grid position: row * columns + col
+      const tileIndex = tilePos.y * tileset.columns + tilePos.x;
+      
+      newTiles.push({
+        x: pos.x + tilePos.x,
+        y: pos.y + tilePos.y,
+        tilesetId: tileset.id,
+        tileIndex: tileIndex,
+        layer: 'props'
+      });
+    });
+  }
+
+  return {
+    success: true,
+    message: `Placed ${positions.length} ${params.objectName}(s) in ${params.placement.mode} mode`,
+    canvasUpdates: { tiles: newTiles }
+  };
+}
+
 // Clear canvas elements
 export function executeClearCanvas(
   params: { target: string },
