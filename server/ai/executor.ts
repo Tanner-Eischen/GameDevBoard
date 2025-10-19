@@ -657,14 +657,14 @@ export function executeCreateScene(
   
   // 4. Randomly scatter trees with spacing to prevent overlap
   const treeTiles: Tile[] = [];
-  const treeCount = Math.min(features.trees || 0, 30);
+  const treeCount = Math.min(features.trees || 0, 100); // Increased from 30 to 100
   const occupiedPositions = new Set<string>();
   let treeTileset: any = null;
   
   if (treeCount > 0) {
     treeTileset = findBestMatch('tree', availableTilesets, t => t.name, 0.4);
     if (treeTileset && treeTileset.tilesetType === 'multi-tile' && treeTileset.multiTileConfig) {
-      const minSpacing = 3; // Minimum distance between trees
+      const minSpacing = 2; // Reduced from 3 to 2 for denser placement
       let attempts = 0;
       let placedTrees = 0;
       
@@ -714,7 +714,7 @@ export function executeCreateScene(
     for (const obj of features.objects) {
       const objTileset = findBestMatch(obj.type, availableTilesets, t => t.name, 0.4);
       if (objTileset && objTileset.tilesetType === 'multi-tile' && objTileset.multiTileConfig) {
-        const minSpacing = 2;
+        const minSpacing = 1; // Reduced from 2 to 1 for denser object placement
         let attempts = 0;
         let placed = 0;
         

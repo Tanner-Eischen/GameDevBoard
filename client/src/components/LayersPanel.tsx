@@ -5,6 +5,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Eye, EyeOff, Trash2, MapPin, Square, Layers2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+import { TilesetPackPanel } from '@/components/TilesetPackPanel';
 
 export function LayersPanel() {
   const { 
@@ -286,5 +287,14 @@ export function LayersPanel() {
         </ScrollArea>
       </CardContent>
     </Card>
+  );
+}
+
+export function LayersPanelWithPacks() {
+  return (
+    <div className="space-y-4">
+      <LayersPanel />
+      <TilesetPackPanel />
+    </div>
   );
 }

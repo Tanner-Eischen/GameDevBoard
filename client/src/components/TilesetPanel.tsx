@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, Plus, Loader2, ImagePlus } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Upload, Plus, Loader2, ImagePlus, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { ObjectUploader } from '@/components/ObjectUploader';
@@ -39,6 +40,7 @@ export function TilesetPanel() {
   const [rows, setRows] = useState(3);
   const [selectedTiles, setSelectedTiles] = useState<Array<{ x: number; y: number }>>([]);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -174,22 +176,32 @@ export function TilesetPanel() {
   };
 
   return (
-    <Card className="h-full overflow-auto">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">Tilesets</CardTitle>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setShowUpload(!showUpload)}
-            data-testid="button-add-tileset"
-            className="h-7 w-7"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <Card className="overflow-hidden">
+        <CollapsibleTrigger asChild>
+          <CardHeader className="pb-3 cursor-pointer hover-elevate">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm flex items-center gap-2">
+                Tilesets
+                {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </CardTitle>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowUpload(!showUpload);
+                }}
+                data-testid="button-add-tileset"
+                className="h-7 w-7"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="space-y-4">
         {showUpload && (
           <div className="space-y-3 p-3 bg-muted/30 rounded-md">
             <div className="space-y-1.5">
@@ -542,7 +554,9 @@ export function TilesetPanel() {
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   );
 }
