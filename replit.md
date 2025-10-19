@@ -109,6 +109,15 @@ These services are integrated and managed by Replit:
   - **Bug #3 - Double Scaling**: Fixed sprite rendering applying scale twice (once via width/height, once via scaleX/scaleY). Changed scaleX/scaleY to only handle flipping (1 or -1), not scaling. Also fixed offsetX/offsetY to account for scale when flipping.
   - Added missing `defaultAnimation` and `tags` properties to knight sprite definition
   - Animation system now fully functional with correct frame timing, scaling, and flipping
+- **Added Swordsman Sprite Sheets**:
+  - Integrated three swordsman sprite animations (Idle, Walk, Attack)
+  - Each sprite is 64×64 pixels per frame
+  - Idle: 12 frames at 10 fps (looping)
+  - Walk: 6 frames at 10 fps (looping)
+  - Attack: 8 frames at 12 fps (non-looping)
+  - All sprites use down-facing direction (row 0) from multi-directional sprite sheets
+  - Sprite sheets copied to public/sprites/ directory
+  - Now have 4 total sprite definitions available: Knight, Swordsman (Idle), Swordsman (Walk), Swordsman (Attack)
 - **Enhanced AI Assistant with Advanced Natural Language Understanding**:
   - Added 5 new terrain patterns: `horizontal_path`, `vertical_path`, `diagonal_path`, `winding_path`, `curved_path`
   - Implemented Catmull-Rom spline algorithm for realistic curved/winding paths (rivers, roads)
