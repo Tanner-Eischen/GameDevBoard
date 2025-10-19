@@ -3,6 +3,48 @@ import type { Shape, ToolType, CanvasState, UserPresence, Tile, Tileset, SpriteI
 import { v4 as uuidv4 } from 'uuid';
 import { initializeDemoSprites } from '@/utils/demoSprites';
 
+type HistoryEntry = CanvasState & { tiles: Tile[] };
+
+type HistorySource = {
+  shapes: Shape[];
+  sprites: SpriteInstance[];
+  selectedIds: string[];
+  tool: ToolType;
+  zoom: number;
+  pan: { x: number; y: number };
+  gridSize: number;
+  gridVisible: boolean;
+  snapToGrid: boolean;
+  tiles: Tile[];
+};
+
+const createHistorySnapshot = (state: HistorySource): HistoryEntry =>
+  structuredClone({
+    shapes: state.shapes,
+    sprites: state.sprites,
+    selectedIds: state.selectedIds,
+    tool: state.tool,
+    zoom: state.zoom,
+    pan: state.pan,
+    gridSize: state.gridSize,
+    gridVisible: state.gridVisible,
+    snapToGrid: state.snapToGrid,
+    tiles: state.tiles,
+  });
+
+const applyHistorySnapshot = (snapshot: HistoryEntry) => ({
+  shapes: structuredClone(snapshot.shapes),
+  sprites: structuredClone(snapshot.sprites),
+  selectedIds: [...snapshot.selectedIds],
+  tool: snapshot.tool,
+  zoom: snapshot.zoom,
+  pan: { ...snapshot.pan },
+  gridSize: snapshot.gridSize,
+  gridVisible: snapshot.gridVisible,
+  snapToGrid: snapshot.snapToGrid,
+  tiles: structuredClone(snapshot.tiles),
+});
+
 interface CanvasStore extends CanvasState {
   // Actions
   setTool: (tool: ToolType) => void;
@@ -12,10 +54,10 @@ interface CanvasStore extends CanvasState {
   setGridVisible: (visible: boolean) => void;
   setSnapToGrid: (snap: boolean) => void;
   setGridSize: (size: number) => void;
-  
+
   // Shape management
   addShape: (shape: Shape) => void;
-  updateShape: (id: string, updates: Partial<Shape>) => void;
+  updateShape: (id: string, updates: Partial<Shape>, options?: { recordHistory?: boolean }) => void;
   deleteShapes: (ids: string[]) => void;
   clearShapes: () => void;
   setSelectedIds: (ids: string[]) => void;
@@ -23,9 +65,9 @@ interface CanvasStore extends CanvasState {
   clearSelection: () => void;
   groupSelectedShapes: () => void;
   ungroupSelectedShapes: () => void;
-  
+
   // History
-  history: CanvasState[];
+  history: HistoryEntry[];
   historyIndex: number;
   pushHistory: () => void;
   undo: () => void;
@@ -62,7 +104,7 @@ interface CanvasStore extends CanvasState {
   selectedSpriteDefId: string | null;
   animationPreview: boolean;
   addSprite: (sprite: SpriteInstance) => void;
-  updateSprite: (id: string, updates: Partial<SpriteInstance>) => void;
+  updateSprite: (id: string, updates: Partial<SpriteInstance>, options?: { recordHistory?: boolean }) => void;
   deleteSprite: (id: string) => void;
   selectSprite: (id: string) => void;
   setSpriteDefinitions: (defs: SpriteDefinition[]) => void;
@@ -87,9 +129,14 @@ const initialState: CanvasState = {
   snapToGrid: false,
 };
 
+const initialHistoryEntry = createHistorySnapshot({
+  ...initialState,
+  tiles: [],
+});
+
 export const useCanvasStore = create<CanvasStore>((set, get) => ({
   ...initialState,
-  history: [initialState],
+  history: [initialHistoryEntry],
   historyIndex: 0,
   users: new Map(),
   currentUser: null,
@@ -148,20 +195,32 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
   },
 
-  updateShape: (id, updates) => {
+  updateShape: (id, updates, options) => {
+    const shouldRecord = options?.recordHistory ?? true;
+    let updated = false;
+
     set((state) => {
       const index = state.shapes.findIndex((s) => s.id === id);
-      const updatedShapes = state.shapes.map((s) =>
-        s.id === id ? { ...s, ...updates } : s
-      );
-      
-      // Notify collaboration service
-      if (index >= 0 && (window as any).__collaborationService) {
-        (window as any).__collaborationService.updateShape(index, updatedShapes[index]);
+      if (index === -1) {
+        return {};
       }
-      
+
+      const updatedShape = { ...state.shapes[index], ...updates };
+      const updatedShapes = [...state.shapes];
+      updatedShapes[index] = updatedShape;
+      updated = true;
+
+      // Notify collaboration service
+      if ((window as any).__collaborationService) {
+        (window as any).__collaborationService.updateShape(index, updatedShape);
+      }
+
       return { shapes: updatedShapes };
     });
+
+    if (updated && shouldRecord) {
+      get().pushHistory();
+    }
   },
 
   deleteShapes: (ids) => {
@@ -253,7 +312,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
 
   pushHistory: () => {
     const state = get();
-    const currentState: CanvasState = {
+    const snapshot = createHistorySnapshot({
       shapes: state.shapes,
       sprites: state.sprites,
       selectedIds: state.selectedIds,
@@ -263,17 +322,18 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       gridSize: state.gridSize,
       gridVisible: state.gridVisible,
       snapToGrid: state.snapToGrid,
-    };
-    
+      tiles: state.tiles,
+    });
+
     set((state) => {
       const newHistory = state.history.slice(0, state.historyIndex + 1);
-      newHistory.push(currentState);
-      
+      newHistory.push(snapshot);
+
       // Limit history to 100 items
       if (newHistory.length > 100) {
         newHistory.shift();
       }
-      
+
       return {
         history: newHistory,
         historyIndex: newHistory.length - 1,
@@ -282,27 +342,35 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   undo: () => {
-    const state = get();
-    if (state.historyIndex > 0) {
+    set((state) => {
+      if (state.historyIndex <= 0) {
+        return {};
+      }
+
       const newIndex = state.historyIndex - 1;
-      const previousState = state.history[newIndex];
-      set({
-        ...previousState,
+      const snapshot = state.history[newIndex];
+
+      return {
+        ...applyHistorySnapshot(snapshot),
         historyIndex: newIndex,
-      });
-    }
+      };
+    });
   },
 
   redo: () => {
-    const state = get();
-    if (state.historyIndex < state.history.length - 1) {
+    set((state) => {
+      if (state.historyIndex >= state.history.length - 1) {
+        return {};
+      }
+
       const newIndex = state.historyIndex + 1;
-      const nextState = state.history[newIndex];
-      set({
-        ...nextState,
+      const snapshot = state.history[newIndex];
+
+      return {
+        ...applyHistorySnapshot(snapshot),
         historyIndex: newIndex,
-      });
-    }
+      };
+    });
   },
 
   setCurrentUser: (user) => set({ currentUser: user }),
@@ -449,20 +517,32 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     }
   },
 
-  updateSprite: (id, updates) => {
+  updateSprite: (id, updates, options) => {
+    const shouldRecord = options?.recordHistory ?? true;
+    let updated = false;
+
     set((state) => {
       const index = state.sprites.findIndex((s) => s.id === id);
-      const updatedSprites = state.sprites.map((s) =>
-        s.id === id ? { ...s, ...updates } : s
-      );
-      
-      // Notify collaboration service
-      if (index >= 0 && (window as any).__collaborationService) {
-        (window as any).__collaborationService.updateSprite(index, updatedSprites[index]);
+      if (index === -1) {
+        return {};
       }
-      
+
+      const updatedSprite = { ...state.sprites[index], ...updates };
+      const updatedSprites = [...state.sprites];
+      updatedSprites[index] = updatedSprite;
+      updated = true;
+
+      // Notify collaboration service
+      if ((window as any).__collaborationService) {
+        (window as any).__collaborationService.updateSprite(index, updatedSprite);
+      }
+
       return { sprites: updatedSprites };
     });
+
+    if (updated && shouldRecord) {
+      get().pushHistory();
+    }
   },
 
   deleteSprite: (id) => {

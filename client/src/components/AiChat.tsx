@@ -5,7 +5,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, Send, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+type AiChatPlacement = 'floating' | 'toolbar';
+
+interface AiChatProps {
+  placement?: AiChatPlacement;
+}
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -42,7 +47,7 @@ interface AiChatResponse {
   }>;
 }
 
-export function AiChat() {
+export function AiChat({ placement = 'floating' }: AiChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -51,7 +56,7 @@ export function AiChat() {
     aiMessage: string;
   } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
-  
+
   const { shapes, tiles, addShape, addTiles, clearShapes, clearTiles, zoom, pan, gridSize, gridVisible, snapToGrid, tool, selectedIds } = useCanvasStore();
 
   // Helper to apply canvas updates
@@ -86,9 +91,9 @@ export function AiChat() {
 
   const handleCancel = () => {
     if (pendingConfirmation) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Action cancelled. Your canvas remains unchanged.' 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Action cancelled. Your canvas remains unchanged.'
       }]);
       setPendingConfirmation(null);
     }
@@ -106,7 +111,7 @@ export function AiChat() {
         gridVisible,
         snapToGrid
       };
-      
+
       const tileMap = {
         gridSize,
         tiles
@@ -147,7 +152,7 @@ export function AiChat() {
 
         // Append chunk to buffer
         buffer += decoder.decode(value, { stream: true });
-        
+
         // Process complete lines
         const lines = buffer.split('\n');
         // Keep last incomplete line in buffer
@@ -191,7 +196,7 @@ export function AiChat() {
     onSuccess: (data) => {
       // Check if any results require confirmation
       const needsConfirmation = data.executionResults.some(r => r.requiresConfirmation);
-      
+
       if (needsConfirmation) {
         // Hold updates pending user confirmation
         setPendingConfirmation({
@@ -211,10 +216,10 @@ export function AiChat() {
 
     const userMessage = input.trim();
     setInput('');
-    
+
     // Add user message to chat
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    
+
     // Send to AI
     chatMutation.mutate(userMessage);
   };
@@ -226,22 +231,8 @@ export function AiChat() {
     }
   }, [messages]);
 
-  if (!isOpen) {
-    return (
-      <Button
-        data-testid="button-ai-chat-toggle"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 h-12 w-12 rounded-full shadow-lg"
-        size="icon"
-        variant="default"
-      >
-        <Sparkles className="h-5 w-5" />
-      </Button>
-    );
-  }
-
-  return (
-    <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-[min(24rem,calc(100vw-3rem))] h-[600px] bg-card border border-border rounded-lg shadow-xl flex flex-col">
+  const renderChatPanel = (panelClassName: string) => (
+    <div className={`${panelClassName} bg-card border border-border rounded-lg shadow-xl flex flex-col`}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
@@ -254,6 +245,7 @@ export function AiChat() {
           variant="ghost"
           size="icon"
           className="h-8 w-8"
+          aria-label="Close AI assistant"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -268,7 +260,7 @@ export function AiChat() {
             <p className="text-xs mt-2">Try: "Paint a grass field" or "Create 5 stars"</p>
           </div>
         )}
-        
+
         <div className="space-y-4">
           {messages.map((msg, idx) => (
             <div
@@ -286,7 +278,7 @@ export function AiChat() {
               </div>
             </div>
           ))}
-          
+
           {chatMutation.isPending && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-lg p-3">
@@ -313,6 +305,7 @@ export function AiChat() {
             type="submit"
             size="icon"
             disabled={!input.trim() || chatMutation.isPending}
+            aria-label="Send message"
           >
             {chatMutation.isPending ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -332,7 +325,7 @@ export function AiChat() {
               Confirm Action
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingConfirmation?.results.find(r => r.requiresConfirmation)?.confirmationPrompt || 
+              {pendingConfirmation?.results.find(r => r.requiresConfirmation)?.confirmationPrompt ||
                 'This action will modify your canvas. Are you sure?'}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -346,6 +339,45 @@ export function AiChat() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+
+  if (placement === 'toolbar') {
+    return (
+      <div className="relative z-30">
+        <Button
+          data-testid="button-ai-chat-toggle"
+          onClick={() => setIsOpen((prev) => !prev)}
+          size="sm"
+          variant="default"
+          className="gap-2"
+          aria-expanded={isOpen}
+        >
+          <Sparkles className="h-4 w-4" />
+          <span className="hidden sm:inline">AI Assistant</span>
+          <span className="sm:hidden">AI</span>
+        </Button>
+        {isOpen && renderChatPanel('absolute right-0 top-12 z-50 w-[min(24rem,calc(100vw-3rem))] sm:w-96 h-[32rem] max-h-[calc(100vh-10rem)]')}
+      </div>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50">
+      {!isOpen ? (
+        <Button
+          data-testid="button-ai-chat-toggle"
+          onClick={() => setIsOpen(true)}
+          className="h-12 w-12 rounded-full shadow-lg"
+          size="icon"
+          variant="default"
+          aria-label="Open AI assistant"
+        >
+          <Sparkles className="h-5 w-5" />
+        </Button>
+      ) : (
+        renderChatPanel('w-[min(24rem,calc(100vw-3rem))] h-[32rem] max-h-[calc(100vh-6rem)]')
+      )}
     </div>
   );
 }
