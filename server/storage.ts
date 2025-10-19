@@ -187,4 +187,122 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db, users as usersTable, projects as projectsTable, tilesets as tilesetsTable } from "./db";
+import { eq } from "drizzle-orm";
+
+export class DbStorage implements IStorage {
+  constructor() {
+    this.initializeDemoData();
+  }
+
+  private async initializeDemoData() {
+    // Check if demo tilesets already exist
+    const existing = await this.getAllTilesets();
+    if (existing.length > 0) return;
+
+    // Create 3x3 demo tilesets from attached assets
+    await this.createTileset({
+      name: 'Dirt Terrain',
+      tileSize: 16,
+      spacing: 1,
+      imageUrl: '/attached_assets/dirt_3x3_1760825550695.png',
+      columns: 3,
+      rows: 3,
+    });
+
+    await this.createTileset({
+      name: 'Grass Terrain',
+      tileSize: 16,
+      spacing: 1,
+      imageUrl: '/attached_assets/grass_3x3_kenney_1760825550695.png',
+      columns: 3,
+      rows: 3,
+    });
+
+    await this.createTileset({
+      name: 'Water Terrain',
+      tileSize: 16,
+      spacing: 1,
+      imageUrl: '/attached_assets/water_3x3_1760825550696.png',
+      columns: 3,
+      rows: 3,
+    });
+  }
+
+  // User methods
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(usersTable).values(insertUser).returning();
+    return user;
+  }
+
+  // Project methods
+  async getProject(id: string): Promise<Project | undefined> {
+    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, id));
+    return project;
+  }
+
+  async getAllProjects(): Promise<Project[]> {
+    return await db.select().from(projectsTable);
+  }
+
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const [project] = await db.insert(projectsTable).values(insertProject as any).returning();
+    return project;
+  }
+
+  async updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined> {
+    const [project] = await db
+      .update(projectsTable)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(eq(projectsTable.id, id))
+      .returning();
+    return project;
+  }
+
+  async deleteProject(id: string): Promise<boolean> {
+    const result = await db.delete(projectsTable).where(eq(projectsTable.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Tileset methods
+  async getTileset(id: string): Promise<TilesetData | undefined> {
+    const [tileset] = await db.select().from(tilesetsTable).where(eq(tilesetsTable.id, id));
+    return tileset;
+  }
+
+  async getAllTilesets(): Promise<TilesetData[]> {
+    return await db.select().from(tilesetsTable);
+  }
+
+  async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
+    const [tileset] = await db.insert(tilesetsTable).values(insertTileset).returning();
+    return tileset;
+  }
+
+  async updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined> {
+    const [tileset] = await db
+      .update(tilesetsTable)
+      .set(updates)
+      .where(eq(tilesetsTable.id, id))
+      .returning();
+    return tileset;
+  }
+
+  async deleteTileset(id: string): Promise<boolean> {
+    const result = await db.delete(tilesetsTable).where(eq(tilesetsTable.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+}
+
+// Use database storage instead of in-memory
+export const storage = new DbStorage();
