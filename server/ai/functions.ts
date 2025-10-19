@@ -262,5 +262,85 @@ Use this when users ask to add objects, props, decorations, or natural elements 
         required: ["spriteType", "count", "layout"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "createScene",
+      description: `Create a complete detailed scene with multiple layers, terrain, and objects with intelligent random placement.
+      
+This is a high-level function that creates entire maps at once with proper layering and random variation.
+Use this when users ask to create a complete scene, generate a whole map, or build an entire environment.
+
+SCENE TYPES:
+- "forest" - Dense forest with grass, trees, and natural elements
+- "camp" - Campground with grass, paths, tents, and campfires
+- "village" - Settlement with paths, buildings, and decorations
+- "grassland" - Open field with grass variations and scattered objects
+- "mixed" - Custom combination based on user description
+
+The function automatically:
+- Creates appropriate base terrain (grass with variants for natural look)
+- Adds winding paths or rivers if requested
+- Randomly scatters objects with natural spacing
+- Uses different tile variants for visual variety
+- Ensures objects don't overlap
+- Creates a cohesive, professional-looking scene`,
+      parameters: {
+        type: "object",
+        properties: {
+          sceneType: {
+            type: "string",
+            enum: ["forest", "camp", "village", "grassland", "mixed"],
+            description: "The type of scene to create"
+          },
+          area: {
+            type: "object",
+            properties: {
+              x: { type: "number", description: "Starting X coordinate" },
+              y: { type: "number", description: "Starting Y coordinate" },
+              width: { type: "number", description: "Scene width in tiles" },
+              height: { type: "number", description: "Scene height in tiles" }
+            },
+            required: ["x", "y", "width", "height"],
+            description: "The area for the scene"
+          },
+          features: {
+            type: "object",
+            properties: {
+              grassVariants: {
+                type: "boolean",
+                description: "Use grass variants for more natural look (default: true)"
+              },
+              trees: {
+                type: "number",
+                description: "Number of trees to scatter (default: 0, max: 30)"
+              },
+              paths: {
+                type: "boolean",
+                description: "Add winding paths through the scene (default: false)"
+              },
+              water: {
+                type: "boolean",
+                description: "Add a winding river or stream (default: false)"
+              },
+              objects: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: { type: "string", description: "Object type name" },
+                    count: { type: "number", description: "How many to place" }
+                  }
+                },
+                description: "Additional objects to scatter (tents, campfires, etc.)"
+              }
+            },
+            description: "Scene features and density"
+          }
+        },
+        required: ["sceneType", "area"]
+      }
+    }
   }
 ];

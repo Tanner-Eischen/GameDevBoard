@@ -8,6 +8,7 @@ import {
   executeClearCanvas,
   executePlaceObject,
   executePlaceSprites,
+  executeCreateScene,
   type ExecutionResult
 } from "./executor";
 import type { CanvasState, TileMap } from "@shared/schema";
@@ -218,6 +219,9 @@ Be precise with your parameters to match the user's spatial intent!`
             }
             case "placeSprites":
               result = executePlaceSprites(functionArgs, canvasState);
+              break;
+            case "createScene":
+              result = executeCreateScene(functionArgs, canvasState, tileMap, tilesets);
               break;
             default:
               result = {

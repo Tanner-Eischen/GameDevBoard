@@ -1,6 +1,7 @@
 import type { CanvasState, TileMap, Shape, Tile } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
 import { applyAutoTiling } from "./autoTiling";
+import { findBestMatch, getSuggestionText } from "./fuzzyMatch";
 
 // AI function execution results
 export interface ExecutionResult {
@@ -11,6 +12,7 @@ export interface ExecutionResult {
   canvasUpdates?: {
     shapes?: Shape[];
     tiles?: Tile[];
+    sprites?: any[];
   };
 }
 
@@ -133,12 +135,18 @@ export function executePaintTerrain(
   tileMap: TileMap,
   tilesets: Array<{ id: string; name: string }>
 ): ExecutionResult {
-  const tileset = tilesets.find(t => t.name === params.tilesetName);
+  // Use fuzzy matching to find tileset
+  const tileset = findBestMatch(
+    params.tilesetName,
+    tilesets,
+    t => t.name,
+    0.4  // Lower threshold for more lenient matching
+  );
   
   if (!tileset) {
     return {
       success: false,
-      message: `Tileset "${params.tilesetName}" not found`
+      message: getSuggestionText(params.tilesetName, tilesets, t => t.name, 'tileset')
     };
   }
 
@@ -411,13 +419,20 @@ export function executePlaceObject(
   tileMap: TileMap,
   availableTilesets: any[]
 ): ExecutionResult {
-  // Find the tileset by name
-  const tileset = availableTilesets.find(t => t.name === params.objectName);
+  // Use fuzzy matching to find object (prioritize multi-tile objects)
+  const multiTileObjects = availableTilesets.filter(t => t.tilesetType === 'multi-tile');
+  const tileset = findBestMatch(
+    params.objectName,
+    multiTileObjects.length > 0 ? multiTileObjects : availableTilesets,
+    t => t.name,
+    0.4  // Lower threshold for more lenient matching
+  );
   
   if (!tileset) {
+    const objectList = multiTileObjects.length > 0 ? multiTileObjects : availableTilesets;
     return {
       success: false,
-      message: `Object "${params.objectName}" not found. Available objects: ${availableTilesets.filter(t => t.tilesetType === 'multi-tile').map(t => t.name).join(', ')}`
+      message: getSuggestionText(params.objectName, objectList, t => t.name, 'object')
     };
   }
 
@@ -530,6 +545,220 @@ export function executeClearCanvas(
     requiresConfirmation: true,
     confirmationPrompt: `This will delete ${itemCount} ${params.target === "all" ? "items" : params.target}. Are you sure?`,
     canvasUpdates: updates
+  };
+}
+
+// Create complete scene with intelligent placement
+export function executeCreateScene(
+  params: {
+    sceneType: string;
+    area: { x: number; y: number; width: number; height: number };
+    features?: {
+      grassVariants?: boolean;
+      trees?: number;
+      paths?: boolean;
+      water?: boolean;
+      objects?: Array<{ type: string; count: number }>;
+    };
+  },
+  canvasState: CanvasState,
+  tileMap: TileMap,
+  availableTilesets: any[]
+): ExecutionResult {
+  const newTiles: Tile[] = [];
+  const { x, y, width, height } = params.area;
+  const features = params.features || {};
+  
+  // 1. Create base terrain with grass variants for natural look
+  const grassTileset = findBestMatch('grass', availableTilesets, t => t.name, 0.4);
+  if (!grassTileset) {
+    return {
+      success: false,
+      message: getSuggestionText('grass', availableTilesets, t => t.name, 'terrain tileset')
+    };
+  }
+
+  // Use grass variants if available (variant_grid tileset)
+  const useVariants = features.grassVariants !== false && grassTileset.tilesetType === 'variant_grid';
+  
+  for (let dy = 0; dy < height; dy++) {
+    for (let dx = 0; dx < width; dx++) {
+      let tileIndex = 4; // Default center tile
+      
+      if (useVariants) {
+        // Randomly select from available variants (0-8 in 3x3 grid)
+        // More weight to center tiles for consistency
+        const random = Math.random();
+        if (random < 0.3) tileIndex = 4; // 30% center
+        else if (random < 0.5) tileIndex = 1; // 20% top
+        else if (random < 0.65) tileIndex = 3; // 15% left
+        else if (random < 0.8) tileIndex = 5; // 15% right
+        else if (random < 0.9) tileIndex = 7; // 10% bottom
+        else tileIndex = Math.floor(Math.random() * 9); // 10% any variant
+      }
+      
+      newTiles.push({
+        x: x + dx,
+        y: y + dy,
+        tilesetId: grassTileset.id,
+        tileIndex,
+        layer: 'terrain'
+      });
+    }
+  }
+
+  // 2. Add winding path if requested
+  if (features.paths) {
+    const dirtTileset = findBestMatch('dirt', availableTilesets, t => t.name, 0.4);
+    if (dirtTileset) {
+      const pathWidth = 3;
+      const pathStart = { x: x, y: y + Math.floor(height / 2) };
+      const pathEnd = { x: x + width - 1, y: y + Math.floor(height / 2) };
+      const pathPoints = generateCurvedPath(pathStart, pathEnd, 4, 0.35);
+      const pathTiles = generatePathTiles(pathPoints, pathWidth, dirtTileset.id);
+      newTiles.push(...pathTiles);
+    }
+  }
+
+  // 3. Add winding river if requested
+  if (features.water) {
+    const waterTileset = findBestMatch('water', availableTilesets, t => t.name, 0.4);
+    if (waterTileset) {
+      const riverWidth = 4;
+      const isVertical = height > width;
+      const riverStart = isVertical 
+        ? { x: x + Math.floor(width / 2), y }
+        : { x, y: y + Math.floor(height / 2) };
+      const riverEnd = isVertical
+        ? { x: x + Math.floor(width / 2), y: y + height - 1 }
+        : { x: x + width - 1, y: y + Math.floor(height / 2) };
+      const riverPoints = generateCurvedPath(riverStart, riverEnd, 5, 0.4);
+      const riverTiles = generatePathTiles(riverPoints, riverWidth, waterTileset.id);
+      newTiles.push(...riverTiles);
+    }
+  }
+
+  // Apply auto-tiling for terrain
+  const autoTiledTerrain = applyAutoTiling(newTiles, tileMap.tiles, grassTileset.id);
+  
+  // 4. Randomly scatter trees with spacing to prevent overlap
+  const treeTiles: Tile[] = [];
+  const treeCount = Math.min(features.trees || 0, 30);
+  const occupiedPositions = new Set<string>();
+  let treeTileset: any = null;
+  
+  if (treeCount > 0) {
+    treeTileset = findBestMatch('tree', availableTilesets, t => t.name, 0.4);
+    if (treeTileset && treeTileset.tilesetType === 'multi-tile' && treeTileset.multiTileConfig) {
+      const minSpacing = 3; // Minimum distance between trees
+      let attempts = 0;
+      let placedTrees = 0;
+      
+      while (placedTrees < treeCount && attempts < treeCount * 10) {
+        attempts++;
+        
+        // Random position within area (with margin)
+        const treeX = x + 2 + Math.floor(Math.random() * (width - 4));
+        const treeY = y + 2 + Math.floor(Math.random() * (height - 4));
+        const posKey = `${treeX},${treeY}`;
+        
+        // Check if position is too close to other trees
+        let tooClose = false;
+        for (let dy = -minSpacing; dy <= minSpacing; dy++) {
+          for (let dx = -minSpacing; dx <= minSpacing; dx++) {
+            if (occupiedPositions.has(`${treeX + dx},${treeY + dy}`)) {
+              tooClose = true;
+              break;
+            }
+          }
+          if (tooClose) break;
+        }
+        
+        if (!tooClose) {
+          // Place tree
+          occupiedPositions.add(posKey);
+          treeTileset.multiTileConfig.tiles.forEach((tilePos: { x: number; y: number }) => {
+            const tileIndex = tilePos.y * treeTileset.columns + tilePos.x;
+            treeTiles.push({
+              x: treeX + tilePos.x,
+              y: treeY + tilePos.y,
+              tilesetId: treeTileset.id,
+              tileIndex,
+              layer: 'props'
+            });
+            occupiedPositions.add(`${treeX + tilePos.x},${treeY + tilePos.y}`);
+          });
+          placedTrees++;
+        }
+      }
+    }
+  }
+
+  // 5. Scatter additional objects (tents, campfires, etc.)
+  const objectTiles: Tile[] = [];
+  if (features.objects) {
+    for (const obj of features.objects) {
+      const objTileset = findBestMatch(obj.type, availableTilesets, t => t.name, 0.4);
+      if (objTileset && objTileset.tilesetType === 'multi-tile' && objTileset.multiTileConfig) {
+        const minSpacing = 2;
+        let attempts = 0;
+        let placed = 0;
+        
+        while (placed < obj.count && attempts < obj.count * 10) {
+          attempts++;
+          
+          const objX = x + 1 + Math.floor(Math.random() * (width - 2));
+          const objY = y + 1 + Math.floor(Math.random() * (height - 2));
+          const posKey = `${objX},${objY}`;
+          
+          // Check spacing
+          let tooClose = false;
+          for (let dy = -minSpacing; dy <= minSpacing; dy++) {
+            for (let dx = -minSpacing; dx <= minSpacing; dx++) {
+              if (occupiedPositions.has(`${objX + dx},${objY + dy}`)) {
+                tooClose = true;
+                break;
+              }
+            }
+            if (tooClose) break;
+          }
+          
+          if (!tooClose) {
+            occupiedPositions.add(posKey);
+            objTileset.multiTileConfig.tiles.forEach((tilePos: { x: number; y: number }) => {
+              const tileIndex = tilePos.y * objTileset.columns + tilePos.x;
+              objectTiles.push({
+                x: objX + tilePos.x,
+                y: objY + tilePos.y,
+                tilesetId: objTileset.id,
+                tileIndex,
+                layer: 'props'
+              });
+              occupiedPositions.add(`${objX + tilePos.x},${objY + tilePos.y}`);
+            });
+            placed++;
+          }
+        }
+      }
+    }
+  }
+
+  // Combine all tiles
+  const allTiles = [...autoTiledTerrain, ...treeTiles, ...objectTiles];
+  
+  const summary = [
+    `Created ${params.sceneType} scene (${width}x${height} tiles)`,
+    useVariants ? 'with grass variants' : '',
+    features.paths ? 'with winding path' : '',
+    features.water ? 'with river' : '',
+    treeTiles.length > 0 ? `${Math.floor(treeTiles.length / (treeTileset?.multiTileConfig?.tiles?.length || 1))} trees` : '',
+    objectTiles.length > 0 ? `and ${features.objects?.length} types of objects` : ''
+  ].filter(Boolean).join(', ');
+
+  return {
+    success: true,
+    message: summary,
+    canvasUpdates: { tiles: allTiles }
   };
 }
 
