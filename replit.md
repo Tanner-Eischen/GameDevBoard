@@ -52,6 +52,17 @@ This is a real-time collaborative game development board built with:
 - Delete shapes from layer panel
 - Layer ordering
 
+### AI Assistant
+- **Natural Language Commands**: Ask AI to create maps and designs using plain English
+- **Streaming Responses**: Real-time word-by-word AI responses via Server-Sent Events
+- **Canvas Operations**: Paint terrain, create shapes, analyze canvas, and clear elements
+- **Smart Terrain Painting**: AI can paint grass, dirt, or water with fill, border, or checkerboard patterns
+- **Shape Generation**: Create rectangles, circles, stars, polygons in grid, random, circle, or line layouts
+- **Canvas Analysis**: Get insights, statistics, and suggestions about your current design
+- **Safety Features**: Confirmation dialogs for destructive actions (clear canvas)
+- **Error Handling**: Zod validation for all AI commands with user-friendly error messages
+- **Powered by OpenAI**: Uses GPT-4o-mini via Replit AI Integrations (no API key needed)
+
 ## Architecture
 
 ### Frontend Structure
@@ -65,7 +76,8 @@ client/src/
 │   ├── TilesetPanel.tsx     # Tileset selector and tile picker
 │   ├── ObjectUploader.tsx   # Tileset image upload component
 │   ├── UserPresence.tsx     # Active user indicators
-│   └── ProjectManager.tsx   # Save/Load/Export functionality
+│   ├── ProjectManager.tsx   # Save/Load/Export functionality
+│   └── AiChat.tsx           # AI assistant chat interface
 ├── store/
 │   └── useCanvasStore.ts    # Zustand state management
 ├── services/
@@ -83,7 +95,13 @@ client/src/
 ```
 server/
 ├── routes.ts      # REST API + WebSocket server
-└── storage.ts     # In-memory storage implementation
+├── storage.ts     # Database storage implementation
+└── ai/
+    ├── openai.ts    # OpenAI client configuration
+    ├── functions.ts # AI function schemas (paintTerrain, createShapes, etc.)
+    ├── executor.ts  # Function execution logic
+    ├── validation.ts # Zod schemas for function arguments
+    └── chat.ts      # Streaming chat handler with SSE
 ```
 
 ### Data Models
@@ -109,6 +127,18 @@ shared/schema.ts   # Shared TypeScript types and schemas
 - **Shift+G**: Toggle snap to grid
 
 ## Recent Changes
+
+### 2025-10-19 - AI Assistant with Streaming & Safety Features Complete
+- ✅ Integrated Replit OpenAI integration (GPT-4o-mini, no API key needed)
+- ✅ Created AI agent infrastructure: openai.ts, functions.ts, executor.ts, validation.ts, chat.ts
+- ✅ Implemented 4 AI canvas functions: paintTerrain, createShapes, analyzeCanvas, clearCanvas
+- ✅ Built streaming chat UI with real-time word-by-word responses via SSE
+- ✅ Added confirmation dialogs for destructive actions (clearCanvas)
+- ✅ Implemented Zod validation for all AI function arguments
+- ✅ Error handling with try-catch blocks and user-friendly messages
+- ✅ SSE buffering for reliable streaming across network chunks
+- ✅ End-to-end tested: 6 test scenarios covering chat, terrain painting, shape creation, analysis, and confirmations
+- ✅ All AI features architect-reviewed and approved
 
 ### 2025-10-19 - Database Persistence (Milestone 1) Complete
 - ✅ Migrated from in-memory storage to PostgreSQL database
