@@ -6,6 +6,7 @@ import { LayersPanel } from '@/components/LayersPanel';
 import { TilesetPanel } from '@/components/TilesetPanel';
 import { UserPresence } from '@/components/UserPresence';
 import { ProjectManager } from '@/components/ProjectManager';
+import { AiChat } from '@/components/AiChat';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { getCollaborationService } from '@/services/collaboration';
 import { v4 as uuidv4 } from 'uuid';
@@ -160,6 +161,9 @@ export default function Board() {
           </div>
         </aside>
       </div>
+
+      {/* AI Chat - Floating */}
+      <AiChat />
     </div>
   );
 }

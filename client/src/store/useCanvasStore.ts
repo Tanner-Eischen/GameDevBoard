@@ -302,6 +302,11 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     get().pushHistory();
   },
 
+  clearShapes: () => {
+    set({ shapes: [], selectedIds: [] });
+    get().pushHistory();
+  },
+
   setTilesets: (tilesets) => set({ tilesets }),
   setSelectedTileset: (tileset) => set({ selectedTileset: tileset }),
   setSelectedTileIndex: (index) => set({ selectedTileIndex: index }),

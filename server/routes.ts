@@ -7,6 +7,7 @@ import * as Y from "yjs";
 import { insertProjectSchema, insertTilesetSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { handleAiChat } from "./ai/chat";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Projects API
@@ -180,6 +181,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Failed to update tileset image" });
     }
   });
+
+  // AI Chat API
+  app.post("/api/ai/chat", express.json(), handleAiChat);
 
   // Create HTTP server
   const httpServer = createServer(app);
