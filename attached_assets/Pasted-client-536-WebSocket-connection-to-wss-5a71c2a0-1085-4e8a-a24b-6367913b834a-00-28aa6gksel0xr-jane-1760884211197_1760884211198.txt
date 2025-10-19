@@ -1,0 +1,615 @@
+client:536 WebSocket connection to 'wss://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/?token=Blio9lQJrOox' failed: 
+setupWebSocket @ client:536
+(anonymous) @ client:531
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=Blio9lQJrOox' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+setupWebSocket @ client:536
+fallback @ client:509
+(anonymous) @ client:555
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+contents.04ff201a.js:1 in iframe false
+collaboration.ts:32 WebSocket connected
+contents.04ff201a.js:354 Init Current tab url: https://replit.com/@tannereischen/GameDevBoard
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+Canvas.tsx:84 Failed to load tileset image: Dirt Terrain
+overrideMethod @ hook.js:608
+console.error @ react-konva.js?v=3f9bec80:26983
+(anonymous) @ Canvas.tsx:84
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: null
+SpritePanel.tsx:35 Selected def: undefined
+(index):1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+SpritePanel.tsx:129 Selecting sprite: Knight
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: knight-demo
+SpritePanel.tsx:35 Selected def: Knight
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: knight-demo
+SpritePanel.tsx:35 Selected def: Knight
+SpritePanel.tsx:43 Adding sprite: Knight
+SpritePanel.tsx:63 Sprite to add: Object
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: knight-demo
+SpritePanel.tsx:35 Selected def: Knight
+SpritePanel.tsx:129 Selecting sprite: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:129 Selecting sprite: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:129 Selecting sprite: Knight
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: knight-demo
+SpritePanel.tsx:35 Selected def: Knight
+SpritePanel.tsx:129 Selecting sprite: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:43 Adding sprite: Swordsman (Idle)
+SpritePanel.tsx:63 Sprite to add: Object
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: Array(4)
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)
+SpritePanel.tsx:32 Sprite Panel - Definitions loaded: 4
+SpritePanel.tsx:33 Sprite definitions: (4) ['Knight', 'Swordsman (Idle)', 'Swordsman (Walk)', 'Swordsman (Attack)']
+SpritePanel.tsx:34 Selected sprite def ID: swordsman-idle
+SpritePanel.tsx:35 Selected def: Swordsman (Idle)

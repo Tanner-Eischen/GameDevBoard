@@ -28,19 +28,8 @@ export function SpritePanel() {
   const selectedSprite = sprites.find(s => s.id === selectedSpriteId);
   const selectedDef = spriteDefinitions.find(d => d.id === selectedSpriteDefId);
 
-  // Debug logging
-  console.log('Sprite Panel - Definitions loaded:', spriteDefinitions.length);
-  console.log('Sprite definitions:', spriteDefinitions.map(d => d.name));
-  console.log('Selected sprite def ID:', selectedSpriteDefId);
-  console.log('Selected def:', selectedDef?.name);
-
   const handleAddSprite = () => {
-    if (!selectedDef) {
-      console.log('No sprite definition selected');
-      return;
-    }
-
-    console.log('Adding sprite:', selectedDef.name);
+    if (!selectedDef) return;
 
     const newSprite: SpriteInstance = {
       id: uuidv4(),
@@ -60,7 +49,6 @@ export function SpritePanel() {
       },
     };
 
-    console.log('Sprite to add:', newSprite);
     addSprite(newSprite);
   };
 
@@ -122,15 +110,12 @@ export function SpritePanel() {
                   key={def.id}
                   data-testid={`sprite-select-${def.id}`}
                   className={cn(
-                    "p-2 border rounded hover:bg-accent",
-                    selectedSpriteDefId === def.id && "bg-accent border-primary"
+                    "p-2 border rounded hover-elevate active-elevate-2 transition-colors",
+                    selectedSpriteDefId === def.id && "bg-accent border-primary ring-2 ring-primary/20"
                   )}
-                  onClick={() => {
-                    console.log('Selecting sprite:', def.name);
-                    setSelectedSpriteDef(def.id);
-                  }}
+                  onClick={() => setSelectedSpriteDef(def.id)}
                 >
-                  <div className="text-xs truncate">{def.name}</div>
+                  <div className="text-xs truncate font-medium">{def.name}</div>
                   <div className="text-xs text-muted-foreground">
                     {def.frameWidth}x{def.frameHeight}
                   </div>
@@ -138,20 +123,25 @@ export function SpritePanel() {
               ))}
             </div>
           </ScrollArea>
-          {selectedDef && (
-            <Button 
-              size="sm" 
-              onClick={handleAddSprite}
-              className="w-full"
-              data-testid="button-add-sprite-to-canvas"
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Add to Canvas
-            </Button>
-          )}
-          {!selectedDef && spriteDefinitions.length > 0 && (
-            <div className="text-xs text-muted-foreground text-center p-2">
-              Select a sprite above to add it to the canvas
+          {selectedDef ? (
+            <div className="space-y-2 p-2 bg-accent/50 rounded-md border border-primary/20">
+              <div className="text-xs font-medium text-center">
+                Selected: {selectedDef.name}
+              </div>
+              <Button 
+                size="sm" 
+                onClick={handleAddSprite}
+                className="w-full"
+                variant="default"
+                data-testid="button-add-sprite-to-canvas"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add to Canvas
+              </Button>
+            </div>
+          ) : (
+            <div className="text-xs text-muted-foreground text-center p-3 border border-dashed rounded-md">
+              Click a sprite above to select it
             </div>
           )}
         </div>
