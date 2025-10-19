@@ -10,6 +10,8 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { handleAiChat } from "./ai/chat";
 import spritesRouter from "./routes/sprites";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { Awareness } from 'y-protocols/awareness';
+import { encodeAwarenessUpdate, applyAwarenessUpdate, removeAwarenessStates } from 'y-protocols/awareness';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware - Reference: blueprint:javascript_log_in_with_replit
@@ -314,6 +316,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Store connections per room for simple broadcasting
   const rooms = new Map<string, Set<WebSocket>>();
+  
+  // Track awareness instances per room
+  const roomAwareness = new Map<string, Awareness>();
+  
+  // Track client IDs for awareness cleanup
+  const clientIds = new Map<WebSocket, number>();
 
   wss.on('connection', (conn: WebSocket, req) => {
     // Extract room ID from query params
@@ -325,11 +333,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Add connection to room
     if (!rooms.has(roomId)) {
       rooms.set(roomId, new Set());
+      // Create awareness instance for this room
+      const doc = new Y.Doc();
+      roomAwareness.set(roomId, new Awareness(doc));
     }
     rooms.get(roomId)!.add(conn);
+    
+    const awareness = roomAwareness.get(roomId)!;
 
     // Broadcast incoming messages to all other clients in the same room
     conn.on("message", (message: Buffer) => {
+      const update = new Uint8Array(message);
+      
+      // Track client ID from awareness updates (message type 1)
+      if (update.length > 0 && update[0] === 1) {
+        // Apply awareness update to server's awareness instance
+        applyAwarenessUpdate(awareness, update.slice(1), null);
+        
+        // Extract and track client ID from the update
+        if (update.length >= 5) {
+          const clientId = new DataView(update.buffer, update.byteOffset + 1, 4).getUint32(0, true);
+          clientIds.set(conn, clientId);
+        }
+      }
+      
       const roomClients = rooms.get(roomId);
       if (roomClients) {
         roomClients.forEach((client) => {
@@ -343,11 +370,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Cleanup on disconnect
     conn.on('close', () => {
       console.log(`WebSocket connection closed for room: ${roomId}`);
+      
+      // Get the client ID for this connection
+      const clientId = clientIds.get(conn);
+      
+      // Broadcast awareness update to remove this client
+      if (clientId !== undefined) {
+        const roomClients = rooms.get(roomId);
+        if (roomClients) {
+          // Remove client from awareness using proper API
+          removeAwarenessStates(awareness, [clientId], null);
+          
+          // Encode the removal update
+          const removeUpdate = encodeAwarenessUpdate(awareness, [clientId]);
+          
+          // Prepend message type byte (1 for awareness)
+          const message = new Uint8Array(removeUpdate.length + 1);
+          message[0] = 1;
+          message.set(removeUpdate, 1);
+          
+          // Broadcast to all other clients in the room
+          roomClients.forEach((client) => {
+            if (client !== conn && client.readyState === WebSocket.OPEN) {
+              client.send(message);
+            }
+          });
+        }
+        
+        clientIds.delete(conn);
+      }
+      
       const roomClients = rooms.get(roomId);
       if (roomClients) {
         roomClients.delete(conn);
         if (roomClients.size === 0) {
           rooms.delete(roomId);
+          roomAwareness.delete(roomId);
         }
       }
     });

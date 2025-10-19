@@ -36,6 +36,14 @@ export class CollaborationService {
       if (this.ws) {
         this.ws.send(stateVector);
       }
+      
+      // Set local user state AFTER WebSocket is connected
+      const currentUser = useCanvasStore.getState().currentUser;
+      if (currentUser) {
+        this.awareness.setLocalState({
+          user: currentUser,
+        });
+      }
     };
 
     this.ws.onmessage = (event) => {
@@ -86,14 +94,6 @@ export class CollaborationService {
         this.ws.send(message);
       }
     });
-
-    // Set local user state
-    const currentUser = useCanvasStore.getState().currentUser;
-    if (currentUser) {
-      this.awareness.setLocalState({
-        user: currentUser,
-      });
-    }
 
     // Listen to awareness changes (other users' cursors, selections, etc.)
     this.awareness.on('change', () => {
