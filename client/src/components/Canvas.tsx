@@ -101,7 +101,7 @@ export function Canvas() {
   const paintTilesAtPosition = (gridX: number, gridY: number) => {
     if (!selectedTileset) return;
 
-    // Handle multi-tile objects (trees, etc.)
+    // Handle multi-tile objects (trees, etc.) - these go on the 'props' layer
     if (selectedTileset.tilesetType === 'multi-tile' && selectedTileset.multiTileConfig) {
       const tilesToAdd: Tile[] = [];
       
@@ -112,6 +112,7 @@ export function Canvas() {
           y: gridY + tilePos.y,
           tilesetId: selectedTileset.id,
           tileIndex: index, // Each tile in the configuration gets its own index
+          layer: 'props', // Props layer for trees, flowers, etc.
         });
       });
       
@@ -120,7 +121,7 @@ export function Canvas() {
       return;
     }
 
-    // Handle auto-tiling tilesets (existing logic)
+    // Handle auto-tiling tilesets (grass, dirt, water) - these go on the 'terrain' layer
     // Collect all tiles to be added/updated
     const tilesToAdd: Tile[] = [];
 
@@ -132,6 +133,7 @@ export function Canvas() {
           y: gridY + dy,
           tilesetId: selectedTileset.id,
           tileIndex: selectedTileIndex,
+          layer: 'terrain', // Terrain layer for grass, dirt, water
         });
       }
     }
@@ -168,6 +170,7 @@ export function Canvas() {
             y: update.y,
             tilesetId: selectedTileset.id,
             tileIndex: update.tileIndex,
+            layer: 'terrain', // Auto-tiled tiles are terrain
           });
         });
       }
@@ -216,8 +219,12 @@ export function Canvas() {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
       
-      // Get the tile to be removed to know its tileset
-      const tileToRemove = tiles.find((t) => t.x === gridX && t.y === gridY);
+      // Find tiles at this position, prioritize props layer
+      const tilesAtPosition = tiles.filter((t) => t.x === gridX && t.y === gridY);
+      if (tilesAtPosition.length === 0) return;
+      
+      // Erase from props layer first, then terrain
+      const tileToRemove = tilesAtPosition.find((t) => t.layer === 'props') || tilesAtPosition[0];
       
       if (!tileToRemove) return;
 
@@ -238,9 +245,9 @@ export function Canvas() {
         const baseX = gridX - configTile.x;
         const baseY = gridY - configTile.y;
 
-        // Remove all tiles belonging to this multi-tile object
+        // Remove all tiles belonging to this multi-tile object (from props layer)
         tileset.multiTileConfig.tiles.forEach((tilePos) => {
-          removeTile(baseX + tilePos.x, baseY + tilePos.y);
+          removeTile(baseX + tilePos.x, baseY + tilePos.y, 'props');
         });
 
         return;
@@ -261,18 +268,21 @@ export function Canvas() {
         false // don't include self since we're removing it
       );
 
-      // Remove the tile first
-      removeTile(gridX, gridY);
+      // Remove the tile from its layer
+      removeTile(gridX, gridY, tileToRemove.layer);
 
-      // Then update all affected neighbor tiles with correct auto-tiling indices
-      tilesToUpdate.forEach((update) => {
-        addTile({
-          x: update.x,
-          y: update.y,
-          tilesetId: tileToRemove.tilesetId,
-          tileIndex: update.tileIndex,
+      // Then update all affected neighbor tiles with correct auto-tiling indices (only for terrain layer)
+      if (tileToRemove.layer === 'terrain') {
+        tilesToUpdate.forEach((update) => {
+          addTile({
+            x: update.x,
+            y: update.y,
+            tilesetId: tileToRemove.tilesetId,
+            tileIndex: update.tileIndex,
+            layer: 'terrain', // Auto-tiled neighbors are terrain
+          });
         });
-      });
+      }
 
       return;
     }
@@ -547,7 +557,14 @@ export function Canvas() {
   };
 
   const renderTiles = () => {
-    return tiles.map((tile, index) => {
+    // Sort tiles by layer: terrain first, then props on top
+    const sortedTiles = [...tiles].sort((a, b) => {
+      if (a.layer === 'terrain' && b.layer === 'props') return -1;
+      if (a.layer === 'props' && b.layer === 'terrain') return 1;
+      return 0;
+    });
+
+    return sortedTiles.map((tile, index) => {
       // Look up the tileset by tilesetId
       const tileset = tilesets.find((ts) => ts.id === tile.tilesetId);
       if (!tileset) return null;

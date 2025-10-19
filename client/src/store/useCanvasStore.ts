@@ -38,7 +38,7 @@ interface CanvasStore extends CanvasState {
   tiles: Tile[];
   addTile: (tile: Tile) => void;
   addTiles: (tiles: Tile[]) => void;
-  removeTile: (x: number, y: number) => void;
+  removeTile: (x: number, y: number, layer?: 'terrain' | 'props') => void;
   clearTiles: () => void;
   
   // Tilesets
@@ -228,8 +228,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
 
   addTile: (tile) => {
     set((state) => {
+      // Find existing tile at same position AND same layer
       const existingIndex = state.tiles.findIndex(
-        (t) => t.x === tile.x && t.y === tile.y
+        (t) => t.x === tile.x && t.y === tile.y && t.layer === tile.layer
       );
       if (existingIndex >= 0) {
         const newTiles = [...state.tiles];
@@ -258,8 +259,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       let newTiles = [...state.tiles];
       
       tilesToAdd.forEach((tile) => {
+        // Find existing tile at same position AND same layer
         const existingIndex = newTiles.findIndex(
-          (t) => t.x === tile.x && t.y === tile.y
+          (t) => t.x === tile.x && t.y === tile.y && t.layer === tile.layer
         );
         
         if (existingIndex >= 0) {
@@ -282,9 +284,13 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     get().pushHistory();
   },
 
-  removeTile: (x, y) => {
+  removeTile: (x, y, layer) => {
     set((state) => {
-      const index = state.tiles.findIndex((t) => t.x === x && t.y === y);
+      // If layer is specified, only remove tiles from that layer
+      // Otherwise, remove all tiles at the position (backwards compatibility)
+      const index = state.tiles.findIndex((t) => 
+        t.x === x && t.y === y && (!layer || t.layer === layer)
+      );
       
       // Notify collaboration service
       if (index >= 0 && (window as any).__collaborationService) {
@@ -292,7 +298,9 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       }
       
       return {
-        tiles: state.tiles.filter((t) => !(t.x === x && t.y === y)),
+        tiles: state.tiles.filter((t) => 
+          !(t.x === x && t.y === y && (!layer || t.layer === layer))
+        ),
       };
     });
     get().pushHistory();

@@ -14,7 +14,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/projects", async (req, res) => {
     try {
       const projects = await storage.getAllProjects();
-      res.json(projects);
+      
+      // Migration: Add layer field to tiles that don't have it
+      const migratedProjects = projects.map((project: any) => {
+        if (project.tileMap && project.tileMap.tiles) {
+          project.tileMap.tiles = project.tileMap.tiles.map((tile: any) => {
+            if (!tile.layer) {
+              // Default to 'terrain' for backward compatibility
+              return { ...tile, layer: 'terrain' };
+            }
+            return tile;
+          });
+        }
+        return project;
+      });
+      
+      res.json(migratedProjects);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch projects" });
     }
@@ -26,6 +41,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!project) {
         return res.status(404).json({ error: "Project not found" });
       }
+      
+      // Migration: Add layer field to tiles that don't have it
+      if (project.tileMap && project.tileMap.tiles) {
+        project.tileMap.tiles = project.tileMap.tiles.map((tile: any) => {
+          if (!tile.layer) {
+            // Infer layer based on tileset type if possible, default to 'terrain'
+            return { ...tile, layer: 'terrain' };
+          }
+          return tile;
+        });
+      }
+      
       res.json(project);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch project" });

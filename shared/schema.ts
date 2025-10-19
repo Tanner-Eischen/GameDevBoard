@@ -44,12 +44,17 @@ export interface Shape {
   points?: number[]; // For polygon, star, line
 }
 
+// Tile layer enum
+export const tileLayerEnum = z.enum(['terrain', 'props']);
+export type TileLayer = z.infer<typeof tileLayerEnum>;
+
 // Tile interface
 export interface Tile {
   x: number;
   y: number;
   tilesetId: string;
   tileIndex: number;
+  layer: TileLayer; // 'terrain' for grass/dirt/water, 'props' for trees/flowers
 }
 
 // TileMap interface
