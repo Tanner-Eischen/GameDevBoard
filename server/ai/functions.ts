@@ -114,6 +114,72 @@ Use this when users ask to add terrain, paint backgrounds, create rivers, roads,
   {
     type: "function",
     function: {
+      name: "placeObject",
+      description: `Place prop objects (trees, tents, campfires, plateau stones) on the canvas at specific positions or scattered across an area.
+
+AVAILABLE OBJECTS:
+- "Tree" - A tall tree prop
+- "Tent" - A camping tent (2x2 tiles)
+- "Campfire 1" - Campfire variant 1 (single tile)
+- "Campfire 2" - Campfire variant 2 (single tile)
+- "Plateau Stone" - Large stone plateau (3x6 tiles)
+
+PLACEMENT MODES:
+- Single placement: Specify exact x,y coordinates to place one object
+- Multiple scattered: Specify area and count to randomly scatter objects
+- Grid placement: Specify area and count with grid layout
+
+Use this when users ask to add objects, props, decorations, or natural elements like trees, tents, campfires, or rocks.`,
+      parameters: {
+        type: "object",
+        properties: {
+          objectName: {
+            type: "string",
+            enum: ["Tree", "Tent", "Campfire 1", "Campfire 2", "Plateau Stone"],
+            description: "The type of object to place"
+          },
+          placement: {
+            type: "object",
+            properties: {
+              mode: {
+                type: "string",
+                enum: ["single", "scatter", "grid"],
+                description: "Placement mode: 'single' (one object at specific position), 'scatter' (randomly distribute), 'grid' (organized grid)"
+              },
+              x: {
+                type: "number",
+                description: "X coordinate for single placement, or area start X for scatter/grid"
+              },
+              y: {
+                type: "number",
+                description: "Y coordinate for single placement, or area start Y for scatter/grid"
+              },
+              width: {
+                type: "number",
+                description: "Area width for scatter/grid placement (not used for single)"
+              },
+              height: {
+                type: "number",
+                description: "Area height for scatter/grid placement (not used for single)"
+              },
+              count: {
+                type: "number",
+                description: "Number of objects to place (for scatter/grid modes)",
+                minimum: 1,
+                maximum: 50
+              }
+            },
+            required: ["mode", "x", "y"],
+            description: "Placement configuration - must include x,y always. For scatter/grid, also include width, height, count"
+          }
+        },
+        required: ["objectName", "placement"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
       name: "analyzeCanvas",
       description: "Analyze the current canvas state and provide insights, statistics, and suggestions. Use this when the user asks about their canvas, wants feedback, or needs suggestions.",
       parameters: {

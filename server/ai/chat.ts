@@ -6,6 +6,7 @@ import {
   executeCreateShapes,
   executeAnalyzeCanvas,
   executeClearCanvas,
+  executePlaceObject,
   type ExecutionResult
 } from "./executor";
 import type { CanvasState, TileMap } from "@shared/schema";
@@ -13,7 +14,8 @@ import { storage } from "../storage";
 import {
   paintTerrainSchema,
   createShapesSchema,
-  clearCanvasSchema
+  clearCanvasSchema,
+  placeObjectSchema
 } from "./validation";
 import { fromZodError } from "zod-validation-error";
 
@@ -189,6 +191,18 @@ Be precise with your parameters to match the user's spatial intent!`
             case "analyzeCanvas":
               result = executeAnalyzeCanvas(canvasState, tileMap);
               break;
+            case "placeObject": {
+              const validation = placeObjectSchema.safeParse(functionArgs);
+              if (!validation.success) {
+                result = {
+                  success: false,
+                  message: `Invalid arguments: ${fromZodError(validation.error).message}`
+                };
+              } else {
+                result = executePlaceObject(validation.data, canvasState, tileMap, tilesets);
+              }
+              break;
+            }
             case "clearCanvas": {
               const validation = clearCanvasSchema.safeParse(functionArgs);
               if (!validation.success) {
