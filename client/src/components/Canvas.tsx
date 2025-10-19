@@ -95,7 +95,10 @@ export function Canvas() {
   };
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (e.target !== e.target.getStage()) return;
+    if (e.target !== e.target.getStage()) {
+      console.log('Click target is not stage, ignoring', e.target);
+      return;
+    }
 
     const stage = stageRef.current;
     if (!stage) return;
@@ -109,6 +112,8 @@ export function Canvas() {
     });
 
     // Handle tile tools with auto-tiling
+    console.log('Tool:', tool, 'Selected tileset:', selectedTileset?.name, 'Selected tile index:', selectedTileIndex);
+    
     if (tool === 'tile-paint' && selectedTileset) {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
