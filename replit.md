@@ -41,8 +41,8 @@ The application is built with a modern web stack, featuring:
 ### October 19, 2025
 - **Implemented Terrain-Aware Auto-Tiling System**:
   - Cross-tileset neighbor detection: Terrain tiles now consider ANY terrain tile as a neighbor (not just same tileset)
-  - Bidirectional updates: When painting grass next to water, both tilesets update (grass shows center, water shows edges)
-  - **Special Grass Behavior**: Grass painted next to existing terrain edges shows grass center WITHOUT updating the neighboring edge (preserves terrain boundaries)
+  - Bidirectional updates: When painting any terrain through another, BOTH tilesets update (painted terrain shows center, neighboring terrain shows edges)
+  - Uniform behavior: ALL terrain types update neighbors consistently when painted - no special cases
   - Erase support: Removing terrain tiles updates surrounding terrain to remove edges
   - Implementation uses explicit layer parameter to handle erase scenarios correctly
 - **Replaced Three Tileset Images**:
