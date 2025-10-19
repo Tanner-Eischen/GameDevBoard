@@ -28,13 +28,16 @@ export function Canvas() {
     tilesets,
     selectedTileset,
     selectedTileIndex,
+    brushSize,
     addTile,
     removeTile,
     currentUser,
   } = useCanvasStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
+  const [isPainting, setIsPainting] = useState(false);
   const [currentShape, setCurrentShape] = useState<Shape | null>(null);
+  const [lastPaintedGrid, setLastPaintedGrid] = useState<{ x: number; y: number } | null>(null);
   const [tilesetImages, setTilesetImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
   useEffect(() => {
@@ -94,6 +97,63 @@ export function Canvas() {
     };
   };
 
+  const paintTilesAtPosition = (gridX: number, gridY: number) => {
+    if (!selectedTileset) return;
+
+    // Paint a brushSize.width x brushSize.height grid of tiles
+    for (let dy = 0; dy < brushSize.height; dy++) {
+      for (let dx = 0; dx < brushSize.width; dx++) {
+        const tileX = gridX + dx;
+        const tileY = gridY + dy;
+
+        // Add the tile temporarily with selected index
+        addTile({
+          x: tileX,
+          y: tileY,
+          tilesetId: selectedTileset.id,
+          tileIndex: selectedTileIndex,
+        });
+      }
+    }
+
+    // Get updated tiles array after adding all brush tiles
+    const updatedTiles = useCanvasStore.getState().tiles;
+
+    // Collect all tiles that need auto-tiling updates
+    const tilesToUpdate = new Map<string, { x: number; y: number; tileIndex: number }>();
+
+    // Calculate auto-tiling for each painted tile and its neighbors
+    for (let dy = 0; dy < brushSize.height; dy++) {
+      for (let dx = 0; dx < brushSize.width; dx++) {
+        const tileX = gridX + dx;
+        const tileY = gridY + dy;
+
+        const updates = getTilesToUpdate(
+          tileX,
+          tileY,
+          selectedTileset.id,
+          updatedTiles,
+          true
+        );
+
+        updates.forEach((update) => {
+          const key = `${update.x},${update.y}`;
+          tilesToUpdate.set(key, update);
+        });
+      }
+    }
+
+    // Apply all auto-tiling updates
+    tilesToUpdate.forEach((update) => {
+      addTile({
+        x: update.x,
+        y: update.y,
+        tilesetId: selectedTileset.id,
+        tileIndex: update.tileIndex,
+      });
+    });
+  };
+
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (e.target !== e.target.getStage()) {
       console.log('Click target is not stage, ignoring', e.target);
@@ -112,42 +172,13 @@ export function Canvas() {
     });
 
     // Handle tile tools with auto-tiling
-    console.log('Tool:', tool, 'Selected tileset:', selectedTileset?.name, 'Selected tile index:', selectedTileIndex);
-    
     if (tool === 'tile-paint' && selectedTileset) {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
       
-      // Add the new tile first (temporarily with selected index)
-      addTile({
-        x: gridX,
-        y: gridY,
-        tilesetId: selectedTileset.id,
-        tileIndex: selectedTileIndex,
-      });
-
-      // Get updated tiles array after adding
-      const updatedTiles = useCanvasStore.getState().tiles;
-      
-      // Calculate auto-tiling for this tile and its neighbors
-      const tilesToUpdate = getTilesToUpdate(
-        gridX,
-        gridY,
-        selectedTileset.id,
-        updatedTiles,
-        true // include self
-      );
-
-      // Update all affected tiles with correct auto-tiling indices
-      tilesToUpdate.forEach((update) => {
-        addTile({
-          x: update.x,
-          y: update.y,
-          tilesetId: selectedTileset.id,
-          tileIndex: update.tileIndex,
-        });
-      });
-
+      setIsPainting(true);
+      setLastPaintedGrid({ x: gridX, y: gridY });
+      paintTilesAtPosition(gridX, gridY);
       return;
     }
 
@@ -245,9 +276,23 @@ export function Canvas() {
       y: (pos.y - pan.y) / zoom,
     };
 
+    const snappedPos = snapToGridIfEnabled(canvasPos);
+
+    // Handle continuous tile painting while dragging
+    if (isPainting && tool === 'tile-paint' && selectedTileset) {
+      const gridX = Math.floor(snappedPos.x / gridSize);
+      const gridY = Math.floor(snappedPos.y / gridSize);
+
+      // Only paint if we've moved to a new grid cell
+      if (!lastPaintedGrid || lastPaintedGrid.x !== gridX || lastPaintedGrid.y !== gridY) {
+        setLastPaintedGrid({ x: gridX, y: gridY });
+        paintTilesAtPosition(gridX, gridY);
+      }
+      return;
+    }
+
     if (!isDrawing || !currentShape) return;
 
-    const snappedPos = snapToGridIfEnabled(canvasPos);
     const width = snappedPos.x - currentShape.transform.x;
     const height = snappedPos.y - currentShape.transform.y;
 
@@ -281,6 +326,10 @@ export function Canvas() {
         addShape(currentShape);
       }
     }
+    
+    // Reset painting state
+    setIsPainting(false);
+    setLastPaintedGrid(null);
     setIsDrawing(false);
     setCurrentShape(null);
   };

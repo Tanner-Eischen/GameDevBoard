@@ -43,9 +43,11 @@ interface CanvasStore extends CanvasState {
   tilesets: Tileset[];
   selectedTileset: Tileset | null;
   selectedTileIndex: number;
+  brushSize: { width: number; height: number };
   setTilesets: (tilesets: Tileset[]) => void;
   setSelectedTileset: (tileset: Tileset | null) => void;
   setSelectedTileIndex: (index: number) => void;
+  setBrushSize: (size: { width: number; height: number }) => void;
   
   // Project
   currentProjectId: string | null;
@@ -74,6 +76,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   tilesets: [],
   selectedTileset: null,
   selectedTileIndex: 0,
+  brushSize: { width: 1, height: 1 },
   currentProjectId: null,
   currentProjectName: 'Untitled Project',
 
@@ -272,6 +275,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   setTilesets: (tilesets) => set({ tilesets }),
   setSelectedTileset: (tileset) => set({ selectedTileset: tileset }),
   setSelectedTileIndex: (index) => set({ selectedTileIndex: index }),
+  setBrushSize: (size) => set({ brushSize: size }),
 
   setCurrentProject: (id, name) =>
     set({ currentProjectId: id, currentProjectName: name }),
