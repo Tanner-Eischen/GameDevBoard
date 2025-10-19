@@ -37,8 +37,11 @@ export function Canvas() {
     sprites,
     spriteDefinitions,
     selectedSpriteDefId,
+    selectedSpriteId,
+    animationPreview,
     addSprite,
     selectSprite,
+    updateSprite,
   } = useCanvasStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
@@ -684,10 +687,17 @@ export function Canvas() {
         <SpriteAnimator
           key={sprite.id}
           sprite={sprite}
-          spriteDef={spriteDef}
-          onSelect={() => selectSprite(sprite.id)}
-          isSelected={selectedIds.includes(sprite.id)}
-          tool={tool}
+          definition={spriteDef}
+          isSelected={selectedSpriteId === sprite.id}
+          isPreviewing={animationPreview}
+          onClick={() => selectSprite(sprite.id)}
+          onDragEnd={(e) => {
+            const node = e.target;
+            updateSprite(sprite.id, {
+              x: node.x(),
+              y: node.y(),
+            });
+          }}
         />
       );
     });

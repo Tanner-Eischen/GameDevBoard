@@ -1,0 +1,75 @@
+client:536 WebSocket connection to 'wss://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/?token=ijeePrYHK_I3' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=ijeePrYHK_I3' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+contents.04ff201a.js:1 in iframe false
+contents.04ff201a.js:354 Init Current tab url: https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/
+collaboration.ts:32 WebSocket connected
+hook.js:608 Failed to load tileset image: Dirt Terrain
+overrideMethod @ hook.js:608
+SpriteAnimator.tsx:37 Uncaught TypeError: Cannot read properties of undefined (reading 'imageUrl')
+    at SpriteAnimator (SpriteAnimator.tsx:37:18)
+    at renderWithHooks (react-konva.js?v=89e5e358:4853:26)
+    at mountIndeterminateComponent (react-konva.js?v=89e5e358:8231:21)
+    at beginWork (react-konva.js?v=89e5e358:9219:22)
+    at HTMLUnknownElement.callCallback2 (react-konva.js?v=89e5e358:10158:22)
+    at Object.invokeGuardedCallbackDev (react-konva.js?v=89e5e358:10183:24)
+    at invokeGuardedCallback (react-konva.js?v=89e5e358:10215:39)
+    at beginWork$1 (react-konva.js?v=89e5e358:13742:15)
+    at performUnitOfWork (react-konva.js?v=89e5e358:13175:20)
+    at workLoopSync (react-konva.js?v=89e5e358:13114:13)
+hook.js:608 The above error occurred in the <SpriteAnimator> component:
+
+    at SpriteAnimator (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/src/components/SpriteAnimator.tsx:21:3)
+    at Layer
+    at FiberProvider (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-konva.js?v=89e5e358:26986:21)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608
+chunk-IYPCNVFT.js?v=bcdcccfd:16211 Uncaught TypeError: Cannot read properties of undefined (reading 'imageUrl')
+    at SpriteAnimator (SpriteAnimator.tsx:37:18)
+    at renderWithHooks (react-konva.js?v=89e5e358:4853:26)
+    at mountIndeterminateComponent (react-konva.js?v=89e5e358:8231:21)
+    at beginWork (react-konva.js?v=89e5e358:9219:22)
+    at beginWork$1 (react-konva.js?v=89e5e358:13730:22)
+    at performUnitOfWork (react-konva.js?v=89e5e358:13175:20)
+    at workLoopSync (react-konva.js?v=89e5e358:13114:13)
+    at renderRootSync (react-konva.js?v=89e5e358:13093:15)
+    at performSyncWorkOnRoot (react-konva.js?v=89e5e358:12820:28)
+    at flushSyncCallbacks (react-konva.js?v=89e5e358:2230:30)
+hook.js:608 The above error occurred in the <StageWrap> component:
+
+    at StageWrap (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-konva.js?v=89e5e358:27060:42)
+    at FiberProvider (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-konva.js?v=89e5e358:26986:21)
+    at div
+    at Canvas (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/src/components/Canvas.tsx?t=1760882598015:26:20)
+    at main
+    at div
+    at div
+    at Board (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/src/pages/Board.tsx?t=1760882598015:43:103)
+    at Route (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=71277e57:191:16)
+    at Switch (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=71277e57:247:17)
+    at Router
+    at Provider (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-E7IAXTU4.js?v=bcdcccfd:38:15)
+    at TooltipProvider (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=62d57b4e:2219:5)
+    at QueryClientProvider (https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=4a7ae6a2:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+overrideMethod @ hook.js:608
+chunk-IYPCNVFT.js?v=bcdcccfd:8670 Uncaught TypeError: Cannot read properties of undefined (reading 'imageUrl')
+    at SpriteAnimator (SpriteAnimator.tsx:37:18)
+    at renderWithHooks (react-konva.js?v=89e5e358:4853:26)
+    at mountIndeterminateComponent (react-konva.js?v=89e5e358:8231:21)
+    at beginWork (react-konva.js?v=89e5e358:9219:22)
+    at beginWork$1 (react-konva.js?v=89e5e358:13730:22)
+    at performUnitOfWork (react-konva.js?v=89e5e358:13175:20)
+    at workLoopSync (react-konva.js?v=89e5e358:13114:13)
+    at renderRootSync (react-konva.js?v=89e5e358:13093:15)
+    at performSyncWorkOnRoot (react-konva.js?v=89e5e358:12820:28)
+    at flushSyncCallbacks (react-konva.js?v=89e5e358:2230:30)
+collaboration.ts:52 WebSocket disconnected

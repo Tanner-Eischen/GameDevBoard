@@ -124,6 +124,8 @@ These services are integrated and managed by Replit:
   - Added sprite observer to sync remote sprite changes to local store
   - Updated store methods to properly notify collaboration service with sprite index
   - Fixed "Unexpected end of array" error when adding sprites to canvas
+  - Fixed prop name mismatch in Canvas component (`spriteDef` → `definition`)
+  - Added missing store variables to Canvas component (`selectedSpriteId`, `animationPreview`, `updateSprite`)
   - Sprites now fully synchronized across multiple users in real-time
 - **Enhanced AI Assistant with Advanced Natural Language Understanding**:
   - Added 5 new terrain patterns: `horizontal_path`, `vertical_path`, `diagonal_path`, `winding_path`, `curved_path`
