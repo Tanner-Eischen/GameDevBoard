@@ -1,23 +1,20 @@
 import type { Tile } from '@shared/schema';
 
 /**
- * 3x3 auto-tiling system
+ * 3x3 auto-tiling system using 4-neighbor bitmask algorithm
  * 
  * Tileset layout (indices):
  * 0 1 2
  * 3 4 5
  * 6 7 8
  * 
- * Each tile represents a neighbor configuration:
- * - 0: Top-left corner (neighbors: right, bottom)
- * - 1: Top edge (neighbors: left, right, bottom)
- * - 2: Top-right corner (neighbors: left, bottom)
- * - 3: Left edge (neighbors: top, right, bottom)
- * - 4: Center/full (neighbors: all sides)
- * - 5: Right edge (neighbors: top, left, bottom)
- * - 6: Bottom-left corner (neighbors: top, right)
- * - 7: Bottom edge (neighbors: top, left, right)
- * - 8: Bottom-right corner (neighbors: top, left)
+ * Bitmask bits:
+ * - North (top) = 1
+ * - East (right) = 2
+ * - South (bottom) = 4
+ * - West (left) = 8
+ * 
+ * Bitmask value (0-15) maps to tile index (0-8)
  */
 
 interface NeighborConfig {
@@ -28,38 +25,40 @@ interface NeighborConfig {
 }
 
 /**
- * Calculate the correct tile index based on neighbor configuration
+ * Bitmask to tile index lookup table
+ * Maps 4-neighbor bitmask (0-15) to 3x3 tile index (0-8)
+ */
+const BITMASK_TO_TILE: number[] = [
+  4,  // 0000 (no neighbors) → center/isolated
+  7,  // 0001 (N) → bottom edge
+  3,  // 0010 (E) → left edge
+  6,  // 0011 (N+E) → bottom-left corner
+  1,  // 0100 (S) → top edge
+  4,  // 0101 (N+S) → center (vertical)
+  0,  // 0110 (E+S) → top-left corner
+  3,  // 0111 (N+E+S) → left edge
+  5,  // 1000 (W) → right edge
+  8,  // 1001 (N+W) → bottom-right corner
+  4,  // 1010 (E+W) → center (horizontal)
+  7,  // 1011 (N+E+W) → bottom edge
+  2,  // 1100 (S+W) → top-right corner
+  5,  // 1101 (N+S+W) → right edge
+  1,  // 1110 (E+S+W) → top edge
+  4,  // 1111 (all) → center
+];
+
+/**
+ * Calculate the correct tile index based on neighbor configuration using bitmask
  */
 export function calculateAutoTileIndex(neighbors: NeighborConfig): number {
-  const { top, bottom, left, right } = neighbors;
+  // Calculate bitmask: N=1, E=2, S=4, W=8
+  const bitmask =
+    (neighbors.top ? 1 : 0) |
+    (neighbors.right ? 2 : 0) |
+    (neighbors.bottom ? 4 : 0) |
+    (neighbors.left ? 8 : 0);
 
-  // All four sides have neighbors = center tile
-  if (top && bottom && left && right) return 4;
-
-  // Three neighbors
-  if (top && left && right && !bottom) return 1; // Top edge
-  if (top && bottom && left && !right) return 3; // Left edge
-  if (top && bottom && right && !left) return 5; // Right edge
-  if (bottom && left && right && !top) return 7; // Bottom edge
-
-  // Two neighbors (corners)
-  if (right && bottom && !top && !left) return 0; // Top-left corner
-  if (left && bottom && !top && !right) return 2; // Top-right corner
-  if (top && right && !bottom && !left) return 6; // Bottom-left corner
-  if (top && left && !bottom && !right) return 8; // Bottom-right corner
-
-  // Two neighbors (opposite sides) - use center
-  if (top && bottom && !left && !right) return 4; // Vertical center
-  if (left && right && !top && !bottom) return 4; // Horizontal center
-
-  // One neighbor - use appropriate edge tile facing the neighbor
-  if (bottom && !top && !left && !right) return 1; // Top edge (neighbor below)
-  if (top && !bottom && !left && !right) return 7; // Bottom edge (neighbor above)
-  if (right && !top && !bottom && !left) return 3; // Left edge (neighbor to right)
-  if (left && !top && !bottom && !right) return 5; // Right edge (neighbor to left)
-
-  // No neighbors = isolated tile, use center
-  return 4;
+  return BITMASK_TO_TILE[bitmask];
 }
 
 /**
