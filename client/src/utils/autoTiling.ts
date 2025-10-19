@@ -63,7 +63,7 @@ export function calculateAutoTileIndex(neighbors: NeighborConfig): number {
 
 /**
  * Get the neighbor configuration for a tile at the given position
- * For both terrain and props tiles, only considers tiles from the same tileset as neighbors
+ * Only considers tiles from the same tileset as neighbors for both terrain and props
  * This creates proper edges when different terrain types meet
  */
 export function getNeighborConfig(
@@ -108,8 +108,8 @@ export function getNeighborConfig(
 
 /**
  * Get all tiles that need to be updated when a tile is added/removed
- * For terrain tiles, this also updates neighboring tiles of different terrain types
- * to create proper edges (e.g., water edges when grass is painted next to water)
+ * Only updates tiles from the SAME tileset to prevent unwanted edge changes
+ * on neighboring different terrains (e.g., prevents grass showing black edges when water is nearby)
  */
 export function getTilesToUpdate(
   x: number,
@@ -145,19 +145,13 @@ export function getTilesToUpdate(
 
   for (const pos of positions) {
     if (isTerrainLayer) {
-      // For terrain tiles: update ALL terrain tiles at neighboring positions (cross-tileset)
-      const tilesAtPosition = tiles.filter(
-        (t) => t.x === pos.x && t.y === pos.y && t.layer === 'terrain'
+      // For terrain tiles: only update tiles from the SAME tileset (not all terrain)
+      // This prevents unwanted edge updates on neighboring different terrains
+      const existingTile = tiles.find(
+        (t) => t.x === pos.x && t.y === pos.y && t.tilesetId === tilesetId && t.layer === 'terrain'
       );
       
-      for (const tile of tilesAtPosition) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles, 'terrain');
-        const tileIndex = calculateAutoTileIndex(neighbors);
-        updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId: tile.tilesetId });
-      }
-      
-      // If no tile at position but includeSelf and it's the center, add it
-      if (tilesAtPosition.length === 0 && pos.x === x && pos.y === y && includeSelf) {
+      if (existingTile || (pos.x === x && pos.y === y && includeSelf)) {
         const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles, 'terrain');
         const tileIndex = calculateAutoTileIndex(neighbors);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId });

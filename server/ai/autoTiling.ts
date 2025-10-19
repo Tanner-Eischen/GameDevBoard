@@ -61,7 +61,7 @@ function calculateAutoTileIndex(neighbors: NeighborConfig): number {
 
 /**
  * Get the neighbor configuration for a tile at the given position
- * For both terrain and props tiles, only considers tiles from the same tileset as neighbors
+ * Only considers tiles from the same tileset as neighbors for both terrain and props
  * This creates proper edges when different terrain types meet
  */
 function getNeighborConfig(
@@ -97,7 +97,7 @@ function getNeighborConfig(
 /**
  * Apply auto-tiling to a set of new tiles and their neighbors
  * Returns all tiles that need to be added/updated with correct auto-tiling indices
- * Creates proper edges when different terrain types meet
+ * Only updates same-tileset tiles to prevent unwanted edge changes on different terrains
  */
 export function applyAutoTiling(
   newTiles: Tile[],
@@ -129,27 +129,13 @@ export function applyAutoTiling(
     ];
     
     positions.forEach(pos => {
-      // For terrain tiles: update ALL terrain tiles at neighboring positions (cross-tileset)
-      const tilesAtPosition = allTiles.filter(
-        (t) => t.x === pos.x && t.y === pos.y && t.layer === 'terrain'
+      // For terrain tiles: only update tiles from the SAME tileset (not all terrain)
+      // This prevents unwanted edge updates on neighboring different terrains
+      const existingTile = allTiles.find(
+        (t) => t.x === pos.x && t.y === pos.y && t.tilesetId === tilesetId && t.layer === 'terrain'
       );
       
-      for (const tile of tilesAtPosition) {
-        const key = `${pos.x},${pos.y},${tile.tilesetId}`;
-        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, allTiles, 'terrain');
-        const tileIndex = calculateAutoTileIndex(neighbors);
-        
-        tilesToUpdate.set(key, {
-          x: pos.x,
-          y: pos.y,
-          tilesetId: tile.tilesetId,
-          tileIndex,
-          layer: 'terrain',
-        });
-      }
-      
-      // If no tile at position but it's the center, add it
-      if (tilesAtPosition.length === 0 && pos.x === newTile.x && pos.y === newTile.y) {
+      if (existingTile || (pos.x === newTile.x && pos.y === newTile.y)) {
         const key = `${pos.x},${pos.y},${tilesetId}`;
         const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, allTiles, 'terrain');
         const tileIndex = calculateAutoTileIndex(neighbors);
