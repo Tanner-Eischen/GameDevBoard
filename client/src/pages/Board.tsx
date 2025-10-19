@@ -4,6 +4,7 @@ import { Toolbar } from '@/components/Toolbar';
 import { PropertiesPanel } from '@/components/PropertiesPanel';
 import { LayersPanel } from '@/components/LayersPanel';
 import { TilesetPanel } from '@/components/TilesetPanel';
+import { TilesetPackPanel } from '@/components/TilesetPackPanel';
 import { SpritePanel } from '@/components/SpritePanel';
 import { UserPresence } from '@/components/UserPresence';
 import { ProjectManager } from '@/components/ProjectManager';
@@ -279,6 +280,7 @@ export default function Board() {
           <div className="p-4 space-y-4 min-w-80">
             <PropertiesPanel />
             <TilesetPanel />
+            <TilesetPackPanel />
             <SpritePanel />
           </div>
         </aside>

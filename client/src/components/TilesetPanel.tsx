@@ -1,9 +1,11 @@
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { useTilesets } from '@/hooks/useTilesets';
+import { useTilesetPacks } from '@/hooks/useTilesetPacks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, Plus, Loader2, ImagePlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -25,8 +27,10 @@ export function TilesetPanel() {
   } = useCanvasStore();
 
   const { data: tilesets, isLoading } = useTilesets();
+  const { data: packs } = useTilesetPacks();
   const [showUpload, setShowUpload] = useState(false);
   const [tilesetName, setTilesetName] = useState('');
+  const [selectedPackId, setSelectedPackId] = useState<string>('');
   const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
@@ -81,6 +85,7 @@ export function TilesetPanel() {
         imageUrl: 'pending',
         columns,
         rows,
+        packId: selectedPackId || null,
       });
       const newTileset = await createRes.json();
 
@@ -108,6 +113,7 @@ export function TilesetPanel() {
       queryClient.invalidateQueries({ queryKey: ['/api/tilesets'] });
       setShowUpload(false);
       setTilesetName('');
+      setSelectedPackId('');
     } catch (error) {
       console.error('Error creating tileset:', error);
       toast({
@@ -146,15 +152,31 @@ export function TilesetPanel() {
               <Input
                 id="tileset-name"
                 placeholder="My Tileset"
-                className="h-8"
-                data-testid="input-tileset-name"
                 value={tilesetName}
                 onChange={(e) => setTilesetName(e.target.value)}
-                disabled={uploading}
+                data-testid="input-tileset-name"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">3x3 Tileset Image (48x48)</Label>
+              <Label htmlFor="pack-select" className="text-xs">
+                Tileset Pack (optional)
+              </Label>
+              <Select value={selectedPackId} onValueChange={setSelectedPackId}>
+                <SelectTrigger id="pack-select" data-testid="select-pack">
+                  <SelectValue placeholder="No pack" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No pack</SelectItem>
+                  {packs?.map((pack) => (
+                    <SelectItem key={pack.id} value={pack.id}>
+                      {pack.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Upload Image (3x3 tileset, 16px tiles, 1px spacing)</Label>
               <ObjectUploader
                 maxNumberOfFiles={1}
                 maxFileSize={10485760}
@@ -166,20 +188,12 @@ export function TilesetPanel() {
                 Select Image
               </ObjectUploader>
             </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setShowUpload(false);
-                  setTilesetName('');
-                }}
-                data-testid="button-cancel-upload"
-                disabled={uploading}
-              >
-                Cancel
-              </Button>
-            </div>
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex justify-center py-4">
+            <Loader2 className="h-4 w-4 animate-spin" />
           </div>
         )}
 

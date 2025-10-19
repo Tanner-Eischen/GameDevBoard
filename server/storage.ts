@@ -70,6 +70,7 @@ export class MemStorage implements IStorage {
       rows: 3,
       tilesetType: 'auto-tiling',
       multiTileConfig: null,
+      packId: null,
       createdAt: new Date(),
     };
     this.tilesets.set(dirtTileset.id, dirtTileset);
@@ -84,6 +85,7 @@ export class MemStorage implements IStorage {
       rows: 3,
       tilesetType: 'auto-tiling',
       multiTileConfig: null,
+      packId: null,
       createdAt: new Date(),
     };
     this.tilesets.set(grassTileset.id, grassTileset);
@@ -98,6 +100,7 @@ export class MemStorage implements IStorage {
       rows: 3,
       tilesetType: 'auto-tiling',
       multiTileConfig: null,
+      packId: null,
       createdAt: new Date(),
     };
     this.tilesets.set(waterTileset.id, waterTileset);
@@ -174,15 +177,19 @@ export class MemStorage implements IStorage {
 
   async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
     const id = randomUUID();
-    const tileset: TilesetData = {
+    const tileset = {
       id,
-      ...insertTileset,
+      name: insertTileset.name,
       tileSize: insertTileset.tileSize ?? 32,
       spacing: insertTileset.spacing ?? 0,
-      tilesetType: insertTileset.tilesetType ?? 'auto-tiling',
-      multiTileConfig: insertTileset.multiTileConfig ?? null,
+      imageUrl: insertTileset.imageUrl,
+      columns: insertTileset.columns,
+      rows: insertTileset.rows,
+      tilesetType: (insertTileset.tilesetType ?? 'auto-tiling') as 'auto-tiling' | 'multi-tile' | 'variant_grid',
+      multiTileConfig: (insertTileset.multiTileConfig ?? null) as MultiTileConfig | null,
+      packId: insertTileset.packId ?? null,
       createdAt: new Date(),
-    };
+    } as TilesetData;
     this.tilesets.set(id, tileset);
     return tileset;
   }
@@ -194,10 +201,12 @@ export class MemStorage implements IStorage {
     const tileset = this.tilesets.get(id);
     if (!tileset) return undefined;
 
-    const updatedTileset: TilesetData = {
+    const updatedTileset = {
       ...tileset,
       ...updates,
-    };
+      tilesetType: updates.tilesetType ? (updates.tilesetType as 'auto-tiling' | 'multi-tile' | 'variant_grid') : tileset.tilesetType,
+      multiTileConfig: updates.multiTileConfig !== undefined ? (updates.multiTileConfig as MultiTileConfig | null) : tileset.multiTileConfig,
+    } as TilesetData;
     this.tilesets.set(id, updatedTileset);
     return updatedTileset;
   }
@@ -220,8 +229,8 @@ export class MemStorage implements IStorage {
     const now = new Date();
     const pack: TilesetPack = {
       id,
-      ...insertPack,
-      tags: insertPack.tags || [],
+      name: insertPack.name,
+      tags: (insertPack.tags || []) as string[],
       description: insertPack.description || null,
       createdAt: now,
       updatedAt: now,
@@ -240,6 +249,7 @@ export class MemStorage implements IStorage {
     const updatedPack: TilesetPack = {
       ...pack,
       ...updates,
+      tags: updates.tags ? (updates.tags as string[]) : pack.tags,
       updatedAt: new Date(),
     };
     this.tilesetPacks.set(id, updatedPack);
@@ -355,17 +365,17 @@ export class DbStorage implements IStorage {
   }
 
   async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
-    const [tileset] = await db.insert(tilesetsTable).values(insertTileset).returning();
-    return tileset;
+    const [tileset] = await db.insert(tilesetsTable).values(insertTileset as any).returning();
+    return tileset as TilesetData;
   }
 
   async updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined> {
     const [tileset] = await db
       .update(tilesetsTable)
-      .set(updates)
+      .set(updates as any)
       .where(eq(tilesetsTable.id, id))
       .returning();
-    return tileset;
+    return tileset as TilesetData;
   }
 
   async deleteTileset(id: string): Promise<boolean> {
@@ -384,8 +394,8 @@ export class DbStorage implements IStorage {
   }
 
   async createTilesetPack(insertPack: InsertTilesetPack): Promise<TilesetPack> {
-    const [pack] = await db.insert(tilesetPacksTable).values(insertPack).returning();
-    return pack;
+    const [pack] = await db.insert(tilesetPacksTable).values(insertPack as any).returning();
+    return pack as TilesetPack;
   }
 
   async updateTilesetPack(id: string, updates: Partial<InsertTilesetPack>): Promise<TilesetPack | undefined> {
