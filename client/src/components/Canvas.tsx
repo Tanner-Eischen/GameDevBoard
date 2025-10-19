@@ -425,9 +425,13 @@ export function Canvas() {
         );
       }
 
-      // Calculate the position in the tileset image
-      const tileX = (tile.tileIndex % tileset.columns) * tileset.tileSize;
-      const tileY = Math.floor(tile.tileIndex / tileset.columns) * tileset.tileSize;
+      // Calculate the position in the tileset image accounting for spacing
+      // For a 3x3 grid with spacing, each tile starts at: col * (tileSize + spacing)
+      const col = tile.tileIndex % tileset.columns;
+      const row = Math.floor(tile.tileIndex / tileset.columns);
+      const spacing = tileset.spacing || 0;
+      const tileX = col * (tileset.tileSize + spacing);
+      const tileY = row * (tileset.tileSize + spacing);
 
       return (
         <Image

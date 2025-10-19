@@ -47,10 +47,12 @@ export class MemStorage implements IStorage {
 
   private initializeDemoData() {
     // Create 3x3 demo tilesets from attached assets
+    // Each image is 50x50 pixels with 9 tiles of 16x16 pixels and 1px spacing
     const dirtTileset: TilesetData = {
       id: randomUUID(),
       name: 'Dirt Terrain',
       tileSize: 16,
+      spacing: 1,
       imageUrl: '/attached_assets/dirt_3x3_1760825550695.png',
       columns: 3,
       rows: 3,
@@ -62,6 +64,7 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       name: 'Grass Terrain',
       tileSize: 16,
+      spacing: 1,
       imageUrl: '/attached_assets/grass_3x3_kenney_1760825550695.png',
       columns: 3,
       rows: 3,
@@ -73,6 +76,7 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       name: 'Water Terrain',
       tileSize: 16,
+      spacing: 1,
       imageUrl: '/attached_assets/water_3x3_1760825550696.png',
       columns: 3,
       rows: 3,
@@ -155,6 +159,8 @@ export class MemStorage implements IStorage {
     const tileset: TilesetData = {
       id,
       ...insertTileset,
+      tileSize: insertTileset.tileSize ?? 32,
+      spacing: insertTileset.spacing ?? 0,
       createdAt: new Date(),
     };
     this.tilesets.set(id, tileset);
