@@ -146,3 +146,14 @@ These services are integrated and managed by Replit:
   - **Campfire Variant 1**: 1x1 multi-tile object (17x16px)
   - **Campfire Variant 2**: 1x1 multi-tile object (17x16px)
 - **E2E Testing**: Verified AI object placement with Playwright tests confirming correct tile placement and Y.js synchronization
+- **Added Variant Grid Tileset Type**:
+  - Created new `variant_grid` tileset type for tilesets that don't use auto-tiling (manual tile variant selection)
+  - Added to tilesetTypeEnum: `'auto-tiling' | 'multi-tile' | 'variant_grid'`
+  - Updated Grass Field Variants tileset to use variant_grid type
+  - Variant grid tilesets paint with the exact tile index the user selects (no auto-tiling algorithm)
+  - Fixes issue where Grass Field Variants was incorrectly applying auto-tiling logic
+- **Fixed Auto-Tiling Layer Detection Bug**:
+  - Updated getNeighborConfig() to accept explicit layer parameter ('terrain' | 'props')
+  - Prevents bug where newly painted tiles couldn't determine their layer
+  - Ensures terrain tiles correctly recognize ANY terrain tile as a neighbor (cross-tileset)
+  - Fixes issue where painting grass on grass incorrectly used edge tiles instead of center tile
