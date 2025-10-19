@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import express from "express";
 import * as Y from "yjs";
-import { insertProjectSchema, insertTilesetSchema } from "@shared/schema";
+import { insertProjectSchema, insertTilesetSchema, insertTilesetPackSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { handleAiChat } from "./ai/chat";
@@ -207,6 +207,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating tileset image:", error);
       res.status(500).json({ error: "Failed to update tileset image" });
+    }
+  });
+
+  // Tileset Packs API
+  app.get("/api/tileset-packs", async (req, res) => {
+    try {
+      const packs = await storage.getAllTilesetPacks();
+      res.json(packs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tileset packs" });
+    }
+  });
+
+  app.get("/api/tileset-packs/:id", async (req, res) => {
+    try {
+      const pack = await storage.getTilesetPack(req.params.id);
+      if (!pack) {
+        return res.status(404).json({ error: "Tileset pack not found" });
+      }
+      res.json(pack);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tileset pack" });
+    }
+  });
+
+  app.get("/api/tileset-packs/:id/tilesets", async (req, res) => {
+    try {
+      const tilesets = await storage.getTilesetsByPackId(req.params.id);
+      res.json(tilesets);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch tilesets for pack" });
+    }
+  });
+
+  app.post("/api/tileset-packs", express.json(), async (req, res) => {
+    try {
+      const validatedData = insertTilesetPackSchema.parse(req.body);
+      const pack = await storage.createTilesetPack(validatedData);
+      res.status(201).json(pack);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ error: validationError.message });
+      }
+      res.status(500).json({ error: "Failed to create tileset pack" });
+    }
+  });
+
+  app.put("/api/tileset-packs/:id", express.json(), async (req, res) => {
+    try {
+      const validatedData = insertTilesetPackSchema.partial().parse(req.body);
+      const pack = await storage.updateTilesetPack(req.params.id, validatedData);
+      if (!pack) {
+        return res.status(404).json({ error: "Tileset pack not found" });
+      }
+      res.json(pack);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        const validationError = fromZodError(error);
+        return res.status(400).json({ error: validationError.message });
+      }
+      res.status(500).json({ error: "Failed to update tileset pack" });
+    }
+  });
+
+  app.delete("/api/tileset-packs/:id", async (req, res) => {
+    try {
+      const deleted = await storage.deleteTilesetPack(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Tileset pack not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete tileset pack" });
     }
   });
 
