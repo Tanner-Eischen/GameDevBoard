@@ -115,12 +115,12 @@ export class MemStorage implements IStorage {
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = randomUUID();
     const now = new Date();
-    const project: Project = {
+    const project = {
       id,
       ...insertProject,
       createdAt: now,
       updatedAt: now,
-    };
+    } as Project;
     this.projects.set(id, project);
     return project;
   }
@@ -132,11 +132,11 @@ export class MemStorage implements IStorage {
     const project = this.projects.get(id);
     if (!project) return undefined;
 
-    const updatedProject: Project = {
+    const updatedProject = {
       ...project,
       ...updates,
       updatedAt: new Date(),
-    };
+    } as Project;
     this.projects.set(id, updatedProject);
     return updatedProject;
   }
