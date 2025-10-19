@@ -563,20 +563,30 @@ export function executeCreateScene(
   },
   canvasState: CanvasState,
   tileMap: TileMap,
-  availableTilesets: any[]
+  availableTilesets: any[],
+  packs?: any[]
 ): ExecutionResult {
   const newTiles: Tile[] = [];
   const { x, y, width, height } = params.area;
   const features = params.features || {};
   
+  // Helper: Filter tilesets by pack for cohesion
+  const filterByPack = (packId: string | null) => {
+    return availableTilesets.filter(t => t.packId === packId);
+  };
+  
   // 1. Create base terrain with grass variants for natural look
-  const grassTileset = findBestMatch('grass', availableTilesets, t => t.name, 0.4);
+  // Try to find grass tileset, preferring from a pack
+  let grassTileset = findBestMatch('grass', availableTilesets, t => t.name, 0.4);
   if (!grassTileset) {
     return {
       success: false,
       message: getSuggestionText('grass', availableTilesets, t => t.name, 'terrain tileset')
     };
   }
+  
+  // Get the pack ID from grass tileset for preferring same pack
+  const preferredPackId = grassTileset.packId || null;
 
   // Use grass variants if available (variant_grid tileset)
   const useVariants = features.grassVariants !== false && grassTileset.tilesetType === 'variant_grid';
@@ -609,7 +619,9 @@ export function executeCreateScene(
 
   // 2. Add winding path if requested
   if (features.paths) {
-    const dirtTileset = findBestMatch('dirt', availableTilesets, t => t.name, 0.4);
+    // Try to find dirt tileset from the same pack first
+    const samePack = preferredPackId ? filterByPack(preferredPackId) : [];
+    const dirtTileset = findBestMatch('dirt', samePack.length > 0 ? samePack : availableTilesets, t => t.name, 0.4);
     if (dirtTileset) {
       const pathWidth = 3;
       const pathStart = { x: x, y: y + Math.floor(height / 2) };
@@ -622,7 +634,9 @@ export function executeCreateScene(
 
   // 3. Add winding river if requested
   if (features.water) {
-    const waterTileset = findBestMatch('water', availableTilesets, t => t.name, 0.4);
+    // Try to find water tileset from the same pack first
+    const samePack = preferredPackId ? filterByPack(preferredPackId) : [];
+    const waterTileset = findBestMatch('water', samePack.length > 0 ? samePack : availableTilesets, t => t.name, 0.4);
     if (waterTileset) {
       const riverWidth = 4;
       const isVertical = height > width;

@@ -40,8 +40,16 @@ export async function handleAiChat(req: Request, res: Response) {
       return res.status(400).json({ error: "Invalid messages array" });
     }
 
-    // Get all tilesets for function execution
+    // Get all tilesets and packs for function execution
     const tilesets = await storage.getAllTilesets();
+    const packs = await storage.getAllTilesetPacks();
+    
+    // Group tilesets by pack for context
+    const packGroups = packs.map(pack => {
+      const packTilesets = tilesets.filter(t => t.packId === pack.id);
+      return `${pack.name} (${packTilesets.map(t => t.name).join(', ')})`;
+    });
+    const unpackedTilesets = tilesets.filter(t => !t.packId).map(t => t.name);
 
     // Add system message with context
     const systemMessage = {
@@ -54,6 +62,13 @@ Current canvas state:
 - Grid size: ${canvasState.gridSize}px
 - Zoom level: ${canvasState.zoom}x
 - Available tilesets: ${tilesets.map(t => t.name).join(", ")}
+${packGroups.length > 0 ? `- Tileset packs: ${packGroups.join(', ')}` : ''}
+${unpackedTilesets.length > 0 ? `- Unpacked tilesets: ${unpackedTilesets.join(', ')}` : ''}
+
+TILESET PACK COHESION:
+- Tilesets grouped in the same pack are designed to work together visually
+- When generating scenes, prefer using tiles from the same pack for visual cohesion
+- Packs ensure consistent art style, color palette, and pixel density
 
 SPATIAL LANGUAGE INTERPRETATION RULES:
 
@@ -221,7 +236,7 @@ Be precise with your parameters to match the user's spatial intent!`
               result = executePlaceSprites(functionArgs, canvasState);
               break;
             case "createScene":
-              result = executeCreateScene(functionArgs, canvasState, tileMap, tilesets);
+              result = executeCreateScene(functionArgs, canvasState, tileMap, tilesets, packs);
               break;
             default:
               result = {
