@@ -127,6 +127,22 @@ These services are integrated and managed by Replit:
   - **Dirt Path**: 3x3 auto-tiling terrain tileset (48x48px, 16x16 tiles, 0px spacing) - Compatible with existing auto-tiling system
   - **Grass Field Variants**: 12x3 variant grid terrain tileset (192x48px, 16x16 tiles, 0px spacing) - Provides 36 different grass tile variants
   - **Plateau Stone**: 3x6 multi-tile prop object (48x87px, 18 tiles total) - Large stone plateau that paints and erases atomically as a complete unit
-- **Tileset Count**: Now 11 total tilesets (7 auto-tiling terrain, 1 variant grid, 3 multi-tile props)
+- **Tileset Count**: Now 14 total tilesets (7 auto-tiling terrain, 1 variant grid, 6 multi-tile props)
 - **Verified Multi-Tile Erase**: Confirmed Plateau Stone (3x6) erases all 18 tiles atomically when any tile is clicked
 - **Fixed LSP Errors**: Updated MemStorage demo tilesets to include tilesetType and multiTileConfig fields
+- **AI Assistant Object Placement Feature**:
+  - Added `placeObject` AI function to place multi-tile prop objects using natural language commands
+  - Supports 5 object types: Tree1, Tree2, Tent, Campfire 1, Campfire 2, Plateau Stone
+  - Three placement modes:
+    - **Single**: Place one object at specific coordinates ("place a tent at 10, 10")
+    - **Scatter**: Randomly place 2-5 objects in an area ("scatter campfires around the map")
+    - **Grid**: Organize objects in a grid pattern ("place trees in a grid from 0, 0 to 30, 30")
+  - Fixed tile index calculation bug in both Canvas component and AI executor
+  - Tile index now correctly calculated as `tilePos.y * tileset.columns + tilePos.x`
+  - Added bounds validation to prevent invalid tile positions
+  - Integrated with Y.js collaboration service for real-time synchronization
+- **Added Three New Prop Tilesets**:
+  - **Tent**: 2x2 multi-tile object (32x32px, merged from 4 cells with 1px spacing removed)
+  - **Campfire Variant 1**: 1x1 multi-tile object (17x16px)
+  - **Campfire Variant 2**: 1x1 multi-tile object (17x16px)
+- **E2E Testing**: Verified AI object placement with Playwright tests confirming correct tile placement and Y.js synchronization
