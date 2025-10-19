@@ -102,6 +102,20 @@ These services are integrated and managed by Replit:
 
 ## Recent Changes
 
+### October 19, 2025 (Latest)
+- **Fixed Sprite Addition Bug**:
+  - Issue: Clicking "Add to Canvas" for swordsman sprites did nothing
+  - Root cause: Knight sprite definition referenced missing `/sprites/knight-sprite-sheet.png` file causing Y.js initialization errors
+  - Solution: Temporarily disabled Knight sprite from demo sprite definitions
+  - Now have 3 working sprite definitions: Swordsman (Idle), Swordsman (Walk), Swordsman (Attack)
+  - Verified with E2E test: sprites now successfully appear on canvas at (200, 200) and are fully interactive (draggable, selectable)
+- **Improved Sprite Panel UX**:
+  - Enhanced visual feedback: selected sprites now show blue ring highlight (`ring-2 ring-primary/20`)
+  - Added prominent blue box below sprite library showing "Selected: [Sprite Name]" with "Add to Canvas" button
+  - Added helper text: "Click a sprite above to select it" when no sprite is selected
+  - Added data-testid attributes for all sprite UI elements
+- **Fixed Dialog Warning**: Added DialogDescription to SpriteEditor to resolve accessibility warning
+
 ### October 19, 2025
 - **Fixed Three Critical Bugs in Sprite Animation System**:
   - **Bug #1 - Property Name Mismatch**: Fixed demo sprite definitions using `frameRate` instead of `fps` to match SpriteDefinition interface. All 6 animation states (idle, walk, run, attack, hurt, die) now use correct property name.

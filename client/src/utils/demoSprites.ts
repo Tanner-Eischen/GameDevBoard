@@ -101,7 +101,7 @@ export const swordsmanAttackDefinition: SpriteDefinition = {
 // Function to initialize demo sprites in the store
 export const initializeDemoSprites = () => {
   return [
-    knightSpriteDefinition,
+    // knightSpriteDefinition, // Temporarily disabled - missing sprite sheet file
     swordsmanIdleDefinition,
     swordsmanWalkDefinition,
     swordsmanAttackDefinition,
