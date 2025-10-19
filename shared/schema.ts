@@ -68,6 +68,15 @@ export interface UserPresence {
   tool: ToolType;
 }
 
+// Tileset type enum
+export const tilesetTypeEnum = z.enum(['auto-tiling', 'multi-tile']);
+export type TilesetType = z.infer<typeof tilesetTypeEnum>;
+
+// Multi-tile configuration for objects like trees
+export interface MultiTileConfig {
+  tiles: Array<{ x: number; y: number }>; // Grid positions of tiles that make up the object
+}
+
 // Tileset interface
 export interface Tileset {
   id: string;
@@ -77,6 +86,8 @@ export interface Tileset {
   imageUrl: string;
   columns: number;
   rows: number;
+  tilesetType: TilesetType; // 'auto-tiling' for 3x3 grids, 'multi-tile' for trees
+  multiTileConfig: MultiTileConfig | null; // Only used for multi-tile objects
 }
 
 // Canvas state interface
@@ -119,6 +130,8 @@ export const tilesets = pgTable("tilesets", {
   imageUrl: text("image_url").notNull(),
   columns: integer("columns").notNull(),
   rows: integer("rows").notNull(),
+  tilesetType: text("tileset_type").notNull().default('auto-tiling').$type<TilesetType>(),
+  multiTileConfig: jsonb("multi_tile_config").$type<MultiTileConfig | null>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

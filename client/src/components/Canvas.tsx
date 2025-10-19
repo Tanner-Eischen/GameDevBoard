@@ -101,6 +101,26 @@ export function Canvas() {
   const paintTilesAtPosition = (gridX: number, gridY: number) => {
     if (!selectedTileset) return;
 
+    // Handle multi-tile objects (trees, etc.)
+    if (selectedTileset.tilesetType === 'multi-tile' && selectedTileset.multiTileConfig) {
+      const tilesToAdd: Tile[] = [];
+      
+      // Place all tiles from the multi-tile configuration
+      selectedTileset.multiTileConfig.tiles.forEach((tilePos, index) => {
+        tilesToAdd.push({
+          x: gridX + tilePos.x,
+          y: gridY + tilePos.y,
+          tilesetId: selectedTileset.id,
+          tileIndex: index, // Each tile in the configuration gets its own index
+        });
+      });
+      
+      // Add all tiles as a complete unit (no auto-tiling for multi-tile objects)
+      addTiles(tilesToAdd);
+      return;
+    }
+
+    // Handle auto-tiling tilesets (existing logic)
     // Collect all tiles to be added/updated
     const tilesToAdd: Tile[] = [];
 
@@ -201,6 +221,32 @@ export function Canvas() {
       
       if (!tileToRemove) return;
 
+      // Get the tileset to check if it's a multi-tile object
+      const tileset = tilesets?.find(ts => ts.id === tileToRemove.tilesetId);
+
+      // Handle multi-tile objects (trees, etc.)
+      if (tileset?.tilesetType === 'multi-tile' && tileset.multiTileConfig) {
+        // Find the root position of this multi-tile object
+        // We need to determine which tile in the configuration this is
+        const configTile = tileset.multiTileConfig.tiles[tileToRemove.tileIndex];
+        if (!configTile) {
+          removeTile(gridX, gridY);
+          return;
+        }
+
+        // Calculate the base position (where the object was placed)
+        const baseX = gridX - configTile.x;
+        const baseY = gridY - configTile.y;
+
+        // Remove all tiles belonging to this multi-tile object
+        tileset.multiTileConfig.tiles.forEach((tilePos) => {
+          removeTile(baseX + tilePos.x, baseY + tilePos.y);
+        });
+
+        return;
+      }
+
+      // Handle auto-tiling tilesets (existing logic)
       // Calculate what tiles array will look like after removal
       const tilesAfterRemoval = tiles.filter(
         (t) => !(t.x === gridX && t.y === gridY)

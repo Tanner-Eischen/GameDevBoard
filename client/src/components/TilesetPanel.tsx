@@ -216,48 +216,81 @@ export function TilesetPanel() {
                 </Button>
 
                 {selectedTileset?.id === tileset.id && (
-                  <div className="grid grid-cols-3 gap-1 p-2 bg-muted/30 rounded-md">
-                    {Array.from({ length: tileset.rows * tileset.columns }).map(
-                      (_, index) => {
-                        const col = index % tileset.columns;
-                        const row = Math.floor(index / tileset.columns);
-                        const tileSize = tileset.tileSize;
-                        const spacing = tileset.spacing || 0;
-                        const x = col * (tileSize + spacing);
-                        const y = row * (tileSize + spacing);
-
-                        return (
-                          <button
-                            key={index}
-                            className={cn(
-                              'border-2 rounded hover-elevate active-elevate-2 overflow-hidden bg-muted',
-                              selectedTileIndex === index
-                                ? 'border-primary ring-2 ring-primary/20'
-                                : 'border-border'
-                            )}
+                  tileset.tilesetType === 'multi-tile' ? (
+                    // Display multi-tile objects as a single complete unit
+                    <div className="p-2 bg-muted/30 rounded-md flex justify-center">
+                      <button
+                        className={cn(
+                          'border-2 rounded hover-elevate active-elevate-2 overflow-hidden bg-muted',
+                          selectedTileIndex === 0
+                            ? 'border-primary ring-2 ring-primary/20'
+                            : 'border-border'
+                        )}
+                        style={{
+                          width: `${tileset.columns * tileset.tileSize}px`,
+                          height: `${tileset.rows * tileset.tileSize}px`,
+                        }}
+                        onClick={() => setSelectedTileIndex(0)}
+                        data-testid="button-multi-tile-object"
+                      >
+                        {tileset.imageUrl && (
+                          <div
+                            className="w-full h-full"
                             style={{
-                              width: `${tileSize}px`,
-                              height: `${tileSize}px`,
+                              backgroundImage: `url(${tileset.imageUrl})`,
+                              backgroundSize: 'contain',
+                              backgroundRepeat: 'no-repeat',
+                              imageRendering: 'pixelated',
                             }}
-                            onClick={() => setSelectedTileIndex(index)}
-                            data-testid={`button-tile-${index}`}
-                          >
-                            {tileset.imageUrl && (
-                              <div
-                                className="w-full h-full"
-                                style={{
-                                  backgroundImage: `url(${tileset.imageUrl})`,
-                                  backgroundPosition: `-${x}px -${y}px`,
-                                  backgroundRepeat: 'no-repeat',
-                                  imageRendering: 'pixelated',
-                                }}
-                              />
-                            )}
-                          </button>
-                        );
-                      }
-                    )}
-                  </div>
+                          />
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    // Display auto-tiling tilesets as a 3x3 grid
+                    <div className="grid grid-cols-3 gap-1 p-2 bg-muted/30 rounded-md">
+                      {Array.from({ length: tileset.rows * tileset.columns }).map(
+                        (_, index) => {
+                          const col = index % tileset.columns;
+                          const row = Math.floor(index / tileset.columns);
+                          const tileSize = tileset.tileSize;
+                          const spacing = tileset.spacing || 0;
+                          const x = col * (tileSize + spacing);
+                          const y = row * (tileSize + spacing);
+
+                          return (
+                            <button
+                              key={index}
+                              className={cn(
+                                'border-2 rounded hover-elevate active-elevate-2 overflow-hidden bg-muted',
+                                selectedTileIndex === index
+                                  ? 'border-primary ring-2 ring-primary/20'
+                                  : 'border-border'
+                              )}
+                              style={{
+                                width: `${tileSize}px`,
+                                height: `${tileSize}px`,
+                              }}
+                              onClick={() => setSelectedTileIndex(index)}
+                              data-testid={`button-tile-${index}`}
+                            >
+                              {tileset.imageUrl && (
+                                <div
+                                  className="w-full h-full"
+                                  style={{
+                                    backgroundImage: `url(${tileset.imageUrl})`,
+                                    backgroundPosition: `-${x}px -${y}px`,
+                                    backgroundRepeat: 'no-repeat',
+                                    imageRendering: 'pixelated',
+                                  }}
+                                />
+                              )}
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+                  )
                 )}
               </div>
             ))}
