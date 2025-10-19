@@ -63,8 +63,8 @@ export function calculateAutoTileIndex(neighbors: NeighborConfig): number {
 
 /**
  * Get the neighbor configuration for a tile at the given position
- * For terrain-layer tiles, considers ANY terrain tile as a neighbor (seamless joins)
- * For props-layer tiles, only considers tiles from the same tileset
+ * For both terrain and props tiles, only considers tiles from the same tileset as neighbors
+ * This creates proper edges when different terrain types meet
  */
 export function getNeighborConfig(
   x: number,
@@ -85,9 +85,10 @@ export function getNeighborConfig(
 
   const hasTileAt = (tx: number, ty: number) => {
     if (isTerrainLayer) {
-      // For terrain tiles: treat ANY terrain tile as a neighbor (seamless joins between different terrain types)
+      // For terrain tiles: only consider tiles from the SAME tileset as neighbors
+      // This creates proper edges when different terrain types meet
       return tiles.some(
-        (t) => t.x === tx && t.y === ty && t.layer === 'terrain'
+        (t) => t.x === tx && t.y === ty && t.tilesetId === tilesetId && t.layer === 'terrain'
       );
     } else {
       // For props tiles: only consider tiles from the same tileset
