@@ -172,7 +172,7 @@ Be precise with your parameters to match the user's spatial intent!`
 
     // Execute any function calls
     if (accumulatedToolCalls.size > 0) {
-      for (const [index, toolCall] of accumulatedToolCalls.entries()) {
+      for (const [index, toolCall] of Array.from(accumulatedToolCalls.entries())) {
         const functionName = toolCall.name;
         let result: ExecutionResult;
 
