@@ -9,7 +9,7 @@ This is a real-time collaborative game development board built with:
 - **State Management**: Zustand for local state
 - **Real-time Collaboration**: Y.js CRDT + WebSocket for seamless multi-user editing
 - **Backend**: Express.js + WebSocket server
-- **Storage**: In-memory storage for projects and tilesets
+- **Database**: PostgreSQL with Drizzle ORM for persistent storage
 - **UI**: Shadcn UI components + Tailwind CSS with professional dark mode design
 
 ## Features
@@ -109,6 +109,15 @@ shared/schema.ts   # Shared TypeScript types and schemas
 - **Shift+G**: Toggle snap to grid
 
 ## Recent Changes
+
+### 2025-10-19 - Database Persistence (Milestone 1) Complete
+- ✅ Migrated from in-memory storage to PostgreSQL database
+- ✅ Created Drizzle ORM client with Neon HTTP driver
+- ✅ Implemented DbStorage class with full IStorage interface
+- ✅ Database schema with projects, tilesets, and users tables
+- ✅ Automatic demo tileset initialization on first run
+- ✅ All API endpoints now persist data to database
+- ✅ Project save/load now persists across server restarts
 
 ### 2025-10-19 - Advanced Brush Painting System Complete
 - ✅ Implemented continuous brush-based tile painting (paint while dragging, not just clicking)
