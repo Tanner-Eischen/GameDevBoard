@@ -70,11 +70,18 @@ export function getNeighborConfig(
   x: number,
   y: number,
   tilesetId: string,
-  tiles: Tile[]
+  tiles: Tile[],
+  layer?: 'terrain' | 'props'
 ): NeighborConfig {
   // Determine if the current tile is terrain or props
-  const currentTile = tiles.find(t => t.x === x && t.y === y && t.tilesetId === tilesetId);
-  const isTerrainLayer = currentTile?.layer === 'terrain';
+  // Use explicit layer parameter if provided, otherwise try to find the tile
+  let isTerrainLayer: boolean;
+  if (layer !== undefined) {
+    isTerrainLayer = layer === 'terrain';
+  } else {
+    const currentTile = tiles.find(t => t.x === x && t.y === y && t.tilesetId === tilesetId);
+    isTerrainLayer = currentTile?.layer === 'terrain';
+  }
 
   const hasTileAt = (tx: number, ty: number) => {
     if (isTerrainLayer) {
@@ -143,14 +150,14 @@ export function getTilesToUpdate(
       );
       
       for (const tile of tilesAtPosition) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles);
+        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles, 'terrain');
         const tileIndex = calculateAutoTileIndex(neighbors);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId: tile.tilesetId });
       }
       
       // If no tile at position but includeSelf and it's the center, add it
       if (tilesAtPosition.length === 0 && pos.x === x && pos.y === y && includeSelf) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles);
+        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles, 'terrain');
         const tileIndex = calculateAutoTileIndex(neighbors);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId });
       }
@@ -161,7 +168,7 @@ export function getTilesToUpdate(
       );
 
       if (existingTile || (pos.x === x && pos.y === y && includeSelf)) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles);
+        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles, 'props');
         const tileIndex = calculateAutoTileIndex(neighbors);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId });
       }
