@@ -197,8 +197,8 @@ export function Canvas() {
     if (!pos) return;
 
     const snappedPos = snapToGridIfEnabled({
-      x: (pos.x - pan.x) / zoom,
-      y: (pos.y - pan.y) / zoom,
+      x: pos.x / zoom - pan.x,
+      y: pos.y / zoom - pan.y,
     });
 
     // Handle tile tools - allow painting over existing tiles and shapes
@@ -331,8 +331,8 @@ export function Canvas() {
     if (!pos) return;
 
     const canvasPos = {
-      x: (pos.x - pan.x) / zoom,
-      y: (pos.y - pan.y) / zoom,
+      x: pos.x / zoom - pan.x,
+      y: pos.y / zoom - pan.y,
     };
 
     const snappedPos = snapToGridIfEnabled(canvasPos);
@@ -342,11 +342,27 @@ export function Canvas() {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
 
-      // Only paint if we've moved to a new grid cell
-      if (!lastPaintedGrid || lastPaintedGrid.x !== gridX || lastPaintedGrid.y !== gridY) {
-        setLastPaintedGrid({ x: gridX, y: gridY });
+      // Fill in all grid cells between last painted position and current position
+      if (lastPaintedGrid) {
+        const dx = gridX - lastPaintedGrid.x;
+        const dy = gridY - lastPaintedGrid.y;
+        const steps = Math.max(Math.abs(dx), Math.abs(dy));
+        
+        if (steps > 0) {
+          // Interpolate between last and current position to fill gaps
+          for (let i = 1; i <= steps; i++) {
+            const t = i / steps;
+            const interpX = Math.floor(lastPaintedGrid.x + dx * t);
+            const interpY = Math.floor(lastPaintedGrid.y + dy * t);
+            paintTilesAtPosition(interpX, interpY);
+          }
+        }
+      } else {
+        // First paint
         paintTilesAtPosition(gridX, gridY);
       }
+      
+      setLastPaintedGrid({ x: gridX, y: gridY });
       return;
     }
 
