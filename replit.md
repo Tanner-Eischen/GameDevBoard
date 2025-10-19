@@ -27,9 +27,13 @@ This is a real-time collaborative game development board built with:
 - **Continuous Brush Painting**: Paint while dragging with adjustable brush sizes (1x1 to 3x3+)
 - Paint and erase tools with auto-tiling
 - **3x3 Auto-Tiling System**: Automatically selects correct tile variants (corners, edges, center) based on neighbor configuration
+- **Multi-Tile Objects**: Support for objects spanning multiple grid cells (trees, buildings)
+  - Trees (16x33) composed of two stacked tiles placed as complete units
+  - Erasing any tile removes the entire multi-tile object
+  - Brush size does not affect multi-tile object placement
 - **Optimized Performance**: Entire brush strokes batched into single undo entry
 - Tileset upload to Replit object storage
-- Three demo tilesets included (dirt, grass, water)
+- Eight tilesets included: dirt, grass, water (auto-tiling) + flower, sand, stone (auto-tiling) + tree1, tree2 (multi-tile)
 - Grid-based tile placement with snap-to-grid
 - Independent auto-tiling per tileset (mixed terrain support)
 
@@ -127,6 +131,17 @@ shared/schema.ts   # Shared TypeScript types and schemas
 - **Shift+G**: Toggle snap to grid
 
 ## Recent Changes
+
+### 2025-10-19 - Multi-Tile Object System Complete
+- ✅ Extended schema with tilesetType ('auto-tiling' | 'multi-tile') and multiTileConfig fields
+- ✅ Added 5 new tilesets: Flower, Sand, Stone (3x3 auto-tiling), Tree1, Tree2 (16x33 multi-tile)
+- ✅ Updated TilesetPanel to display multi-tile objects as complete units (not 3x3 grids)
+- ✅ Implemented multi-tile painting: place all tiles together as a single object
+- ✅ Implemented multi-tile erasing: clicking any tile removes the entire object
+- ✅ Multi-tile objects bypass auto-tiling system (fixed tile positions)
+- ✅ Brush size correctly ignored for multi-tile objects
+- ✅ End-to-end tested: 9 test scenarios covering placement, erasure, mixed terrain
+- ✅ All features architect-reviewed and approved
 
 ### 2025-10-19 - AI Assistant with Streaming & Safety Features Complete
 - ✅ Integrated Replit OpenAI integration (GPT-4o-mini, no API key needed)
