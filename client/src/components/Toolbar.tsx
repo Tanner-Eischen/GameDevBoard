@@ -22,6 +22,7 @@ import {
   Ungroup,
 } from 'lucide-react';
 import type { ToolType } from '@shared/schema';
+import { AiChat } from './AiChat';
 
 const tools: Array<{ type: ToolType | 'sprite'; icon: typeof MousePointer; label: string }> = [
   { type: 'select', icon: MousePointer, label: 'Select (V)' },
@@ -42,7 +43,6 @@ export function Toolbar() {
     tool,
     setTool,
     zoom,
-    setZoom,
     zoomToCenter,
     undo,
     redo,
@@ -73,144 +73,151 @@ export function Toolbar() {
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-card border-b border-card-border">
-      {/* History Controls */}
-      <div className="flex items-center gap-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={undo}
-          disabled={!canUndo}
-          data-testid="button-undo"
-          title="Undo (Ctrl+Z)"
-        >
-          <Undo className="h-4 w-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={redo}
-          disabled={!canRedo}
-          data-testid="button-redo"
-          title="Redo (Ctrl+Shift+Z)"
-        >
-          <Redo className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <Separator orientation="vertical" className="h-6" />
-
-      {/* Tool Selection */}
-      <div className="flex items-center gap-1">
-        {tools.map(({ type, icon: Icon, label }) => (
+    <div className="flex items-center justify-between gap-4 p-2 bg-card border-b border-card-border">
+      <div className="flex flex-wrap items-center gap-2">
+        {/* History Controls */}
+        <div className="flex items-center gap-1">
           <Button
-            key={type}
             size="icon"
-            variant={tool === type ? 'default' : 'ghost'}
-            onClick={() => setTool(type)}
-            data-testid={`button-tool-${type}`}
-            title={label}
-            className="toggle-elevate"
-            data-active={tool === type}
+            variant="ghost"
+            onClick={undo}
+            disabled={!canUndo}
+            data-testid="button-undo"
+            title="Undo (Ctrl+Z)"
           >
-            <Icon className="h-4 w-4" />
+            <Undo className="h-4 w-4" />
           </Button>
-        ))}
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={redo}
+            disabled={!canRedo}
+            data-testid="button-redo"
+            title="Redo (Ctrl+Shift+Z)"
+          >
+            <Redo className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* Tool Selection */}
+        <div className="flex items-center gap-1">
+          {tools.map(({ type, icon: Icon, label }) => (
+            <Button
+              key={type}
+              size="icon"
+              variant={tool === type ? 'default' : 'ghost'}
+              onClick={() => setTool(type)}
+              data-testid={`button-tool-${type}`}
+              title={label}
+              className="toggle-elevate"
+              data-active={tool === type}
+            >
+              <Icon className="h-4 w-4" />
+            </Button>
+          ))}
+        </div>
+
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* Advanced Shape Operations */}
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant={canGroup ? 'default' : 'ghost'}
+            onClick={groupSelectedShapes}
+            disabled={!canGroup}
+            title="Group Selected (Ctrl+G)"
+            data-testid="button-group"
+            className="toggle-elevate"
+            data-active={canGroup}
+          >
+            <Group className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant={canUngroup ? 'default' : 'ghost'}
+            onClick={ungroupSelectedShapes}
+            disabled={!canUngroup}
+            title="Ungroup (Ctrl+Shift+G)"
+            data-testid="button-ungroup"
+            className="toggle-elevate"
+            data-active={canUngroup}
+          >
+            <Ungroup className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* View Controls */}
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => handleZoom(zoom * 1.2)}
+            data-testid="button-zoom-in"
+            title="Zoom In (+)"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-mono text-muted-foreground min-w-[4rem] text-center">
+            {Math.round(zoom * 100)}%
+          </span>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => handleZoom(zoom / 1.2)}
+            data-testid="button-zoom-out"
+            title="Zoom Out (-)"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => handleZoom(1)}
+            data-testid="button-zoom-reset"
+            title="Reset Zoom (0)"
+            className="text-xs"
+          >
+            1:1
+          </Button>
+        </div>
+
+        <Separator orientation="vertical" className="h-6" />
+
+        {/* Grid Controls */}
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant={gridVisible ? 'default' : 'ghost'}
+            onClick={() => setGridVisible(!gridVisible)}
+            data-testid="button-grid-toggle"
+            title="Toggle Grid (G)"
+            className="toggle-elevate"
+            data-active={gridVisible}
+          >
+            <Grid3x3 className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant={snapToGrid ? 'default' : 'ghost'}
+            onClick={() => setSnapToGrid(!snapToGrid)}
+            data-testid="button-snap-toggle"
+            title="Snap to Grid (Shift+G)"
+            className="toggle-elevate text-xs"
+            data-active={snapToGrid}
+          >
+            Snap
+          </Button>
+        </div>
       </div>
 
-      <Separator orientation="vertical" className="h-6" />
-
-      {/* Advanced Shape Operations */}
-      <div className="flex items-center gap-1">
-        <Button
-          size="icon"
-          variant={canGroup ? 'default' : 'ghost'}
-          onClick={groupSelectedShapes}
-          disabled={!canGroup}
-          title="Group Selected (Ctrl+G)"
-          data-testid="button-group"
-          className="toggle-elevate"
-          data-active={canGroup}
-        >
-          <Group className="h-4 w-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant={canUngroup ? 'default' : 'ghost'}
-          onClick={ungroupSelectedShapes}
-          disabled={!canUngroup}
-          title="Ungroup (Ctrl+Shift+G)"
-          data-testid="button-ungroup"
-          className="toggle-elevate"
-          data-active={canUngroup}
-        >
-          <Ungroup className="h-4 w-4" />
-        </Button>
-      </div>
-
-      <Separator orientation="vertical" className="h-6" />
-
-      {/* View Controls */}
-      <div className="flex items-center gap-1">
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => handleZoom(zoom * 1.2)}
-          data-testid="button-zoom-in"
-          title="Zoom In (+)"
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-        <span className="text-sm font-mono text-muted-foreground min-w-[4rem] text-center">
-          {Math.round(zoom * 100)}%
-        </span>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => handleZoom(zoom / 1.2)}
-          data-testid="button-zoom-out"
-          title="Zoom Out (-)"
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => handleZoom(1)}
-          data-testid="button-zoom-reset"
-          title="Reset Zoom (0)"
-          className="text-xs"
-        >
-          1:1
-        </Button>
-      </div>
-
-      <Separator orientation="vertical" className="h-6" />
-
-      {/* Grid Controls */}
-      <div className="flex items-center gap-1">
-        <Button
-          size="icon"
-          variant={gridVisible ? 'default' : 'ghost'}
-          onClick={() => setGridVisible(!gridVisible)}
-          data-testid="button-grid-toggle"
-          title="Toggle Grid (G)"
-          className="toggle-elevate"
-          data-active={gridVisible}
-        >
-          <Grid3x3 className="h-4 w-4" />
-        </Button>
-        <Button
-          size="sm"
-          variant={snapToGrid ? 'default' : 'ghost'}
-          onClick={() => setSnapToGrid(!snapToGrid)}
-          data-testid="button-snap-toggle"
-          title="Snap to Grid (Shift+G)"
-          className="toggle-elevate text-xs"
-          data-active={snapToGrid}
-        >
-          Snap
-        </Button>
+      <div className="flex items-center gap-2">
+        <Separator orientation="vertical" className="h-6 hidden sm:block" />
+        <AiChat placement="toolbar" />
       </div>
     </div>
   );

@@ -6,7 +6,6 @@ import { PropertiesPanel } from '@/components/PropertiesPanel';
 import { LayersPanelWithPacks } from '@/components/LayersPanel';
 import { UserPresence } from '@/components/UserPresence';
 import { ProjectManager } from '@/components/ProjectManager';
-import { AiChat } from '@/components/AiChat';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { getCollaborationService } from '@/services/collaboration';
 import { Button } from '@/components/ui/button';
@@ -311,8 +310,6 @@ export default function Board() {
         </aside>
       </div>
 
-      {/* AI Chat - Floating */}
-      <AiChat />
     </div>
   );
 }
