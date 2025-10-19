@@ -39,6 +39,16 @@ The application is built with a modern web stack, featuring:
 ## Recent Changes
 
 ### October 19, 2025
+- **Implemented Terrain-Aware Auto-Tiling System**:
+  - Cross-tileset neighbor detection: Terrain tiles now consider ANY terrain tile as a neighbor (not just same tileset)
+  - Bidirectional updates: When painting grass next to water, both tilesets update (grass shows center, water shows edges)
+  - **Special Grass Behavior**: Grass painted next to existing terrain edges shows grass center WITHOUT updating the neighboring edge (preserves terrain boundaries)
+  - Erase support: Removing terrain tiles updates surrounding terrain to remove edges
+  - Implementation uses explicit layer parameter to handle erase scenarios correctly
+- **Replaced Three Tileset Images**:
+  - **Grass Terrain**: Updated to grass2.png (48x48px, 0px spacing)
+  - **Water Terrain**: Updated to river_48x48.png (48x48px, 0px spacing)
+  - **Dirt Path**: Updated to dirt_path_grass.png (48x48px, 0px spacing)
 - **Added Three New Tilesets**:
   - **Dirt Path**: 3x3 auto-tiling terrain tileset (48x48px, 16x16 tiles, 0px spacing) - Compatible with existing auto-tiling system
   - **Grass Field Variants**: 12x3 variant grid terrain tileset (192x48px, 16x16 tiles, 0px spacing) - Provides 36 different grass tile variants
