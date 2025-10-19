@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Line, RegularPolygon, Star } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Line, RegularPolygon, Star, Image } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import type { Shape } from '@shared/schema';
 import Konva from 'konva';
@@ -25,6 +25,7 @@ export function Canvas() {
     selectShape,
     clearSelection,
     tiles,
+    tilesets,
     selectedTileset,
     selectedTileIndex,
     addTile,
@@ -34,6 +35,7 @@ export function Canvas() {
 
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentShape, setCurrentShape] = useState<Shape | null>(null);
+  const [tilesetImages, setTilesetImages] = useState<Map<string, HTMLImageElement>>(new Map());
 
   useEffect(() => {
     const updateSize = () => {
@@ -49,6 +51,40 @@ export function Canvas() {
     window.addEventListener('resize', updateSize);
     return () => window.removeEventListener('resize', updateSize);
   }, []);
+
+  // Load tileset images when tilesets change
+  useEffect(() => {
+    const loadImages = async () => {
+      const imageMap = new Map<string, HTMLImageElement>();
+      
+      for (const tileset of tilesets) {
+        if (tileset.imageUrl && !tilesetImages.has(tileset.id)) {
+          const img = new window.Image();
+          img.crossOrigin = 'anonymous';
+          
+          // Wait for image to load
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject();
+            img.src = tileset.imageUrl;
+          }).catch(() => {
+            console.error(`Failed to load tileset image: ${tileset.name}`);
+          });
+          
+          if (img.complete && img.naturalWidth > 0) {
+            imageMap.set(tileset.id, img);
+          }
+        } else if (tilesetImages.has(tileset.id)) {
+          // Keep existing loaded image
+          imageMap.set(tileset.id, tilesetImages.get(tileset.id)!);
+        }
+      }
+      
+      setTilesetImages(imageMap);
+    };
+    
+    loadImages();
+  }, [tilesets]);
 
   const snapToGridIfEnabled = (pos: { x: number; y: number }) => {
     if (!snapToGrid) return pos;
@@ -367,21 +403,46 @@ export function Canvas() {
 
   const renderTiles = () => {
     return tiles.map((tile, index) => {
-      const tileset = selectedTileset; // TODO: Look up by tilesetId
+      // Look up the tileset by tilesetId
+      const tileset = tilesets.find((ts) => ts.id === tile.tilesetId);
       if (!tileset) return null;
 
+      // Get the loaded image for this tileset
+      const image = tilesetImages.get(tileset.id);
+      if (!image) {
+        // Fallback to colored rectangle while image is loading
+        return (
+          <Rect
+            key={`tile-${index}`}
+            x={tile.x * gridSize}
+            y={tile.y * gridSize}
+            width={gridSize}
+            height={gridSize}
+            fill="#6366f1"
+            opacity={0.3}
+            listening={false}
+          />
+        );
+      }
+
+      // Calculate the position in the tileset image
       const tileX = (tile.tileIndex % tileset.columns) * tileset.tileSize;
       const tileY = Math.floor(tile.tileIndex / tileset.columns) * tileset.tileSize;
 
       return (
-        <Rect
+        <Image
           key={`tile-${index}`}
+          image={image}
           x={tile.x * gridSize}
           y={tile.y * gridSize}
           width={gridSize}
           height={gridSize}
-          fill="#6366f1"
-          opacity={0.5}
+          crop={{
+            x: tileX,
+            y: tileY,
+            width: tileset.tileSize,
+            height: tileset.tileSize,
+          }}
           listening={false}
         />
       );
