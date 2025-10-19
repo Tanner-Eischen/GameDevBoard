@@ -169,6 +169,25 @@ export const insertProjectSchema = createInsertSchema(projects).omit({
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type Project = typeof projects.$inferSelect;
 
+// Tileset Pack schema
+export const tilesetPacks = pgTable("tileset_packs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  tags: jsonb("tags").$type<string[]>().default(sql`'[]'::jsonb`),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertTilesetPackSchema = createInsertSchema(tilesetPacks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTilesetPack = z.infer<typeof insertTilesetPackSchema>;
+export type TilesetPack = typeof tilesetPacks.$inferSelect;
+
 // Tileset schema
 export const tilesets = pgTable("tilesets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -180,6 +199,7 @@ export const tilesets = pgTable("tilesets", {
   rows: integer("rows").notNull(),
   tilesetType: text("tileset_type").notNull().default('auto-tiling').$type<TilesetType>(),
   multiTileConfig: jsonb("multi_tile_config").$type<MultiTileConfig | null>(),
+  packId: varchar("pack_id"), // Optional reference to tileset pack
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

@@ -5,6 +5,8 @@ import {
   type InsertProject,
   type TilesetData,
   type InsertTileset,
+  type TilesetPack,
+  type InsertTilesetPack,
   type CanvasState,
   type TileMap,
 } from "@shared/schema";
@@ -29,17 +31,27 @@ export interface IStorage {
   createTileset(tileset: InsertTileset): Promise<TilesetData>;
   updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined>;
   deleteTileset(id: string): Promise<boolean>;
+
+  // Tileset Packs
+  getTilesetPack(id: string): Promise<TilesetPack | undefined>;
+  getAllTilesetPacks(): Promise<TilesetPack[]>;
+  createTilesetPack(pack: InsertTilesetPack): Promise<TilesetPack>;
+  updateTilesetPack(id: string, updates: Partial<InsertTilesetPack>): Promise<TilesetPack | undefined>;
+  deleteTilesetPack(id: string): Promise<boolean>;
+  getTilesetsByPackId(packId: string): Promise<TilesetData[]>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private projects: Map<string, Project>;
   private tilesets: Map<string, TilesetData>;
+  private tilesetPacks: Map<string, TilesetPack>;
 
   constructor() {
     this.users = new Map();
     this.projects = new Map();
     this.tilesets = new Map();
+    this.tilesetPacks = new Map();
 
     // Add some demo tilesets for testing
     this.initializeDemoData();
@@ -193,9 +205,59 @@ export class MemStorage implements IStorage {
   async deleteTileset(id: string): Promise<boolean> {
     return this.tilesets.delete(id);
   }
+
+  // Tileset Pack methods
+  async getTilesetPack(id: string): Promise<TilesetPack | undefined> {
+    return this.tilesetPacks.get(id);
+  }
+
+  async getAllTilesetPacks(): Promise<TilesetPack[]> {
+    return Array.from(this.tilesetPacks.values());
+  }
+
+  async createTilesetPack(insertPack: InsertTilesetPack): Promise<TilesetPack> {
+    const id = randomUUID();
+    const now = new Date();
+    const pack: TilesetPack = {
+      id,
+      ...insertPack,
+      tags: insertPack.tags || [],
+      description: insertPack.description || null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.tilesetPacks.set(id, pack);
+    return pack;
+  }
+
+  async updateTilesetPack(
+    id: string,
+    updates: Partial<InsertTilesetPack>
+  ): Promise<TilesetPack | undefined> {
+    const pack = this.tilesetPacks.get(id);
+    if (!pack) return undefined;
+
+    const updatedPack: TilesetPack = {
+      ...pack,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.tilesetPacks.set(id, updatedPack);
+    return updatedPack;
+  }
+
+  async deleteTilesetPack(id: string): Promise<boolean> {
+    return this.tilesetPacks.delete(id);
+  }
+
+  async getTilesetsByPackId(packId: string): Promise<TilesetData[]> {
+    return Array.from(this.tilesets.values()).filter(
+      (tileset) => tileset.packId === packId
+    );
+  }
 }
 
-import { db, users as usersTable, projects as projectsTable, tilesets as tilesetsTable } from "./db";
+import { db, users as usersTable, projects as projectsTable, tilesets as tilesetsTable, tilesetPacks as tilesetPacksTable } from "./db";
 import { eq } from "drizzle-orm";
 
 export class DbStorage implements IStorage {
@@ -309,6 +371,39 @@ export class DbStorage implements IStorage {
   async deleteTileset(id: string): Promise<boolean> {
     const result = await db.delete(tilesetsTable).where(eq(tilesetsTable.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Tileset Pack methods
+  async getTilesetPack(id: string): Promise<TilesetPack | undefined> {
+    const [pack] = await db.select().from(tilesetPacksTable).where(eq(tilesetPacksTable.id, id));
+    return pack;
+  }
+
+  async getAllTilesetPacks(): Promise<TilesetPack[]> {
+    return await db.select().from(tilesetPacksTable);
+  }
+
+  async createTilesetPack(insertPack: InsertTilesetPack): Promise<TilesetPack> {
+    const [pack] = await db.insert(tilesetPacksTable).values(insertPack).returning();
+    return pack;
+  }
+
+  async updateTilesetPack(id: string, updates: Partial<InsertTilesetPack>): Promise<TilesetPack | undefined> {
+    const [pack] = await db
+      .update(tilesetPacksTable)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(eq(tilesetPacksTable.id, id))
+      .returning();
+    return pack;
+  }
+
+  async deleteTilesetPack(id: string): Promise<boolean> {
+    const result = await db.delete(tilesetPacksTable).where(eq(tilesetPacksTable.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  async getTilesetsByPackId(packId: string): Promise<TilesetData[]> {
+    return await db.select().from(tilesetsTable).where(eq(tilesetsTable.packId, packId));
   }
 }
 
