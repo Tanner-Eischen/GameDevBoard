@@ -221,18 +221,22 @@ export function TilesetPanel() {
                         const row = Math.floor(index / tileset.columns);
                         const tileSize = tileset.tileSize;
                         const spacing = tileset.spacing || 0;
-                        const x = col * (spacing -1) + col * (tileSize);
-                        const y = row * (spacing -1) + row * (tileSize);
+                        const x = col * (tileSize + spacing);
+                        const y = row * (tileSize + spacing);
 
                         return (
                           <button
                             key={index}
                             className={cn(
-                              'aspect-square border-2 rounded hover-elevate active-elevate-2 overflow-hidden bg-muted',
+                              'border-2 rounded hover-elevate active-elevate-2 overflow-hidden bg-muted',
                               selectedTileIndex === index
                                 ? 'border-primary ring-2 ring-primary/20'
                                 : 'border-border'
                             )}
+                            style={{
+                              width: `${tileSize}px`,
+                              height: `${tileSize}px`,
+                            }}
                             onClick={() => setSelectedTileIndex(index)}
                             data-testid={`button-tile-${index}`}
                           >
@@ -244,7 +248,6 @@ export function TilesetPanel() {
                                   backgroundPosition: `-${x}px -${y}px`,
                                   backgroundRepeat: 'no-repeat',
                                   imageRendering: 'pixelated',
-                                  transform: 'scale(1.5)',
                                 }}
                               />
                             )}
