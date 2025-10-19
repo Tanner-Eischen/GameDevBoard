@@ -4,6 +4,7 @@ import { Toolbar } from '@/components/Toolbar';
 import { PropertiesPanel } from '@/components/PropertiesPanel';
 import { LayersPanel } from '@/components/LayersPanel';
 import { TilesetPanel } from '@/components/TilesetPanel';
+import { SpritePanel } from '@/components/SpritePanel';
 import { UserPresence } from '@/components/UserPresence';
 import { ProjectManager } from '@/components/ProjectManager';
 import { AiChat } from '@/components/AiChat';
@@ -189,6 +190,9 @@ export default function Board() {
             setTool('tile-erase');
           }
           break;
+        case 'x':
+          setTool('sprite');
+          break;
       }
     };
 
@@ -237,6 +241,7 @@ export default function Board() {
           <div className="p-4 space-y-4">
             <PropertiesPanel />
             <TilesetPanel />
+            <SpritePanel />
           </div>
         </aside>
       </div>

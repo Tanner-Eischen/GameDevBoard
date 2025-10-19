@@ -6,6 +6,7 @@ import {
   executeCreateShapes,
   executeAnalyzeCanvas,
   executeClearCanvas,
+  executePlaceSprites,
   type ExecutionResult
 } from "./executor";
 import type { CanvasState, TileMap } from "@shared/schema";
@@ -201,6 +202,9 @@ Be precise with your parameters to match the user's spatial intent!`
               }
               break;
             }
+            case "placeSprites":
+              result = executePlaceSprites(functionArgs, canvasState);
+              break;
             default:
               result = {
                 success: false,

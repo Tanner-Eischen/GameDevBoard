@@ -16,10 +16,11 @@ import {
   Grid3x3,
   ZoomIn,
   ZoomOut,
+  User,
 } from 'lucide-react';
 import type { ToolType } from '@shared/schema';
 
-const tools: Array<{ type: ToolType; icon: typeof MousePointer; label: string }> = [
+const tools: Array<{ type: ToolType | 'sprite'; icon: typeof MousePointer; label: string }> = [
   { type: 'select', icon: MousePointer, label: 'Select (V)' },
   { type: 'pan', icon: Hand, label: 'Pan (H)' },
   { type: 'rectangle', icon: Square, label: 'Rectangle (R)' },
@@ -29,6 +30,7 @@ const tools: Array<{ type: ToolType; icon: typeof MousePointer; label: string }>
   { type: 'line', icon: Minus, label: 'Line (L)' },
   { type: 'tile-paint', icon: Paintbrush, label: 'Paint Tile (T)' },
   { type: 'tile-erase', icon: Eraser, label: 'Erase Tile (E)' },
+  { type: 'sprite' as any, icon: User, label: 'Sprite (X)' },
 ];
 
 export function Toolbar() {

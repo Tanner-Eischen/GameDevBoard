@@ -140,5 +140,61 @@ Use this when users ask to add terrain, paint backgrounds, create rivers, roads,
         required: ["target"]
       }
     }
+  },
+  {
+    type: "function",
+    function: {
+      name: "placeSprites",
+      description: "Place animated sprites on the canvas at specified positions. Use this when users want to add characters, NPCs, enemies, or any animated game objects.",
+      parameters: {
+        type: "object",
+        properties: {
+          spriteType: {
+            type: "string",
+            enum: ["knight-demo"],
+            description: "The type of sprite to place. Currently available: 'knight-demo' (armored knight character)"
+          },
+          count: {
+            type: "number",
+            description: "How many sprites to place",
+            minimum: 1,
+            maximum: 10
+          },
+          layout: {
+            type: "string",
+            enum: ["grid", "random", "circle", "line", "formation"],
+            description: "How to arrange the sprites: 'grid' (organized grid), 'random' (scattered), 'circle' (circular pattern), 'line' (horizontal line), 'formation' (tactical formation)"
+          },
+          area: {
+            type: "object",
+            properties: {
+              x: { type: "number", description: "Starting X coordinate in pixels" },
+              y: { type: "number", description: "Starting Y coordinate in pixels" },
+              width: { type: "number", description: "Area width in pixels" },
+              height: { type: "number", description: "Area height in pixels" }
+            },
+            description: "The area where sprites should be placed (optional, defaults to center)"
+          },
+          animation: {
+            type: "string",
+            enum: ["idle", "walk", "run", "attack", "hurt", "die"],
+            description: "Initial animation state for the sprites (default: 'idle')"
+          },
+          scale: {
+            type: "number",
+            description: "Scale factor for the sprites (default: 1.0, range: 0.5-3.0)",
+            minimum: 0.5,
+            maximum: 3.0
+          },
+          rotation: {
+            type: "number",
+            description: "Rotation angle in degrees (default: 0, range: 0-360)",
+            minimum: 0,
+            maximum: 360
+          }
+        },
+        required: ["spriteType", "count", "layout"]
+      }
+    }
   }
 ];

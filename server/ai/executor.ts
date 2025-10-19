@@ -428,3 +428,88 @@ export function executeClearCanvas(
     canvasUpdates: updates
   };
 }
+
+// Place sprites on the canvas
+export function executePlaceSprites(
+  params: {
+    spriteType: string;
+    count: number;
+    layout: string;
+    area?: { x: number; y: number; width: number; height: number };
+    animation?: string;
+    scale?: number;
+    rotation?: number;
+  },
+  canvasState: CanvasState
+): ExecutionResult {
+  const newSprites: any[] = [];
+  
+  // Default area if not specified (center of canvas)
+  const area = params.area || { x: 200, y: 200, width: 400, height: 400 };
+  const animation = params.animation || 'idle';
+  const scale = params.scale || 1.0;
+  const rotation = params.rotation || 0;
+
+  for (let i = 0; i < params.count; i++) {
+    let x: number, y: number;
+
+    if (params.layout === "grid") {
+      const cols = Math.ceil(Math.sqrt(params.count));
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      x = area.x + (col * (area.width / cols)) + (area.width / cols / 2);
+      y = area.y + (row * (area.height / cols)) + (area.height / cols / 2);
+    } else if (params.layout === "random") {
+      x = area.x + Math.random() * area.width;
+      y = area.y + Math.random() * area.height;
+    } else if (params.layout === "circle") {
+      const angle = (i / params.count) * Math.PI * 2;
+      const radius = Math.min(area.width, area.height) / 3;
+      x = area.x + area.width / 2 + Math.cos(angle) * radius;
+      y = area.y + area.height / 2 + Math.sin(angle) * radius;
+    } else if (params.layout === "formation") {
+      // Tactical formation - staggered rows
+      const cols = Math.ceil(Math.sqrt(params.count));
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const stagger = (row % 2) * 20; // Offset every other row
+      x = area.x + (col * (area.width / cols)) + (area.width / cols / 2) + stagger;
+      y = area.y + (row * (area.height / Math.ceil(params.count / cols))) + 30;
+    } else { // line
+      x = area.x + (i / (params.count - 1 || 1)) * area.width;
+      y = area.y + area.height / 2;
+    }
+
+    const sprite = {
+      id: uuidv4(),
+      spriteDefId: params.spriteType,
+      x,
+      y,
+      scale,
+      rotation,
+      flipX: false,
+      flipY: false,
+      currentAnimation: animation,
+      animationState: {
+        currentFrame: 0,
+        frameTime: 0,
+        isPlaying: true,
+        loop: true
+      },
+      metadata: {
+        createdBy: "ai-agent",
+        createdAt: Date.now(),
+        locked: false,
+        layer: 1
+      }
+    };
+
+    newSprites.push(sprite);
+  }
+
+  return {
+    success: true,
+    message: `Placed ${params.count} ${params.spriteType} sprite(s) in ${params.layout} layout with ${animation} animation`,
+    canvasUpdates: { sprites: newSprites }
+  };
+}

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { Shape, ToolType, CanvasState, UserPresence, Tile, Tileset } from '@shared/schema';
+import type { Shape, ToolType, CanvasState, UserPresence, Tile, Tileset, SpriteInstance, SpriteDefinition, AnimationState } from '@shared/schema';
 import { v4 as uuidv4 } from 'uuid';
+import { initializeDemoSprites } from '@/utils/demoSprites';
 
 interface CanvasStore extends CanvasState {
   // Actions
@@ -52,6 +53,20 @@ interface CanvasStore extends CanvasState {
   setSelectedTileIndex: (index: number) => void;
   setBrushSize: (size: { width: number; height: number }) => void;
   
+  // Sprites
+  sprites: SpriteInstance[];
+  spriteDefinitions: SpriteDefinition[];
+  selectedSpriteId: string | null;
+  selectedSpriteDefId: string | null;
+  animationPreview: boolean;
+  addSprite: (sprite: SpriteInstance) => void;
+  updateSprite: (id: string, updates: Partial<SpriteInstance>) => void;
+  deleteSprite: (id: string) => void;
+  selectSprite: (id: string) => void;
+  setSpriteDefinitions: (defs: SpriteDefinition[]) => void;
+  setSelectedSpriteDef: (id: string | null) => void;
+  setAnimationPreview: (preview: boolean) => void;
+  
   // Project
   currentProjectId: string | null;
   currentProjectName: string;
@@ -60,6 +75,7 @@ interface CanvasStore extends CanvasState {
 
 const initialState: CanvasState = {
   shapes: [],
+  sprites: [],
   selectedIds: [],
   tool: 'select',
   zoom: 1,
@@ -82,6 +98,12 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   brushSize: { width: 1, height: 1 },
   currentProjectId: null,
   currentProjectName: 'Untitled Project',
+  
+  // Sprite state
+  spriteDefinitions: initializeDemoSprites(),
+  selectedSpriteId: null,
+  selectedSpriteDefId: null,
+  animationPreview: true,
 
   setTool: (tool) => set({ tool }),
   setZoom: (zoom) => set({ zoom: Math.max(0.1, Math.min(5, zoom)) }),
@@ -178,6 +200,7 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
     const state = get();
     const currentState: CanvasState = {
       shapes: state.shapes,
+      sprites: state.sprites,
       selectedIds: state.selectedIds,
       tool: state.tool,
       zoom: state.zoom,
@@ -355,4 +378,43 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       localStorage.removeItem('currentProjectName');
     }
   },
+
+  // Sprite actions
+  addSprite: (sprite) => {
+    set((state) => ({
+      sprites: [...state.sprites, sprite],
+      selectedSpriteId: sprite.id,
+      selectedIds: [], // Clear shape selection
+    }));
+    get().pushHistory();
+    
+    // Notify collaboration service
+    if ((window as any).__collaborationService) {
+      (window as any).__collaborationService.addSprite(sprite);
+    }
+  },
+
+  updateSprite: (id, updates) => {
+    set((state) => ({
+      sprites: state.sprites.map((s) =>
+        s.id === id ? { ...s, ...updates } : s
+      ),
+    }));
+  },
+
+  deleteSprite: (id) => {
+    set((state) => ({
+      sprites: state.sprites.filter((s) => s.id !== id),
+      selectedSpriteId: state.selectedSpriteId === id ? null : state.selectedSpriteId,
+    }));
+    get().pushHistory();
+  },
+
+  selectSprite: (id) => {
+    set({ selectedSpriteId: id, selectedIds: [] }); // Clear shape selection
+  },
+
+  setSpriteDefinitions: (defs) => set({ spriteDefinitions: defs }),
+  setSelectedSpriteDef: (id) => set({ selectedSpriteDefId: id }),
+  setAnimationPreview: (preview) => set({ animationPreview: preview }),
 }));

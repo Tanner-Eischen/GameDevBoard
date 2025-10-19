@@ -5,6 +5,7 @@ import type { Shape, Tile } from '@shared/schema';
 import Konva from 'konva';
 import { v4 as uuidv4 } from 'uuid';
 import { getTilesToUpdate } from '@/utils/autoTiling';
+import { SpriteAnimator } from './SpriteAnimator';
 
 export function Canvas() {
   const stageRef = useRef<Konva.Stage>(null);
@@ -33,6 +34,11 @@ export function Canvas() {
     addTiles,
     removeTile,
     currentUser,
+    sprites,
+    spriteDefinitions,
+    selectedSpriteDefId,
+    addSprite,
+    selectSprite,
   } = useCanvasStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
@@ -206,6 +212,32 @@ export function Canvas() {
       x: (pos.x - pan.x) / zoom,
       y: (pos.y - pan.y) / zoom,
     });
+
+    // Handle sprite tool
+    if (tool === 'sprite' && selectedSpriteDefId) {
+      const spriteDef = spriteDefinitions.find(def => def.id === selectedSpriteDefId);
+      if (spriteDef) {
+        const newSprite = {
+          id: uuidv4(),
+          spriteId: spriteDef.id,
+          x: snappedPos.x,
+          y: snappedPos.y,
+          scale: 1,
+          rotation: 0,
+          currentAnimation: spriteDef.defaultAnimation,
+          flipX: false,
+          flipY: false,
+          layer: 1,
+          metadata: {
+            createdBy: currentUser?.id || 'local',
+            createdAt: Date.now(),
+            locked: false,
+          },
+        };
+        addSprite(newSprite);
+      }
+      return;
+    }
 
     // Handle tile tools - allow painting over existing tiles and shapes
     if (tool === 'tile-paint' && selectedTileset) {
@@ -619,6 +651,24 @@ export function Canvas() {
     });
   };
 
+  const renderSprites = () => {
+    return sprites.map((sprite) => {
+      const spriteDef = spriteDefinitions.find(def => def.id === sprite.spriteId);
+      if (!spriteDef) return null;
+
+      return (
+        <SpriteAnimator
+          key={sprite.id}
+          sprite={sprite}
+          spriteDef={spriteDef}
+          onSelect={() => selectSprite(sprite.id)}
+          isSelected={selectedIds.includes(sprite.id)}
+          tool={tool}
+        />
+      );
+    });
+  };
+
   return (
     <div ref={containerRef} className="w-full h-full bg-canvas">
       <Stage
@@ -640,6 +690,7 @@ export function Canvas() {
           {renderGrid()}
           {renderTiles()}
           {shapes.map((shape) => renderShape(shape))}
+          {renderSprites()}
           {currentShape && renderShape(currentShape, true)}
         </Layer>
       </Stage>

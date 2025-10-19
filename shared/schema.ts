@@ -7,8 +7,12 @@ import { z } from "zod";
 export const shapeTypeEnum = z.enum(['rectangle', 'circle', 'polygon', 'star', 'line']);
 export type ShapeType = z.infer<typeof shapeTypeEnum>;
 
-export const toolTypeEnum = z.enum(['select', 'rectangle', 'circle', 'polygon', 'star', 'line', 'pan', 'tile-paint', 'tile-erase']);
+export const toolTypeEnum = z.enum(['select', 'rectangle', 'circle', 'polygon', 'star', 'line', 'pan', 'tile-paint', 'tile-erase', 'sprite']);
 export type ToolType = z.infer<typeof toolTypeEnum>;
+
+// Sprite animation state enum
+export const animationStateEnum = z.enum(['idle', 'walk', 'run', 'attack', 'hurt', 'die', 'custom']);
+export type AnimationState = z.infer<typeof animationStateEnum>;
 
 // Transform interface
 export interface Transform {
@@ -57,10 +61,48 @@ export interface Tile {
   layer: TileLayer; // 'terrain' for grass/dirt/water, 'props' for trees/flowers
 }
 
+// Sprite instance on canvas
+export interface SpriteInstance {
+  id: string;
+  spriteId: string; // Reference to sprite definition
+  x: number;
+  y: number;
+  scale: number;
+  rotation: number;
+  currentAnimation: AnimationState;
+  flipX: boolean;
+  flipY: boolean;
+  layer: number;
+  metadata: {
+    createdBy: string;
+    createdAt: number;
+    locked: boolean;
+  };
+}
+
+// Sprite definition (shared across projects)
+export interface SpriteDefinition {
+  id: string;
+  name: string;
+  imageUrl: string;
+  frameWidth: number;
+  frameHeight: number;
+  animations: {
+    [key in AnimationState]?: {
+      frames: number[]; // Frame indices
+      fps: number;
+      loop: boolean;
+    };
+  };
+  defaultAnimation: AnimationState;
+  tags: string[]; // e.g., ['character', 'enemy', 'npc']
+}
+
 // TileMap interface
 export interface TileMap {
   gridSize: number;
   tiles: Tile[];
+  spriteDefinitions: SpriteDefinition[];
 }
 
 // User presence interface
@@ -98,6 +140,7 @@ export interface Tileset {
 // Canvas state interface
 export interface CanvasState {
   shapes: Shape[];
+  sprites: SpriteInstance[];
   selectedIds: string[];
   tool: ToolType;
   zoom: number;
