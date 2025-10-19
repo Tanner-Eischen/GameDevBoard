@@ -32,6 +32,13 @@ export function TilesetPanel() {
   const [tilesetName, setTilesetName] = useState('');
   const [selectedPackId, setSelectedPackId] = useState<string>('');
   const [uploading, setUploading] = useState(false);
+  const [tilesetType, setTilesetType] = useState<'auto-tiling' | 'multi-tile' | 'variant_grid'>('multi-tile');
+  const [tileSize, setTileSize] = useState(16);
+  const [spacing, setSpacing] = useState(1);
+  const [columns, setColumns] = useState(3);
+  const [rows, setRows] = useState(3);
+  const [selectedTiles, setSelectedTiles] = useState<Array<{ x: number; y: number }>>([]);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -61,7 +68,6 @@ export function TilesetPanel() {
       return;
     }
 
-    setUploading(true);
     try {
       const file = result.successful[0];
       const uploadURL = file.uploadURL;
@@ -70,12 +76,46 @@ export function TilesetPanel() {
         throw new Error('Upload URL not found');
       }
 
-      // For 3x3 tileset with 1px spacing: 50x50 image
-      // Each tile is 16x16, with 1px spacing between them
-      const tileSize = 16;
-      const spacing = 1;
-      const columns = 3;
-      const rows = 3;
+      // Store the uploaded URL and show configuration UI
+      setUploadedImageUrl(uploadURL);
+
+      toast({
+        title: 'Image uploaded',
+        description: 'Now configure your tileset below',
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to upload image',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCreateTileset = async () => {
+    if (!uploadedImageUrl) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an image first',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (tilesetType === 'multi-tile' && selectedTiles.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please select at least one tile for the multi-tile object',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Prepare multi-tile config if needed
+      const multiTileConfig = tilesetType === 'multi-tile' ? { tiles: selectedTiles } : null;
 
       // Create tileset in database with placeholder URL first
       const createRes = await apiRequest('POST', '/api/tilesets', {
@@ -86,16 +126,18 @@ export function TilesetPanel() {
         columns,
         rows,
         packId: selectedPackId || null,
+        tilesetType,
+        multiTileConfig,
       });
       const newTileset = await createRes.json();
 
       // Update tileset with normalized object path
       const updateRes = await apiRequest('PUT', `/api/tilesets/${newTileset.id}/image`, {
-        imageURL: uploadURL,
+        imageURL: uploadedImageUrl,
       });
       const updatedTileset = await updateRes.json();
 
-      // Now we can use the normalized path to parse the image
+      // Load image to verify
       if (updatedTileset.imageUrl) {
         const img = new Image();
         await new Promise((resolve, reject) => {
@@ -107,13 +149,18 @@ export function TilesetPanel() {
 
       toast({
         title: 'Success',
-        description: 'Tileset uploaded successfully',
+        description: 'Tileset created successfully',
       });
 
       queryClient.invalidateQueries({ queryKey: ['/api/tilesets'] });
+      
+      // Reset form
       setShowUpload(false);
       setTilesetName('');
       setSelectedPackId('');
+      setUploadedImageUrl(null);
+      setSelectedTiles([]);
+      setTilesetType('multi-tile');
     } catch (error) {
       console.error('Error creating tileset:', error);
       toast({
@@ -151,12 +198,29 @@ export function TilesetPanel() {
               </Label>
               <Input
                 id="tileset-name"
-                placeholder="My Tileset"
+                placeholder="My Waterfall"
                 value={tilesetName}
                 onChange={(e) => setTilesetName(e.target.value)}
                 data-testid="input-tileset-name"
               />
             </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="type-select" className="text-xs">
+                Tileset Type
+              </Label>
+              <Select value={tilesetType} onValueChange={(val: any) => setTilesetType(val)}>
+                <SelectTrigger id="type-select" data-testid="select-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="multi-tile">Multi-Tile Object (trees, waterfalls, bridges)</SelectItem>
+                  <SelectItem value="auto-tiling">Auto-Tiling Terrain (grass, dirt, water)</SelectItem>
+                  <SelectItem value="variant_grid">Variant Grid (manual selection)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-1.5">
               <Label htmlFor="pack-select" className="text-xs">
                 Tileset Pack (optional)
@@ -175,19 +239,149 @@ export function TilesetPanel() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Upload Image (3x3 tileset, 16px tiles, 1px spacing)</Label>
-              <ObjectUploader
-                maxNumberOfFiles={1}
-                maxFileSize={10485760}
-                onGetUploadParameters={handleGetUploadParameters}
-                onComplete={handleUploadComplete}
-                buttonClassName="w-full"
-              >
-                <ImagePlus className="h-3 w-3 mr-2" />
-                Select Image
-              </ObjectUploader>
-            </div>
+
+            {!uploadedImageUrl && (
+              <div className="space-y-1.5">
+                <Label className="text-xs">1. Upload Image</Label>
+                <ObjectUploader
+                  maxNumberOfFiles={1}
+                  maxFileSize={10485760}
+                  onGetUploadParameters={handleGetUploadParameters}
+                  onComplete={handleUploadComplete}
+                  buttonClassName="w-full"
+                >
+                  <ImagePlus className="h-3 w-3 mr-2" />
+                  Select Image
+                </ObjectUploader>
+              </div>
+            )}
+
+            {uploadedImageUrl && (
+              <>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">2. Configure Dimensions</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="tile-size" className="text-xs text-muted-foreground">
+                        Tile Size (px)
+                      </Label>
+                      <Input
+                        id="tile-size"
+                        type="number"
+                        value={tileSize}
+                        onChange={(e) => setTileSize(parseInt(e.target.value) || 16)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="spacing" className="text-xs text-muted-foreground">
+                        Spacing (px)
+                      </Label>
+                      <Input
+                        id="spacing"
+                        type="number"
+                        value={spacing}
+                        onChange={(e) => setSpacing(parseInt(e.target.value) || 0)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="columns" className="text-xs text-muted-foreground">
+                        Columns
+                      </Label>
+                      <Input
+                        id="columns"
+                        type="number"
+                        value={columns}
+                        onChange={(e) => setColumns(parseInt(e.target.value) || 1)}
+                        className="text-xs"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rows" className="text-xs text-muted-foreground">
+                        Rows
+                      </Label>
+                      <Input
+                        id="rows"
+                        type="number"
+                        value={rows}
+                        onChange={(e) => setRows(parseInt(e.target.value) || 1)}
+                        className="text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {tilesetType === 'multi-tile' && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">3. Select Tiles (click tiles to select)</Label>
+                    <p className="text-xs text-muted-foreground">Selected: {selectedTiles.length} tile{selectedTiles.length !== 1 ? 's' : ''}</p>
+                    <div 
+                      className="grid gap-0.5 border rounded-md p-2 bg-background"
+                      style={{ 
+                        gridTemplateColumns: `repeat(${columns}, 1fr)`,
+                        maxHeight: '200px',
+                        overflow: 'auto'
+                      }}
+                    >
+                      {Array.from({ length: rows * columns }).map((_, index) => {
+                        const x = index % columns;
+                        const y = Math.floor(index / columns);
+                        const isSelected = selectedTiles.some(t => t.x === x && t.y === y);
+                        return (
+                          <button
+                            key={`${x}-${y}`}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedTiles(selectedTiles.filter(t => !(t.x === x && t.y === y)));
+                              } else {
+                                setSelectedTiles([...selectedTiles, { x, y }]);
+                              }
+                            }}
+                            className={cn(
+                              "aspect-square border rounded flex items-center justify-center text-xs transition-colors",
+                              isSelected ? "bg-primary text-primary-foreground" : "bg-muted hover-elevate"
+                            )}
+                            data-testid={`tile-${x}-${y}`}
+                          >
+                            {x},{y}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCreateTileset}
+                    disabled={uploading || (tilesetType === 'multi-tile' && selectedTiles.length === 0)}
+                    className="flex-1"
+                    data-testid="button-create-tileset"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Tileset'
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setUploadedImageUrl(null);
+                      setSelectedTiles([]);
+                    }}
+                    data-testid="button-reset-upload"
+                  >
+                    Reset
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
