@@ -221,8 +221,8 @@ export function TilesetPanel() {
                         const row = Math.floor(index / tileset.columns);
                         const tileSize = tileset.tileSize;
                         const spacing = tileset.spacing || 0;
-                        const x = col * (tileSize + spacing);
-                        const y = row * (tileSize + spacing);
+                        const x = col * (spacing -1) + col * (tileSize);
+                        const y = row * (spacing -1) + row * (tileSize);
 
                         return (
                           <button
