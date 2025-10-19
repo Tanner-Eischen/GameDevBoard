@@ -152,8 +152,6 @@ export function Canvas() {
     const autoTiledTiles = new Map<string, Tile>();
 
     // Calculate auto-tiling for each painted tile and its neighbors
-    const isGrass = selectedTileset.name.toLowerCase().includes('grass');
-    
     for (let dy = 0; dy < brushSize.height; dy++) {
       for (let dx = 0; dx < brushSize.width; dx++) {
         const tileX = gridX + dx;
@@ -165,8 +163,7 @@ export function Canvas() {
           selectedTileset.id,
           simulatedTiles,
           true,
-          'terrain', // explicitly pass layer for clarity
-          isGrass // special grass behavior: don't update edges
+          'terrain' // explicitly pass layer for clarity
         );
 
         updates.forEach((update) => {

@@ -102,9 +102,6 @@ export function getNeighborConfig(
  * Get all tiles that need to be updated when a tile is added/removed
  * For terrain tiles, this also updates neighboring tiles of different terrain types
  * to create proper edges (e.g., water edges when grass is painted next to water)
- * 
- * Special case for grass: When painting grass next to terrain edges, grass shows center
- * but doesn't update the neighboring edge tiles (preserves existing terrain edges)
  */
 export function getTilesToUpdate(
   x: number,
@@ -112,8 +109,7 @@ export function getTilesToUpdate(
   tilesetId: string,
   tiles: Tile[],
   includeSelf: boolean = true,
-  layer?: 'terrain' | 'props',
-  isGrassTileset?: boolean
+  layer?: 'terrain' | 'props'
 ): Array<{ x: number; y: number; tileIndex: number; tilesetId: string }> {
   const updates: Array<{ x: number; y: number; tileIndex: number; tilesetId: string }> = [];
 
@@ -147,17 +143,6 @@ export function getTilesToUpdate(
       );
       
       for (const tile of tilesAtPosition) {
-        // Special case for grass: Don't update neighboring tiles that are already showing edges
-        // Only update if the neighbor is showing a center tile (index 4) or if it's the same tileset
-        const isNeighborPosition = pos.x !== x || pos.y !== y;
-        const isCenterTile = tile.tileIndex === 4;
-        const isSameTileset = tile.tilesetId === tilesetId;
-        
-        if (isGrassTileset && isNeighborPosition && !isCenterTile && !isSameTileset) {
-          // Skip updating this neighbor - grass painted next to terrain edge doesn't update the edge
-          continue;
-        }
-        
         const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles);
         const tileIndex = calculateAutoTileIndex(neighbors);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId: tile.tilesetId });
