@@ -36,6 +36,7 @@ interface CanvasStore extends CanvasState {
   // Tiles
   tiles: Tile[];
   addTile: (tile: Tile) => void;
+  addTiles: (tiles: Tile[]) => void;
   removeTile: (x: number, y: number) => void;
   clearTiles: () => void;
   
@@ -247,6 +248,35 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
       }
       
       return { tiles: [...state.tiles, tile] };
+    });
+    get().pushHistory();
+  },
+
+  addTiles: (tilesToAdd) => {
+    set((state) => {
+      let newTiles = [...state.tiles];
+      
+      tilesToAdd.forEach((tile) => {
+        const existingIndex = newTiles.findIndex(
+          (t) => t.x === tile.x && t.y === tile.y
+        );
+        
+        if (existingIndex >= 0) {
+          newTiles[existingIndex] = tile;
+          // Notify collaboration service
+          if ((window as any).__collaborationService) {
+            (window as any).__collaborationService.updateTile(existingIndex, tile);
+          }
+        } else {
+          newTiles.push(tile);
+          // Notify collaboration service
+          if ((window as any).__collaborationService) {
+            (window as any).__collaborationService.addTile(tile);
+          }
+        }
+      });
+      
+      return { tiles: newTiles };
     });
     get().pushHistory();
   },

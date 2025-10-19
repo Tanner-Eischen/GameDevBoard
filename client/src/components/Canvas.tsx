@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { Stage, Layer, Rect, Circle, Line, RegularPolygon, Star, Image } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
-import type { Shape } from '@shared/schema';
+import type { Shape, Tile } from '@shared/schema';
 import Konva from 'konva';
 import { v4 as uuidv4 } from 'uuid';
 import { getTilesToUpdate } from '@/utils/autoTiling';
@@ -30,6 +30,7 @@ export function Canvas() {
     selectedTileIndex,
     brushSize,
     addTile,
+    addTiles,
     removeTile,
     currentUser,
   } = useCanvasStore();
@@ -100,27 +101,31 @@ export function Canvas() {
   const paintTilesAtPosition = (gridX: number, gridY: number) => {
     if (!selectedTileset) return;
 
-    // Paint a brushSize.width x brushSize.height grid of tiles
+    // Collect all tiles to be added/updated
+    const tilesToAdd: Tile[] = [];
+
+    // First, add all brush tiles with selected index
     for (let dy = 0; dy < brushSize.height; dy++) {
       for (let dx = 0; dx < brushSize.width; dx++) {
-        const tileX = gridX + dx;
-        const tileY = gridY + dy;
-
-        // Add the tile temporarily with selected index
-        addTile({
-          x: tileX,
-          y: tileY,
+        tilesToAdd.push({
+          x: gridX + dx,
+          y: gridY + dy,
           tilesetId: selectedTileset.id,
           tileIndex: selectedTileIndex,
         });
       }
     }
 
-    // Get updated tiles array after adding all brush tiles
-    const updatedTiles = useCanvasStore.getState().tiles;
+    // Simulate updated tiles array for auto-tiling calculation
+    const currentTiles = useCanvasStore.getState().tiles;
+    const tileMap = new Map(currentTiles.map(t => [`${t.x},${t.y}`, t]));
+    tilesToAdd.forEach(tile => {
+      tileMap.set(`${tile.x},${tile.y}`, tile);
+    });
+    const simulatedTiles = Array.from(tileMap.values());
 
-    // Collect all tiles that need auto-tiling updates
-    const tilesToUpdate = new Map<string, { x: number; y: number; tileIndex: number }>();
+    // Collect all tiles that need auto-tiling updates (using Map to avoid duplicates)
+    const autoTiledTiles = new Map<string, Tile>();
 
     // Calculate auto-tiling for each painted tile and its neighbors
     for (let dy = 0; dy < brushSize.height; dy++) {
@@ -132,34 +137,39 @@ export function Canvas() {
           tileX,
           tileY,
           selectedTileset.id,
-          updatedTiles,
+          simulatedTiles,
           true
         );
 
         updates.forEach((update) => {
           const key = `${update.x},${update.y}`;
-          tilesToUpdate.set(key, update);
+          autoTiledTiles.set(key, {
+            x: update.x,
+            y: update.y,
+            tilesetId: selectedTileset.id,
+            tileIndex: update.tileIndex,
+          });
         });
       }
     }
 
-    // Apply all auto-tiling updates
-    tilesToUpdate.forEach((update) => {
-      addTile({
-        x: update.x,
-        y: update.y,
-        tilesetId: selectedTileset.id,
-        tileIndex: update.tileIndex,
-      });
+    // Merge original brush tiles with auto-tiled results
+    // Start with all the auto-tiled updates
+    const finalTiles = new Map(autoTiledTiles);
+    
+    // Ensure all original brush tiles are included (in case auto-tiling didn't cover them)
+    tilesToAdd.forEach(tile => {
+      const key = `${tile.x},${tile.y}`;
+      if (!finalTiles.has(key)) {
+        finalTiles.set(key, tile);
+      }
     });
+
+    // Batch all tile additions into a single operation
+    addTiles(Array.from(finalTiles.values()));
   };
 
   const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (e.target !== e.target.getStage()) {
-      console.log('Click target is not stage, ignoring', e.target);
-      return;
-    }
-
     const stage = stageRef.current;
     if (!stage) return;
 
@@ -171,7 +181,7 @@ export function Canvas() {
       y: (pos.y - pan.y) / zoom,
     });
 
-    // Handle tile tools with auto-tiling
+    // Handle tile tools - allow painting over existing tiles and shapes
     if (tool === 'tile-paint' && selectedTileset) {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
@@ -220,6 +230,9 @@ export function Canvas() {
 
       return;
     }
+
+    // For shape tools, only respond to clicks on empty canvas
+    if (e.target !== e.target.getStage()) return;
 
     if (tool === 'select') {
       clearSelection();
