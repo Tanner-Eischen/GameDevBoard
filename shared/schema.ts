@@ -73,6 +73,7 @@ export interface Tileset {
   id: string;
   name: string;
   tileSize: number;
+  spacing: number; // Spacing between tiles in pixels
   imageUrl: string;
   columns: number;
   rows: number;
@@ -114,6 +115,7 @@ export const tilesets = pgTable("tilesets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   tileSize: integer("tile_size").notNull().default(32),
+  spacing: integer("spacing").notNull().default(0),
   imageUrl: text("image_url").notNull(),
   columns: integer("columns").notNull(),
   rows: integer("rows").notNull(),
