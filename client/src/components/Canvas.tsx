@@ -139,8 +139,10 @@ export function Canvas() {
     }
 
     // Simulate updated tiles array for auto-tiling calculation
+    // Only consider terrain-layer tiles for auto-tiling neighbor detection
     const currentTiles = useCanvasStore.getState().tiles;
-    const tileMap = new Map(currentTiles.map(t => [`${t.x},${t.y}`, t]));
+    const terrainTiles = currentTiles.filter(t => t.layer === 'terrain');
+    const tileMap = new Map(terrainTiles.map(t => [`${t.x},${t.y}`, t]));
     tilesToAdd.forEach(tile => {
       tileMap.set(`${tile.x},${tile.y}`, tile);
     });
