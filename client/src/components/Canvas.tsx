@@ -537,6 +537,14 @@ export function Canvas() {
         },
       });
     }
+
+    // Update cursor position for real-time collaboration
+    const collaborationService = (window as any).__collaborationService;
+    if (collaborationService && currentUser) {
+      collaborationService.updateUserPresence({
+        cursor: canvasPos,
+      });
+    }
   };
 
   const handleMouseUp = () => {

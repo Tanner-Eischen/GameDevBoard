@@ -9,10 +9,26 @@ import { fromZodError } from "zod-validation-error";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { handleAiChat } from "./ai/chat";
 import spritesRouter from "./routes/sprites";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Projects API
-  app.get("/api/projects", async (req, res) => {
+  // Auth middleware - Reference: blueprint:javascript_log_in_with_replit
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Projects API - all protected by authentication
+  app.get("/api/projects", isAuthenticated, async (req, res) => {
     try {
       const projects = await storage.getAllProjects();
       
@@ -36,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/projects/:id", async (req, res) => {
+  app.get("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
       const project = await storage.getProject(req.params.id);
       if (!project) {
@@ -60,7 +76,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", express.json(), async (req, res) => {
+  app.post("/api/projects", isAuthenticated, express.json(), async (req, res) => {
     try {
       const validatedData = insertProjectSchema.parse(req.body);
       const project = await storage.createProject(validatedData);
@@ -74,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/projects/:id", express.json(), async (req, res) => {
+  app.patch("/api/projects/:id", isAuthenticated, express.json(), async (req, res) => {
     try {
       const validatedData = insertProjectSchema.partial().parse(req.body);
       const project = await storage.updateProject(req.params.id, validatedData);
@@ -91,7 +107,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projects/:id", async (req, res) => {
+  app.delete("/api/projects/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteProject(req.params.id);
       if (!deleted) {
@@ -103,8 +119,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tilesets API
-  app.get("/api/tilesets", async (req, res) => {
+  // Tilesets API - all protected by authentication
+  app.get("/api/tilesets", isAuthenticated, async (req, res) => {
     try {
       const tilesets = await storage.getAllTilesets();
       res.json(tilesets);
@@ -113,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tilesets/:id", async (req, res) => {
+  app.get("/api/tilesets/:id", isAuthenticated, async (req, res) => {
     try {
       const tileset = await storage.getTileset(req.params.id);
       if (!tileset) {
@@ -125,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tilesets", express.json(), async (req, res) => {
+  app.post("/api/tilesets", isAuthenticated, express.json(), async (req, res) => {
     try {
       const validatedData = insertTilesetSchema.parse(req.body);
       const tileset = await storage.createTileset(validatedData);
@@ -139,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/tilesets/:id", async (req, res) => {
+  app.delete("/api/tilesets/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteTileset(req.params.id);
       if (!deleted) {
@@ -153,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Object Storage routes for tileset uploads
   // Get upload URL for a tileset image
-  app.post("/api/objects/upload", async (req, res) => {
+  app.post("/api/objects/upload", isAuthenticated, async (req, res) => {
     try {
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
@@ -181,8 +197,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update tileset with uploaded image URL
-  app.put("/api/tilesets/:id/image", express.json(), async (req, res) => {
+  // Update tileset with uploaded image URL - protected by authentication
+  app.put("/api/tilesets/:id/image", isAuthenticated, express.json(), async (req, res) => {
     try {
       if (!req.body.imageURL) {
         return res.status(400).json({ error: "imageURL is required" });
@@ -210,8 +226,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tileset Packs API
-  app.get("/api/tileset-packs", async (req, res) => {
+  // Tileset Packs API - all protected by authentication
+  app.get("/api/tileset-packs", isAuthenticated, async (req, res) => {
     try {
       const packs = await storage.getAllTilesetPacks();
       res.json(packs);
@@ -220,7 +236,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tileset-packs/:id", async (req, res) => {
+  app.get("/api/tileset-packs/:id", isAuthenticated, async (req, res) => {
     try {
       const pack = await storage.getTilesetPack(req.params.id);
       if (!pack) {
@@ -232,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/tileset-packs/:id/tilesets", async (req, res) => {
+  app.get("/api/tileset-packs/:id/tilesets", isAuthenticated, async (req, res) => {
     try {
       const tilesets = await storage.getTilesetsByPackId(req.params.id);
       res.json(tilesets);
@@ -241,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/tileset-packs", express.json(), async (req, res) => {
+  app.post("/api/tileset-packs", isAuthenticated, express.json(), async (req, res) => {
     try {
       const validatedData = insertTilesetPackSchema.parse(req.body);
       const pack = await storage.createTilesetPack(validatedData);
@@ -255,7 +271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/tileset-packs/:id", express.json(), async (req, res) => {
+  app.put("/api/tileset-packs/:id", isAuthenticated, express.json(), async (req, res) => {
     try {
       const validatedData = insertTilesetPackSchema.partial().parse(req.body);
       const pack = await storage.updateTilesetPack(req.params.id, validatedData);
@@ -272,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/tileset-packs/:id", async (req, res) => {
+  app.delete("/api/tileset-packs/:id", isAuthenticated, async (req, res) => {
     try {
       const deleted = await storage.deleteTilesetPack(req.params.id);
       if (!deleted) {
@@ -288,7 +304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use("/api/sprites", spritesRouter);
 
   // AI Chat API
-  app.post("/api/ai/chat", express.json(), handleAiChat);
+  app.post("/api/ai/chat", isAuthenticated, express.json(), handleAiChat);
 
   // Create HTTP server
   const httpServer = createServer(app);

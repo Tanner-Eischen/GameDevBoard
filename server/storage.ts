@@ -1,6 +1,6 @@
 import {
   type User,
-  type InsertUser,
+  type UpsertUser,
   type Project,
   type InsertProject,
   type TilesetData,
@@ -9,14 +9,15 @@ import {
   type InsertTilesetPack,
   type CanvasState,
   type TileMap,
+  type MultiTileConfig,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
-  // Users
+  // Users - Replit Auth compatible
+  // Reference: blueprint:javascript_log_in_with_replit
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  upsertUser(user: UpsertUser): Promise<User>;
 
   // Projects
   getProject(id: string): Promise<Project | undefined>;
@@ -106,21 +107,24 @@ export class MemStorage implements IStorage {
     this.tilesets.set(waterTileset.id, waterTileset);
   }
 
-  // User methods
+  // User methods - Replit Auth compatible
+  // Reference: blueprint:javascript_log_in_with_replit
   async getUser(id: string): Promise<User | undefined> {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const now = new Date();
+    const user: User = {
+      id: userData.id || randomUUID(),
+      email: userData.email || null,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.users.set(user.id, user);
     return user;
   }
 
@@ -309,19 +313,25 @@ export class DbStorage implements IStorage {
     });
   }
 
-  // User methods
+  // User methods - Replit Auth compatible
+  // Reference: blueprint:javascript_log_in_with_replit
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.id, id));
     return user;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(usersTable).values(insertUser).returning();
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(usersTable)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: usersTable.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
     return user;
   }
 

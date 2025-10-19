@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Canvas } from '@/components/Canvas';
+import { CursorOverlay } from '@/components/CursorOverlay';
 import { Toolbar } from '@/components/Toolbar';
 import { PropertiesPanel } from '@/components/PropertiesPanel';
 import { LayersPanelWithPacks } from '@/components/LayersPanel';
@@ -10,10 +11,10 @@ import { ProjectManager } from '@/components/ProjectManager';
 import { AiChat } from '@/components/AiChat';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { getCollaborationService } from '@/services/collaboration';
-import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
-import { PanelLeft, PanelRight } from 'lucide-react';
+import { PanelLeft, PanelRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 const USER_COLORS = [
   'hsl(217 91% 60%)',
@@ -27,6 +28,7 @@ const USER_COLORS = [
 ];
 
 export default function Board() {
+  const { user } = useAuth();
   const { setCurrentUser, setTool, undo, redo, setCurrentProject, currentProjectId, tiles, shapes } = useCanvasStore();
   const collaborationRef = useRef<ReturnType<typeof getCollaborationService> | null>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -34,13 +36,16 @@ export default function Board() {
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   useEffect(() => {
-    // Initialize current user
-    const userId = uuidv4();
-    const userName = `User ${Math.floor(Math.random() * 1000)}`;
-    const userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
+    if (!user) return;
+
+    // Initialize current user from authenticated user
+    const userName = user.firstName && user.lastName 
+      ? `${user.firstName} ${user.lastName}`.trim()
+      : user.email?.split('@')[0] || `User ${user.id.substring(0, 6)}`;
+    const userColor = USER_COLORS[parseInt(user.id, 36) % USER_COLORS.length];
 
     setCurrentUser({
-      id: userId,
+      id: user.id,
       name: userName,
       color: userColor,
       cursor: null,
@@ -93,7 +98,7 @@ export default function Board() {
         (window as any).__collaborationService = null;
       }
     };
-  }, [setCurrentUser, setCurrentProject]);
+  }, [user, setCurrentUser, setCurrentProject]);
 
   // Auto-save when tiles or shapes change
   useEffect(() => {
@@ -221,6 +226,15 @@ export default function Board() {
         <div className="flex items-center gap-4">
           <ProjectManager />
           <UserPresence />
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => window.location.href = '/api/logout'}
+            data-testid="button-logout"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </header>
 
@@ -266,8 +280,9 @@ export default function Board() {
         </aside>
 
         {/* Canvas */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 relative">
           <Canvas />
+          <CursorOverlay />
         </main>
 
         {/* Right Sidebar */}

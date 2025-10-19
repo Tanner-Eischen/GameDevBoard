@@ -3,6 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
+import { isAuthenticated } from '../replitAuth';
 
 const router = express.Router();
 
@@ -33,8 +34,8 @@ const ensureSpritesDir = async () => {
   return spritesDir;
 };
 
-// Upload sprite image
-router.post('/upload', upload.single('image'), async (req, res) => {
+// Upload sprite image - protected by authentication
+router.post('/upload', isAuthenticated, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
@@ -64,8 +65,8 @@ router.post('/upload', upload.single('image'), async (req, res) => {
   }
 });
 
-// Get all sprite files
-router.get('/files', async (req, res) => {
+// Get all sprite files - protected by authentication
+router.get('/files', isAuthenticated, async (req, res) => {
   try {
     const spritesDir = await ensureSpritesDir();
     const files = await fs.readdir(spritesDir);
@@ -85,8 +86,8 @@ router.get('/files', async (req, res) => {
   }
 });
 
-// Delete sprite file
-router.delete('/files/:filename', async (req, res) => {
+// Delete sprite file - protected by authentication
+router.delete('/files/:filename', isAuthenticated, async (req, res) => {
   try {
     const { filename } = req.params;
     
@@ -115,8 +116,8 @@ router.delete('/files/:filename', async (req, res) => {
   }
 });
 
-// Get sprite metadata (for future use with database)
-router.get('/metadata/:filename', async (req, res) => {
+// Get sprite metadata - protected by authentication
+router.get('/metadata/:filename', isAuthenticated, async (req, res) => {
   try {
     const { filename } = req.params;
     
