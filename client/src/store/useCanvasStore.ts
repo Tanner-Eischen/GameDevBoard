@@ -15,6 +15,7 @@ interface CanvasStore extends CanvasState {
   addShape: (shape: Shape) => void;
   updateShape: (id: string, updates: Partial<Shape>) => void;
   deleteShapes: (ids: string[]) => void;
+  clearShapes: () => void;
   setSelectedIds: (ids: string[]) => void;
   selectShape: (id: string, multi?: boolean) => void;
   clearSelection: () => void;

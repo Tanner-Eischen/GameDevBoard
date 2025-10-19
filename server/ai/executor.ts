@@ -1,5 +1,6 @@
 import type { CanvasState, TileMap, Shape, Tile } from "@shared/schema";
 import { v4 as uuidv4 } from "uuid";
+import { applyAutoTiling } from "./autoTiling";
 
 // AI function execution results
 export interface ExecutionResult {
@@ -44,7 +45,7 @@ export function executePaintTerrain(
           x: x + dx,
           y: y + dy,
           tilesetId: tileset.id,
-          tileIndex: 4 // Center tile for auto-tiling
+          tileIndex: 4 // Initial center tile (will be updated by auto-tiling)
         });
       }
     }
@@ -74,10 +75,14 @@ export function executePaintTerrain(
     }
   }
 
+  // Apply auto-tiling to all tiles (new + existing)
+  // This calculates correct edge/corner pieces based on neighbors
+  const autoTiledTiles = applyAutoTiling(newTiles, tileMap.tiles, tileset.id);
+
   return {
     success: true,
-    message: `Painted ${newTiles.length} ${params.tilesetName} tiles in ${params.pattern} pattern`,
-    canvasUpdates: { tiles: newTiles }
+    message: `Painted ${autoTiledTiles.length} ${params.tilesetName} tiles in ${params.pattern} pattern with auto-tiling`,
+    canvasUpdates: { tiles: autoTiledTiles }
   };
 }
 
