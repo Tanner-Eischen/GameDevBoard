@@ -197,8 +197,8 @@ export function Canvas() {
     if (!pos) return;
 
     const snappedPos = snapToGridIfEnabled({
-      x: pos.x / zoom - pan.x,
-      y: pos.y / zoom - pan.y,
+      x: (pos.x - pan.x) / zoom,
+      y: (pos.y - pan.y) / zoom,
     });
 
     // Handle tile tools - allow painting over existing tiles and shapes
@@ -331,8 +331,8 @@ export function Canvas() {
     if (!pos) return;
 
     const canvasPos = {
-      x: pos.x / zoom - pan.x,
-      y: pos.y / zoom - pan.y,
+      x: (pos.x - pan.x) / zoom,
+      y: (pos.y - pan.y) / zoom,
     };
 
     const snappedPos = snapToGridIfEnabled(canvasPos);
@@ -341,6 +341,9 @@ export function Canvas() {
     if (isPainting && tool === 'tile-paint' && selectedTileset) {
       const gridX = Math.floor(snappedPos.x / gridSize);
       const gridY = Math.floor(snappedPos.y / gridSize);
+
+      // Collect all grid cells to paint (deduplicated via Set)
+      const cellsToPaint = new Set<string>();
 
       // Fill in all grid cells between last painted position and current position
       if (lastPaintedGrid) {
@@ -354,13 +357,19 @@ export function Canvas() {
             const t = i / steps;
             const interpX = Math.floor(lastPaintedGrid.x + dx * t);
             const interpY = Math.floor(lastPaintedGrid.y + dy * t);
-            paintTilesAtPosition(interpX, interpY);
+            cellsToPaint.add(`${interpX},${interpY}`);
           }
         }
       } else {
         // First paint
-        paintTilesAtPosition(gridX, gridY);
+        cellsToPaint.add(`${gridX},${gridY}`);
       }
+      
+      // Paint all unique cells
+      cellsToPaint.forEach(cell => {
+        const [x, y] = cell.split(',').map(Number);
+        paintTilesAtPosition(x, y);
+      });
       
       setLastPaintedGrid({ x: gridX, y: gridY });
       return;
@@ -419,6 +428,13 @@ export function Canvas() {
     const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
 
     useCanvasStore.setState({ zoom: newScale });
+  };
+
+  const handleStageDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+    const stage = e.target as Konva.Stage;
+    useCanvasStore.setState({ 
+      pan: { x: stage.x(), y: stage.y() } 
+    });
   };
 
   const renderShape = (shape: Shape, isTemp = false) => {
@@ -596,6 +612,7 @@ export function Canvas() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onWheel={handleWheel}
+        onDragEnd={handleStageDragEnd}
         draggable={tool === 'pan'}
       >
         <Layer>
