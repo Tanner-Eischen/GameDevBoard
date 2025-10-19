@@ -25,8 +25,10 @@ The application is built with a modern web stack, emphasizing real-time collabor
 -   **Canvas & Drawing Tools**: Infinite canvas with pan/zoom, various shape tools (Rectangle, Circle, Polygon, Star, Line), selection/transformation, multi-select, customizable shape properties, and a grid system with snap-to-grid.
 -   **Tile Mapping**: Two-layer tile system (terrain and props) with layer-aware painting, continuous brush painting, adjustable brush sizes, 3x3 auto-tiling with cross-tileset neighbor detection, multi-tile object support, and optimized batching. Includes variant grid tilesets for manual tile selection.
 -   **AI Assistant**: Integrates an AI assistant for natural language commands, supporting map creation, design operations (e.g., paint terrain, create shapes, analyze canvas, clear elements, place objects), streaming responses, and safety features with Zod validation. Enhanced with advanced natural language understanding for spatial concepts and various terrain patterns.
+    - **Fuzzy Matching**: AI can find objects by partial names using similarity scoring (e.g., "tree" matches "Tree 1", "tree_oak", "Tree Sprite"). Word-based, contains, starts-with, and character overlap matching with user-friendly suggestions.
+    - **Scene Generation**: `createScene` function creates entire detailed maps with grass variants, random tree/object scattering with spacing, winding paths/rivers, and proper auto-tiling integration. Supports forest, camp, village, grassland, and custom mixed scenes.
 -   **Project Management**: Save/load functionality, auto-save, local storage persistence, auto-load of the last project, export to JSON, and undo/redo history.
--   **Layer Management**: Visual panel for managing layers, including visibility toggling and deletion.
+-   **Layer Management**: Enhanced visual panel displaying all canvas objects (shapes, tiles grouped by tileset/layer, sprites) with snap-to-center navigation, visibility toggle, and deletion controls. Each object type shows counts and provides quick access via MapPin button for viewport centering.
 -   **Sprite Animation System**: Supports sprite definitions with animations, frame rates, scaling, and flipping, fully synchronized across collaborators.
 -   **Development**: Vite for fast development, TypeScript for type safety, ESLint/Prettier for code quality.
 
