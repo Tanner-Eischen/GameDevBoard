@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness';
+import { encodeAwarenessUpdate, applyAwarenessUpdate } from 'y-protocols/awareness';
 import type { Shape, UserPresence } from '@shared/schema';
 import { useCanvasStore } from '@/store/useCanvasStore';
 
@@ -40,7 +41,17 @@ export class CollaborationService {
     this.ws.onmessage = (event) => {
       if (event.data instanceof ArrayBuffer) {
         const update = new Uint8Array(event.data);
-        Y.applyUpdate(this.doc, update);
+        // Check if this is an awareness update (first byte is 1) or doc update (first byte is 0)
+        if (update.length > 0 && update[0] === 1) {
+          // This is an awareness update - strip the prefix byte
+          applyAwarenessUpdate(this.awareness, update.slice(1), null);
+        } else if (update.length > 0 && update[0] === 0) {
+          // This is a document update - strip the prefix byte
+          Y.applyUpdate(this.doc, update.slice(1));
+        } else {
+          // Legacy message without prefix (for backwards compatibility during initial handshake)
+          Y.applyUpdate(this.doc, update);
+        }
       }
     };
 
@@ -52,10 +63,27 @@ export class CollaborationService {
       console.log('WebSocket disconnected');
     };
 
-    // Send updates to the server
+    // Send document updates to the server
     this.doc.on('update', (update: Uint8Array) => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send(update);
+        // Prepend 0 to indicate this is a document update
+        const message = new Uint8Array(update.length + 1);
+        message[0] = 0;
+        message.set(update, 1);
+        this.ws.send(message);
+      }
+    });
+
+    // Send awareness updates to the server
+    this.awareness.on('update', ({ added, updated, removed }: any) => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        const changedClients = added.concat(updated).concat(removed);
+        const update = encodeAwarenessUpdate(this.awareness, changedClients);
+        // Prepend 1 to indicate this is an awareness update
+        const message = new Uint8Array(update.length + 1);
+        message[0] = 1;
+        message.set(update, 1);
+        this.ws.send(message);
       }
     });
 
@@ -222,12 +250,12 @@ export class CollaborationService {
   updateUserPresence(updates: Partial<UserPresence>) {
     if (this.awareness) {
       const currentState = this.awareness.getLocalState();
+      const updatedUser = {
+        ...currentState?.user,
+        ...updates,
+      };
       this.awareness.setLocalState({
-        ...currentState,
-        user: {
-          ...currentState?.user,
-          ...updates,
-        },
+        user: updatedUser,
       });
     }
   }

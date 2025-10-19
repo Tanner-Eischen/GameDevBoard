@@ -21,7 +21,7 @@ The application is built with a modern web stack, emphasizing real-time collabor
 - **Frontend**: React, TypeScript, React-Konva for canvas rendering, Zustand for local state management, Shadcn UI, and Tailwind CSS.
 -   **Backend**: Express.js and a WebSocket server for real-time communication.
 -   **Database**: PostgreSQL with Drizzle ORM.
--   **Real-time Collaboration**: Y.js CRDT for conflict-free, multi-user editing, enabling shared canvas state, sprite synchronization, and object placement.
+-   **Real-time Collaboration**: Y.js CRDT for conflict-free, multi-user editing, enabling shared canvas state, sprite synchronization, object placement, and real-time cursor tracking with awareness protocol for presence updates.
 -   **Canvas & Drawing Tools**: Infinite canvas with pan/zoom, various shape tools (Rectangle, Circle, Polygon, Star, Line), selection/transformation, multi-select, customizable shape properties, and a grid system with snap-to-grid.
 -   **Tile Mapping**: Two-layer tile system (terrain and props) with layer-aware painting, continuous brush painting, adjustable brush sizes, 3x3 auto-tiling with smart edge detection (only updates same-tileset tiles while detecting all terrain as neighbors for proper edge display), multi-tile object support, and optimized batching. Includes variant grid tilesets for manual tile selection.
 -   **Tileset Pack Management**: Organize related tilesets into packs for visual cohesion. Packs group tilesets with consistent art style, color palette, and pixel density. AI assistant preferentially uses tiles from the same pack when generating scenes to ensure visual consistency.
