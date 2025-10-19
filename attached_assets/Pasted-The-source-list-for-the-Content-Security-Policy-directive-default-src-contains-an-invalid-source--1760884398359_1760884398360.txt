@@ -1,0 +1,823 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+GameDevBoard:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+GameDevBoard:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+GameDevBoard:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+ in iframe false
+ Init Current tab url: https://replit.com/@tannereischen/GameDevBoard
+ [LaunchDarkly] LaunchDarkly client initialized
+ in iframe false
+GameDevBoard:1 Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.
+ Init Current tab url: https://replit.com/@tannereischen/GameDevBoard
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+[Report Only] Refused to load the font '<URL>' because it violates the following Content Security Policy directive: "font-src 'none'".
+
+contents.04ff201a.js:1 in iframe false
+contents.04ff201a.js:354 Init Current tab url: https://replit.com/@tannereischen/GameDevBoard
+ in iframe false
+ Init Current tab url: https://replit.com/@tannereischen/GameDevBoard
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+ Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'battery'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'layout-animations'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'navigation-override'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'oversized-images'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'publickey-credentials'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'speaker-selection'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'unoptimized-images'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'unsized-media'.
+_ @ framework-3657452a98147308.js:1
+ Unrecognized feature: 'pointer-lock'.
+_ @ framework-3657452a98147308.js:1
+ Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-3657452a98147308.js:1
+ Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-3657452a98147308.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+GameDevBoard:1 Uncaught (in promise) 
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+ stallwart: failed ping 1
+ stallwart: failed ping 2
+ stallwart: failed ping 3
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ingest.app.coframe.com/ingest/v2/batched_events/68c9ad4d4cddb58cf3a1f93d/:1  Failed to load resource: the server responded with a status of 502 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+hook.js:608 task queue exceeded allotted deadline by 42ms
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1760867234630%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252F%2540tannereischen%252FGameDevBoard%2522%252C%2522trackingOnly%2522%253Atrue%257D:10 Uncaught (in promise) Error: Timeout waiting for command after 3600000ms for:
+e=>!("treatmentApplied"!==e.subscribe||!e.callback)
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 [Coframe] Mutation callback infinite loop protection triggered, disconnecting mutation observer Object
+overrideMethod @ hook.js:608
+hook.js:608 WARN: A component changed from uncontrolled to controlled.
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 task queue exceeded allotted deadline by 163ms
+overrideMethod @ hook.js:608
+ Canvas2D: Multiple readback operations using getImageData are faster with the willReadFrequently attribute set to true. See: https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+value @ 5333.9bdfd077e24d3bd1.js:1
+ stallwart: failed ping 1
+ stallwart: failed ping 2
+ stallwart: failed ping 3
+ stallwart: failed ping 1
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+ stallwart: failed ping 1
+ stallwart: failed ping 2
+ stallwart: failed ping 1
+ stallwart: failed ping 2
+ stallwart: failed ping 3
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ stallwart: failed ping 1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ingest.app.coframe.com/ingest/v2/batched_events/68c9ad4d4cddb58cf3a1f93d/:1  Failed to load resource: the server responded with a status of 502 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+analytics.google.com/g/collect?v=2&tid=G-MPJY3F1YEL&gtm=45je5af1v9135634466za200&_p=1760867240320&gcd=13l3l3l3l2l1&npa=0&dma=0&ul=en-us&sr=1280x800&cid=1037805241.1760766702&ecid=1069476558&ir=1&uaa=x86&uab=64&uafvl=Google%2520Chrome%3B141.0.7390.77%7CNot%253FA_Brand%3B8.0.0.0%7CChromium%3B141.0.7390.77&uamb=0&uam=&uap=Windows&uapv=15.0.0&uaw=0&are=1&frm=0&pscdl=noapi&_eu=EBAIAAQ&_s=145&tag_exp=101509157~103116026~103200004~103233427~104527907~104528500~104684208~104684211~104948813~115480710~115616986~115938466~115938469&dl=https%3A%2F%2Freplit.com%2F%40tannereischen%2FGameDevBoard&dp=%2F%40tannereischen%2FGameDevBoard&dt=replEnvironmentDesktop&sid=1760876358&sct=9&seg=1&_tu=wAQ&en=Git%20Feature%20Used&_ee=1&ep.event_category=All&ep.value=0&tfd=13254932:1  Failed to load resource: net::ERR_CONNECTION_CLOSED
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+t0.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/&size=32:1  Failed to load resource: the server responded with a status of 404 ()
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+ If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ installHook.js:1
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'battery'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html?initialPath=%2F&id=%3Ar9ge%3A:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+contents.04ff201a.js:1 in iframe false
+contents.04ff201a.js:354 Init Current tab url: https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/
+client:536 WebSocket connection to 'wss://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/?token=GIbbDqu3fMxa' failed: 
+setupWebSocket @ client:536
+client:536 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=GIbbDqu3fMxa' is invalid.
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)
+contents.04ff201a.js:1 in iframe false
+injected.js:27 WebSocket connected
+contents.04ff201a.js:354 Init Current tab url: https://5a71c2a0-1085-4e8a-a24b-6367913b834a-00-28aa6gksel0xr.janeway.replit.dev/
+injected.js:27 Failed to load tileset image: Dirt Terrain
+(anonymous) @ injected.js:27
+chunk-V5RMUKZ5.js?v=3f9bec80:625 Uncaught Error: Unexpected end of array
+    at create3 (chunk-V5RMUKZ5.js?v=3f9bec80:581:22)
+    at chunk-V5RMUKZ5.js?v=3f9bec80:590:33
+chunk-V5RMUKZ5.js?v=3f9bec80:625 Uncaught Error: Unexpected end of array
+    at create3 (chunk-V5RMUKZ5.js?v=3f9bec80:581:22)
+    at chunk-V5RMUKZ5.js?v=3f9bec80:590:33
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+hook.js:608 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+841ae018ae768e85f4195ff5eab7c8ff:1  Failed to load resource: the server responded with a status of 404 ()
+_app-77ade3cb53ad0c49.js:28 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+(anonymous) @ _app-77ade3cb53ad0c49.js:28
+u @ 9859-7ed290b904df0194.js:1
+u @ 9859-7ed290b904df0194.js:1
+(anonymous) @ 5688-de94224afc837a73.js:1
+ld @ framework-3657452a98147308.js:1
+ou @ framework-3657452a98147308.js:1
+i @ framework-3657452a98147308.js:1
+uI @ framework-3657452a98147308.js:1
+uM @ framework-3657452a98147308.js:1
+uS @ framework-3657452a98147308.js:1
+C @ framework-3657452a98147308.js:1
+z @ framework-3657452a98147308.js:1
+_app-77ade3cb53ad0c49.js:28 If you do not provide children, you must specify an aria-label for accessibility
+overrideMethod @ hook.js:608
+(anonymous) @ _app-77ade3cb53ad0c49.js:28
+u @ 9859-7ed290b904df0194.js:1
+u @ 9859-7ed290b904df0194.js:1
+(anonymous) @ 5688-de94224afc837a73.js:1
+ld @ framework-3657452a98147308.js:1
+ou @ framework-3657452a98147308.js:1
+i @ framework-3657452a98147308.js:1
+uI @ framework-3657452a98147308.js:1
+uM @ framework-3657452a98147308.js:1
+uS @ framework-3657452a98147308.js:1
+C @ framework-3657452a98147308.js:1
+z @ framework-3657452a98147308.js:1

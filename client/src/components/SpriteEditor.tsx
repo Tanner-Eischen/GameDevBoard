@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -119,6 +119,9 @@ export function SpriteEditor({ onClose }: SpriteEditorProps) {
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Sprite</DialogTitle>
+          <DialogDescription>
+            Upload a sprite sheet and configure animations for your game characters
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">
