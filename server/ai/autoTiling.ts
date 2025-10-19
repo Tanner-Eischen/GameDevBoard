@@ -61,17 +61,28 @@ function calculateAutoTileIndex(neighbors: NeighborConfig): number {
 
 /**
  * Get the neighbor configuration for a tile at the given position
+ * For terrain-layer tiles, considers ANY terrain tile as a neighbor (seamless joins)
+ * For props-layer tiles, only considers tiles from the same tileset
  */
 function getNeighborConfig(
   x: number,
   y: number,
   tilesetId: string,
-  tiles: Tile[]
+  tiles: Tile[],
+  layer: 'terrain' | 'props'
 ): NeighborConfig {
   const hasTileAt = (tx: number, ty: number) => {
-    return tiles.some(
-      (t) => t.x === tx && t.y === ty && t.tilesetId === tilesetId
-    );
+    if (layer === 'terrain') {
+      // For terrain tiles: treat ANY terrain tile as a neighbor (seamless joins between different terrain types)
+      return tiles.some(
+        (t) => t.x === tx && t.y === ty && t.layer === 'terrain'
+      );
+    } else {
+      // For props tiles: only consider tiles from the same tileset
+      return tiles.some(
+        (t) => t.x === tx && t.y === ty && t.tilesetId === tilesetId
+      );
+    }
   };
 
   return {
@@ -85,22 +96,19 @@ function getNeighborConfig(
 /**
  * Apply auto-tiling to a set of new tiles and their neighbors
  * Returns all tiles that need to be added/updated with correct auto-tiling indices
+ * Supports cross-tileset terrain neighbor detection
  */
 export function applyAutoTiling(
   newTiles: Tile[],
   existingTiles: Tile[],
   tilesetId: string
 ): Tile[] {
-  // Create a combined tile map for neighbor checking
+  // Filter to only terrain tiles for neighbor checking
+  const terrainTiles = [...existingTiles, ...newTiles].filter(t => t.layer === 'terrain');
+  
+  // Create a combined tile map
   const tileMap = new Map<string, Tile>();
-  
-  // Add existing tiles
-  existingTiles.forEach(t => {
-    tileMap.set(`${t.x},${t.y}`, t);
-  });
-  
-  // Add new tiles (overwriting existing at same position)
-  newTiles.forEach(t => {
+  terrainTiles.forEach(t => {
     tileMap.set(`${t.x},${t.y}`, t);
   });
   
@@ -120,12 +128,29 @@ export function applyAutoTiling(
     ];
     
     positions.forEach(pos => {
-      const key = `${pos.x},${pos.y}`;
-      const existingTile = tileMap.get(key);
+      // For terrain tiles: update ALL terrain tiles at neighboring positions (cross-tileset)
+      const tilesAtPosition = allTiles.filter(
+        (t) => t.x === pos.x && t.y === pos.y && t.layer === 'terrain'
+      );
       
-      // Only update tiles that exist and belong to the same tileset
-      if (existingTile && existingTile.tilesetId === tilesetId) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, allTiles);
+      for (const tile of tilesAtPosition) {
+        const key = `${pos.x},${pos.y},${tile.tilesetId}`;
+        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, allTiles, 'terrain');
+        const tileIndex = calculateAutoTileIndex(neighbors);
+        
+        tilesToUpdate.set(key, {
+          x: pos.x,
+          y: pos.y,
+          tilesetId: tile.tilesetId,
+          tileIndex,
+          layer: 'terrain',
+        });
+      }
+      
+      // If no tile at position but it's the center, add it
+      if (tilesAtPosition.length === 0 && pos.x === newTile.x && pos.y === newTile.y) {
+        const key = `${pos.x},${pos.y},${tilesetId}`;
+        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, allTiles, 'terrain');
         const tileIndex = calculateAutoTileIndex(neighbors);
         
         tilesToUpdate.set(key, {
@@ -133,6 +158,7 @@ export function applyAutoTiling(
           y: pos.y,
           tilesetId,
           tileIndex,
+          layer: 'terrain',
         });
       }
     });
