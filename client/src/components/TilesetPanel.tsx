@@ -16,9 +16,11 @@ export function TilesetPanel() {
   const {
     selectedTileset,
     selectedTileIndex,
+    brushSize,
     setSelectedTileset,
     setSelectedTileIndex,
     setTilesets,
+    setBrushSize,
     gridSize,
   } = useCanvasStore();
 
@@ -262,10 +264,41 @@ export function TilesetPanel() {
           </div>
         )}
 
-        <div className="pt-2 text-xs text-muted-foreground space-y-1">
-          <div className="flex justify-between">
-            <span>Grid Size:</span>
-            <span className="font-mono">{gridSize}px</span>
+        <div className="pt-2 space-y-3 border-t border-border">
+          <div className="pt-3 text-xs text-muted-foreground">
+            <div className="flex justify-between">
+              <span>Grid Size:</span>
+              <span className="font-mono">{gridSize}px</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-xs">Brush Size</Label>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { width: 1, height: 1, label: '1×1' },
+                { width: 2, height: 2, label: '2×2' },
+                { width: 3, height: 3, label: '3×3' },
+                { width: 2, height: 1, label: '2×1' },
+                { width: 1, height: 2, label: '1×2' },
+                { width: 2, height: 3, label: '2×3' },
+              ].map((size) => (
+                <Button
+                  key={`${size.width}x${size.height}`}
+                  size="sm"
+                  variant={
+                    brushSize.width === size.width && brushSize.height === size.height
+                      ? 'default'
+                      : 'outline'
+                  }
+                  onClick={() => setBrushSize({ width: size.width, height: size.height })}
+                  data-testid={`button-brush-${size.width}x${size.height}`}
+                  className="text-xs h-7"
+                >
+                  {size.label}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </CardContent>
