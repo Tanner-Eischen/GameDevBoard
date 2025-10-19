@@ -37,6 +37,7 @@ export function Toolbar() {
     setTool,
     zoom,
     setZoom,
+    zoomToCenter,
     undo,
     redo,
     historyIndex,
@@ -49,6 +50,13 @@ export function Toolbar() {
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
+  
+  // Get viewport dimensions for zooming to center
+  const handleZoom = (newZoom: number) => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    zoomToCenter(newZoom, viewportWidth, viewportHeight);
+  };
 
   return (
     <div className="flex items-center gap-2 p-2 bg-card border-b border-card-border">
@@ -103,7 +111,7 @@ export function Toolbar() {
         <Button
           size="icon"
           variant="ghost"
-          onClick={() => setZoom(zoom * 1.2)}
+          onClick={() => handleZoom(zoom * 1.2)}
           data-testid="button-zoom-in"
           title="Zoom In (+)"
         >
@@ -115,7 +123,7 @@ export function Toolbar() {
         <Button
           size="icon"
           variant="ghost"
-          onClick={() => setZoom(zoom / 1.2)}
+          onClick={() => handleZoom(zoom / 1.2)}
           data-testid="button-zoom-out"
           title="Zoom Out (-)"
         >
@@ -124,7 +132,7 @@ export function Toolbar() {
         <Button
           size="icon"
           variant="ghost"
-          onClick={() => setZoom(1)}
+          onClick={() => handleZoom(1)}
           data-testid="button-zoom-reset"
           title="Reset Zoom (0)"
           className="text-xs"

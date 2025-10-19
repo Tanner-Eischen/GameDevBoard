@@ -7,6 +7,7 @@ interface CanvasStore extends CanvasState {
   setTool: (tool: ToolType) => void;
   setZoom: (zoom: number) => void;
   setPan: (pan: { x: number; y: number }) => void;
+  zoomToCenter: (newZoom: number, viewportWidth: number, viewportHeight: number) => void;
   setGridVisible: (visible: boolean) => void;
   setSnapToGrid: (snap: boolean) => void;
   setGridSize: (size: number) => void;
@@ -85,6 +86,27 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   setTool: (tool) => set({ tool }),
   setZoom: (zoom) => set({ zoom: Math.max(0.1, Math.min(5, zoom)) }),
   setPan: (pan) => set({ pan }),
+  
+  // Zoom to center of viewport
+  zoomToCenter: (newZoom: number, viewportWidth: number, viewportHeight: number) => {
+    const state = get();
+    const oldZoom = state.zoom;
+    const clampedZoom = Math.max(0.1, Math.min(5, newZoom));
+    
+    // Calculate viewport center in screen coordinates
+    const viewportCenterX = viewportWidth / 2;
+    const viewportCenterY = viewportHeight / 2;
+    
+    // Adjust pan to keep viewport center at same world position
+    const zoomRatio = clampedZoom / oldZoom;
+    const newPanX = state.pan.x * zoomRatio + viewportCenterX * (1 - zoomRatio);
+    const newPanY = state.pan.y * zoomRatio + viewportCenterY * (1 - zoomRatio);
+    
+    set({
+      zoom: clampedZoom,
+      pan: { x: newPanX, y: newPanY },
+    });
+  },
   setGridVisible: (visible) => set({ gridVisible: visible }),
   setSnapToGrid: (snap) => set({ snapToGrid: snap }),
   setGridSize: (size) => set({ gridSize: size }),
