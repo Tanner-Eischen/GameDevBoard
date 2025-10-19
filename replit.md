@@ -39,6 +39,16 @@ The application is built with a modern web stack, featuring:
 ## Recent Changes
 
 ### October 19, 2025
+- **Enhanced AI Assistant with Advanced Natural Language Understanding**:
+  - Added 5 new terrain patterns: `horizontal_path`, `vertical_path`, `diagonal_path`, `winding_path`, `curved_path`
+  - Implemented Catmull-Rom spline algorithm for realistic curved/winding paths (rivers, roads)
+  - New parameters: `pathWidth` (1-20 tiles) and `curveIntensity` (0.1-0.8) for fine control
+  - Enhanced function descriptions with comprehensive "Natural Language Interpretation Guide"
+  - Improved system prompt with spatial language rules: geometric concepts, aspect ratio understanding, directional language, feature composition, size interpretation
+  - AI now correctly interprets: "winding river" → high aspect ratio + curved path, "narrow" → pathWidth 2-4, "through/across" → spans full dimension
+  - Example: "paint a grass field with a river winding through it" → Creates 40×30 grass fill + 40×12 winding water path with curveIntensity 0.4
+  - Fixed diagonal path boundary issue (paths now correctly terminate at area bounds)
+  - Increased Express body size limit to 10MB to handle large canvas states
 - **Implemented Terrain-Aware Auto-Tiling System**:
   - Cross-tileset neighbor detection: Terrain tiles now consider ANY terrain tile as a neighbor (not just same tileset)
   - Bidirectional updates: When painting any terrain through another, BOTH tilesets update (painted terrain shows center, neighboring terrain shows edges)
