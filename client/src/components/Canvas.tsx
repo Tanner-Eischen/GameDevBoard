@@ -124,6 +124,27 @@ export function Canvas() {
       return;
     }
 
+    // Handle variant grid tilesets (grass variants) - no auto-tiling, just use selected index
+    if (selectedTileset.tilesetType === 'variant_grid') {
+      const tilesToAdd: Tile[] = [];
+      
+      // Paint with the user's selected tile variant
+      for (let dy = 0; dy < brushSize.height; dy++) {
+        for (let dx = 0; dx < brushSize.width; dx++) {
+          tilesToAdd.push({
+            x: gridX + dx,
+            y: gridY + dy,
+            tilesetId: selectedTileset.id,
+            tileIndex: selectedTileIndex, // Use the exact tile the user selected
+            layer: 'terrain',
+          });
+        }
+      }
+      
+      addTiles(tilesToAdd);
+      return;
+    }
+
     // Handle auto-tiling tilesets (grass, dirt, water) - these go on the 'terrain' layer
     // Collect all tiles to be added/updated
     const tilesToAdd: Tile[] = [];
