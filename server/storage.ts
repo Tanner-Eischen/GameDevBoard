@@ -56,6 +56,8 @@ export class MemStorage implements IStorage {
       imageUrl: '/attached_assets/dirt_3x3_1760825550695.png',
       columns: 3,
       rows: 3,
+      tilesetType: 'auto-tiling',
+      multiTileConfig: null,
       createdAt: new Date(),
     };
     this.tilesets.set(dirtTileset.id, dirtTileset);
@@ -68,6 +70,8 @@ export class MemStorage implements IStorage {
       imageUrl: '/attached_assets/grass_3x3_kenney_1760825550695.png',
       columns: 3,
       rows: 3,
+      tilesetType: 'auto-tiling',
+      multiTileConfig: null,
       createdAt: new Date(),
     };
     this.tilesets.set(grassTileset.id, grassTileset);
@@ -80,6 +84,8 @@ export class MemStorage implements IStorage {
       imageUrl: '/attached_assets/water_3x3_1760825550696.png',
       columns: 3,
       rows: 3,
+      tilesetType: 'auto-tiling',
+      multiTileConfig: null,
       createdAt: new Date(),
     };
     this.tilesets.set(waterTileset.id, waterTileset);
@@ -161,6 +167,8 @@ export class MemStorage implements IStorage {
       ...insertTileset,
       tileSize: insertTileset.tileSize ?? 32,
       spacing: insertTileset.spacing ?? 0,
+      tilesetType: insertTileset.tilesetType ?? 'auto-tiling',
+      multiTileConfig: insertTileset.multiTileConfig ?? null,
       createdAt: new Date(),
     };
     this.tilesets.set(id, tileset);
