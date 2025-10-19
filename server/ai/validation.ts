@@ -9,7 +9,18 @@ export const paintTerrainSchema = z.object({
     width: z.number().positive(),
     height: z.number().positive()
   }),
-  pattern: z.enum(["fill", "border", "checkerboard"])
+  pattern: z.enum([
+    "fill", 
+    "border", 
+    "checkerboard",
+    "horizontal_path",
+    "vertical_path",
+    "diagonal_path",
+    "winding_path",
+    "curved_path"
+  ]),
+  pathWidth: z.number().min(1).max(20).optional(),
+  curveIntensity: z.number().min(0.1).max(0.8).optional()
 });
 
 export const createShapesSchema = z.object({

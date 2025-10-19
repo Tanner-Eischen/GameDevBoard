@@ -14,12 +14,120 @@ export interface ExecutionResult {
   };
 }
 
+// Helper: Generate points for a curved path (Catmull-Rom spline)
+function generateCurvedPath(
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  curvePoints: number = 3,
+  curvature: number = 0.3
+): Array<{ x: number; y: number }> {
+  const points: Array<{ x: number; y: number }> = [];
+  const controlPoints: Array<{ x: number; y: number }> = [start];
+
+  // Generate random control points between start and end
+  for (let i = 1; i < curvePoints; i++) {
+    const t = i / curvePoints;
+    const baseX = start.x + (end.x - start.x) * t;
+    const baseY = start.y + (end.y - start.y) * t;
+    
+    // Add perpendicular offset for curvature
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const perpX = -dy / length;
+    const perpY = dx / length;
+    
+    // Alternate curve direction for winding effect
+    const offset = (i % 2 === 0 ? 1 : -1) * curvature * length;
+    
+    controlPoints.push({
+      x: Math.round(baseX + perpX * offset),
+      y: Math.round(baseY + perpY * offset)
+    });
+  }
+  
+  controlPoints.push(end);
+
+  // Interpolate between control points
+  for (let i = 0; i < controlPoints.length - 1; i++) {
+    const p0 = controlPoints[Math.max(0, i - 1)];
+    const p1 = controlPoints[i];
+    const p2 = controlPoints[i + 1];
+    const p3 = controlPoints[Math.min(controlPoints.length - 1, i + 2)];
+    
+    const steps = 20;
+    for (let t = 0; t <= steps; t++) {
+      const u = t / steps;
+      const u2 = u * u;
+      const u3 = u2 * u;
+      
+      // Catmull-Rom spline formula
+      const x = 0.5 * (
+        2 * p1.x +
+        (-p0.x + p2.x) * u +
+        (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * u2 +
+        (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * u3
+      );
+      const y = 0.5 * (
+        2 * p1.y +
+        (-p0.y + p2.y) * u +
+        (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * u2 +
+        (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * u3
+      );
+      
+      points.push({ x: Math.round(x), y: Math.round(y) });
+    }
+  }
+
+  return points;
+}
+
+// Helper: Generate tiles along a path with width
+function generatePathTiles(
+  pathPoints: Array<{ x: number; y: number }>,
+  width: number,
+  tilesetId: string
+): Tile[] {
+  const tiles: Tile[] = [];
+  const tileSet = new Set<string>();
+
+  for (const point of pathPoints) {
+    // Add tiles in a circle around each point for path width
+    const radius = Math.floor(width / 2);
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        // Use circular brush
+        if (dx * dx + dy * dy <= radius * radius) {
+          const tileX = point.x + dx;
+          const tileY = point.y + dy;
+          const key = `${tileX},${tileY}`;
+          
+          if (!tileSet.has(key)) {
+            tileSet.add(key);
+            tiles.push({
+              x: tileX,
+              y: tileY,
+              tilesetId,
+              tileIndex: 4,
+              layer: 'terrain'
+            });
+          }
+        }
+      }
+    }
+  }
+
+  return tiles;
+}
+
 // Paint terrain on the canvas
 export function executePaintTerrain(
   params: {
     tilesetName: string;
     area: { x: number; y: number; width: number; height: number };
     pattern: string;
+    pathWidth?: number;
+    curveIntensity?: number;
   },
   canvasState: CanvasState,
   tileMap: TileMap,
@@ -45,19 +153,20 @@ export function executePaintTerrain(
           x: x + dx,
           y: y + dy,
           tilesetId: tileset.id,
-          tileIndex: 4 // Initial center tile (will be updated by auto-tiling)
+          tileIndex: 4,
+          layer: 'terrain'
         });
       }
     }
   } else if (params.pattern === "border") {
     // Paint border only
     for (let dx = 0; dx < width; dx++) {
-      newTiles.push({ x: x + dx, y, tilesetId: tileset.id, tileIndex: 4 });
-      newTiles.push({ x: x + dx, y: y + height - 1, tilesetId: tileset.id, tileIndex: 4 });
+      newTiles.push({ x: x + dx, y, tilesetId: tileset.id, tileIndex: 4, layer: 'terrain' });
+      newTiles.push({ x: x + dx, y: y + height - 1, tilesetId: tileset.id, tileIndex: 4, layer: 'terrain' });
     }
     for (let dy = 1; dy < height - 1; dy++) {
-      newTiles.push({ x, y: y + dy, tilesetId: tileset.id, tileIndex: 4 });
-      newTiles.push({ x: x + width - 1, y: y + dy, tilesetId: tileset.id, tileIndex: 4 });
+      newTiles.push({ x, y: y + dy, tilesetId: tileset.id, tileIndex: 4, layer: 'terrain' });
+      newTiles.push({ x: x + width - 1, y: y + dy, tilesetId: tileset.id, tileIndex: 4, layer: 'terrain' });
     }
   } else if (params.pattern === "checkerboard") {
     // Alternating pattern
@@ -68,11 +177,79 @@ export function executePaintTerrain(
             x: x + dx,
             y: y + dy,
             tilesetId: tileset.id,
-            tileIndex: 4
+            tileIndex: 4,
+            layer: 'terrain'
           });
         }
       }
     }
+  } else if (params.pattern === "horizontal_path" || params.pattern === "vertical_path") {
+    // Straight path (for roads, simple rivers)
+    const pathWidth = params.pathWidth || 3;
+    const isHorizontal = params.pattern === "horizontal_path";
+    
+    if (isHorizontal) {
+      const centerY = y + Math.floor(height / 2);
+      for (let dx = 0; dx < width; dx++) {
+        for (let dy = -Math.floor(pathWidth / 2); dy <= Math.floor(pathWidth / 2); dy++) {
+          newTiles.push({
+            x: x + dx,
+            y: centerY + dy,
+            tilesetId: tileset.id,
+            tileIndex: 4,
+            layer: 'terrain'
+          });
+        }
+      }
+    } else {
+      const centerX = x + Math.floor(width / 2);
+      for (let dy = 0; dy < height; dy++) {
+        for (let dx = -Math.floor(pathWidth / 2); dx <= Math.floor(pathWidth / 2); dx++) {
+          newTiles.push({
+            x: centerX + dx,
+            y: y + dy,
+            tilesetId: tileset.id,
+            tileIndex: 4,
+            layer: 'terrain'
+          });
+        }
+      }
+    }
+  } else if (params.pattern === "winding_path" || params.pattern === "curved_path") {
+    // Curved/winding path (for rivers, winding roads)
+    const pathWidth = params.pathWidth || 3;
+    const curveIntensity = params.curveIntensity || 0.3;
+    
+    // Determine start and end based on area dimensions (favor longer dimension)
+    const isWide = width > height;
+    const start = isWide 
+      ? { x, y: y + Math.floor(height / 2) }
+      : { x: x + Math.floor(width / 2), y };
+    const end = isWide
+      ? { x: x + width - 1, y: y + Math.floor(height / 2) }
+      : { x: x + Math.floor(width / 2), y: y + height - 1 };
+    
+    // Generate curved path with 3-5 curve points for natural winding
+    const curvePoints = Math.max(3, Math.floor(Math.max(width, height) / 10));
+    const pathCurve = generateCurvedPath(start, end, curvePoints, curveIntensity);
+    
+    // Generate tiles along the curved path
+    newTiles.push(...generatePathTiles(pathCurve, pathWidth, tileset.id));
+  } else if (params.pattern === "diagonal_path") {
+    // Diagonal path from top-left to bottom-right
+    const pathWidth = params.pathWidth || 3;
+    const pathPoints: Array<{ x: number; y: number }> = [];
+    
+    const steps = Math.max(width, height);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      pathPoints.push({
+        x: Math.round(x + t * (width - 1)),
+        y: Math.round(y + t * (height - 1))
+      });
+    }
+    
+    newTiles.push(...generatePathTiles(pathPoints, pathWidth, tileset.id));
   }
 
   // Apply auto-tiling to all tiles (new + existing)
