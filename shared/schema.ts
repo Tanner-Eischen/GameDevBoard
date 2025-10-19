@@ -4,10 +4,10 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Shape types for canvas
-export const shapeTypeEnum = z.enum(['rectangle', 'circle', 'polygon', 'star', 'line']);
+export const shapeTypeEnum = z.enum(['rectangle', 'circle', 'polygon', 'star', 'line', 'text']);
 export type ShapeType = z.infer<typeof shapeTypeEnum>;
 
-export const toolTypeEnum = z.enum(['select', 'rectangle', 'circle', 'polygon', 'star', 'line', 'pan', 'tile-paint', 'tile-erase', 'sprite']);
+export const toolTypeEnum = z.enum(['select', 'rectangle', 'circle', 'polygon', 'star', 'line', 'text', 'pan', 'tile-paint', 'tile-erase', 'sprite']);
 export type ToolType = z.infer<typeof toolTypeEnum>;
 
 // Sprite animation state enum
@@ -31,6 +31,9 @@ export interface ShapeStyle {
   stroke: string;
   strokeWidth: number;
   opacity: number;
+  fontSize?: number;
+  fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
 }
 
 // Shape interface
@@ -39,11 +42,13 @@ export interface Shape {
   type: ShapeType;
   transform: Transform;
   style: ShapeStyle;
+  text?: string;
   metadata: {
     createdBy: string;
     createdAt: number;
     locked: boolean;
     layer: number;
+    groupId?: string;
   };
   points?: number[]; // For polygon, star, line
 }

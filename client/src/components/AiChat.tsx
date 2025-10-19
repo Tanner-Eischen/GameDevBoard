@@ -231,7 +231,7 @@ export function AiChat() {
       <Button
         data-testid="button-ai-chat-toggle"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 h-12 w-12 rounded-full shadow-lg"
+        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 h-12 w-12 rounded-full shadow-lg"
         size="icon"
         variant="default"
       >
@@ -241,7 +241,7 @@ export function AiChat() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-card border border-border rounded-lg shadow-xl flex flex-col">
+    <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-[min(24rem,calc(100vw-3rem))] h-[600px] bg-card border border-border rounded-lg shadow-xl flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">

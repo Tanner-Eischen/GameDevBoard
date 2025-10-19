@@ -21,6 +21,8 @@ interface CanvasStore extends CanvasState {
   setSelectedIds: (ids: string[]) => void;
   selectShape: (id: string, multi?: boolean) => void;
   clearSelection: () => void;
+  groupSelectedShapes: () => void;
+  ungroupSelectedShapes: () => void;
   
   // History
   history: CanvasState[];
@@ -195,6 +197,59 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   clearSelection: () => set({ selectedIds: [] }),
+
+  groupSelectedShapes: () => {
+    const state = get();
+    if (state.selectedIds.length < 2) return;
+
+    const groupId = uuidv4();
+    const updatedShapes = state.shapes.map((shape) =>
+      state.selectedIds.includes(shape.id)
+        ? {
+            ...shape,
+            metadata: { ...shape.metadata, groupId },
+          }
+        : shape
+    );
+
+    set({ shapes: updatedShapes });
+
+    if ((window as any).__collaborationService) {
+      state.selectedIds.forEach((id) => {
+        const index = state.shapes.findIndex((shape) => shape.id === id);
+        if (index >= 0) {
+          (window as any).__collaborationService.updateShape(index, updatedShapes[index]);
+        }
+      });
+    }
+    get().pushHistory();
+  },
+
+  ungroupSelectedShapes: () => {
+    const state = get();
+    if (state.selectedIds.length === 0) return;
+
+    const updatedShapes = state.shapes.map((shape) =>
+      state.selectedIds.includes(shape.id)
+        ? {
+            ...shape,
+            metadata: { ...shape.metadata, groupId: undefined },
+          }
+        : shape
+    );
+
+    set({ shapes: updatedShapes });
+
+    if ((window as any).__collaborationService) {
+      state.selectedIds.forEach((id) => {
+        const index = state.shapes.findIndex((shape) => shape.id === id);
+        if (index >= 0) {
+          (window as any).__collaborationService.updateShape(index, updatedShapes[index]);
+        }
+      });
+    }
+    get().pushHistory();
+  },
 
   pushHistory: () => {
     const state = get();

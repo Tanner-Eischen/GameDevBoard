@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Line, RegularPolygon, Star, Image } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Line, RegularPolygon, Star, Image, Text as KonvaText } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import type { Shape, Tile } from '@shared/schema';
 import Konva from 'konva';
@@ -369,6 +369,40 @@ export function Canvas() {
 
     if (tool === 'pan') return;
 
+    if (tool === 'text') {
+      const textShape: Shape = {
+        id: uuidv4(),
+        type: 'text',
+        transform: {
+          x: snappedPos.x,
+          y: snappedPos.y,
+          width: 240,
+          height: 60,
+          rotation: 0,
+          scaleX: 1,
+          scaleY: 1,
+        },
+        style: {
+          fill: '#111827',
+          stroke: 'transparent',
+          strokeWidth: 0,
+          opacity: 1,
+          fontSize: 28,
+          fontFamily: 'Inter, sans-serif',
+          textAlign: 'left',
+        },
+        text: 'New Text',
+        metadata: {
+          createdBy: currentUser?.id || 'local',
+          createdAt: Date.now(),
+          locked: false,
+          layer: 0,
+        },
+      };
+      addShape(textShape);
+      return;
+    }
+
     // Create new shape
     const newShape: Shape = {
       id: uuidv4(),
@@ -520,6 +554,10 @@ export function Canvas() {
     const width = snappedPos.x - currentShape.transform.x;
     const height = snappedPos.y - currentShape.transform.y;
 
+    if (currentShape.type === 'text') {
+      return;
+    }
+
     if (currentShape.type === 'line' && currentShape.points) {
       setCurrentShape({
         ...currentShape,
@@ -666,6 +704,18 @@ export function Canvas() {
           <Line
             {...commonProps}
             points={shape.points || [0, 0, 100, 100]}
+          />
+        );
+      case 'text':
+        return (
+          <KonvaText
+            {...commonProps}
+            width={shape.transform.width || undefined}
+            height={shape.transform.height || undefined}
+            text={shape.text || 'New Text'}
+            fontSize={shape.style.fontSize ?? 28}
+            fontFamily={shape.style.fontFamily ?? 'Inter, sans-serif'}
+            align={shape.style.textAlign ?? 'left'}
           />
         );
       default:
