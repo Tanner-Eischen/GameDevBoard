@@ -10,6 +10,9 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 // Serve attached_assets as static files
 app.use('/attached_assets', express.static(path.resolve(import.meta.dirname, '../attached_assets')));
 
+// Serve sprites directory
+app.use('/sprites', express.static(path.resolve(import.meta.dirname, '../attached_assets/sprites')));
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
