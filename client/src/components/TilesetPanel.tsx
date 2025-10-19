@@ -64,7 +64,7 @@ export function TilesetPanel() {
         throw new Error('Upload URL not found');
       }
 
-      // For 3x3 tileset with 1px spacing: 48x48 image
+      // For 3x3 tileset with 1px spacing: 50x50 image
       // Each tile is 16x16, with 1px spacing between them
       const tileSize = 16;
       const spacing = 1;
@@ -75,6 +75,7 @@ export function TilesetPanel() {
       const createRes = await apiRequest('POST', '/api/tilesets', {
         name: tilesetName || 'Untitled Tileset',
         tileSize,
+        spacing,
         imageUrl: 'pending',
         columns,
         rows,
@@ -219,7 +220,7 @@ export function TilesetPanel() {
                         const col = index % tileset.columns;
                         const row = Math.floor(index / tileset.columns);
                         const tileSize = tileset.tileSize;
-                        const spacing = 1;
+                        const spacing = tileset.spacing || 0;
                         const x = col * (tileSize + spacing);
                         const y = row * (tileSize + spacing);
 
