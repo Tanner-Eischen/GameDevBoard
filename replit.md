@@ -24,9 +24,15 @@ This is a real-time collaborative game development board built with:
 
 ### Tile Mapping
 - Tile palette system with visual previews
+- **Two-Layer Tile System**: Terrain layer (grass, dirt, water, stone, sand, flower) and props layer (trees, flowers)
+  - Props render ON TOP of terrain without replacing underlying tiles
+  - Layer-aware painting: Only replaces tiles at same position AND same layer
+  - Erase prioritizes props first, then terrain
 - **Continuous Brush Painting**: Paint while dragging with adjustable brush sizes (1x1 to 3x3+)
 - Paint and erase tools with auto-tiling
 - **3x3 Auto-Tiling System**: Automatically selects correct tile variants (corners, edges, center) based on neighbor configuration
+  - Auto-tiling simulation filters to terrain-layer tiles only
+  - Props tiles don't disrupt terrain neighbor detection
 - **Multi-Tile Objects**: Support for objects spanning multiple grid cells (trees, buildings)
   - Trees (16x33) composed of two stacked tiles placed as complete units
   - Erasing any tile removes the entire multi-tile object
@@ -46,8 +52,10 @@ This is a real-time collaborative game development board built with:
 
 ### Project Management
 - Save/Load projects with full canvas state
+- **Auto-Save**: Projects automatically save 1 second after tile/shape changes
+- **localStorage Persistence**: Current project ID persists across page refreshes
+- **Auto-Load**: Last project automatically loads when page opens
 - Export projects as JSON
-- Auto-save capability (ready for implementation)
 - Project history with undo/redo (100 steps)
 
 ### Layer Management
@@ -131,6 +139,18 @@ shared/schema.ts   # Shared TypeScript types and schemas
 - **Shift+G**: Toggle snap to grid
 
 ## Recent Changes
+
+### 2025-10-19 - Two-Layer Tile System + Auto-Save Complete
+- ✅ Implemented two-layer tile system: 'terrain' (grass, dirt, water) and 'props' (trees, flowers)
+- ✅ Props render ON TOP of terrain without replacing underlying tiles
+- ✅ Layer-aware tile management: Only replaces tiles at same position AND same layer
+- ✅ Auto-tiling simulation filters to terrain-only tiles to prevent props disrupting neighbor detection
+- ✅ Erase tool prioritizes props layer first, then terrain
+- ✅ Migration logic for backward compatibility: Existing tiles default to 'terrain' layer
+- ✅ Auto-save functionality: Project auto-saves 1 second after tile/shape changes
+- ✅ localStorage persistence: Current project ID persists across page refreshes
+- ✅ Auto-load on page init: Last project automatically loads from localStorage
+- ✅ End-to-end tested: All layering, save/load, and auto-save features working correctly
 
 ### 2025-10-19 - Canvas Painting Fixes: Pan Sync & Continuous Brush Complete
 - ✅ Fixed CRITICAL BUG: Painting offset after panning - added Stage onDragEnd to sync pan position

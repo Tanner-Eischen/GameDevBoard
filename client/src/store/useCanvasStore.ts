@@ -321,6 +321,16 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   setSelectedTileIndex: (index) => set({ selectedTileIndex: index }),
   setBrushSize: (size) => set({ brushSize: size }),
 
-  setCurrentProject: (id, name) =>
-    set({ currentProjectId: id, currentProjectName: name }),
+  setCurrentProject: (id, name) => {
+    set({ currentProjectId: id, currentProjectName: name });
+    
+    // Persist to localStorage for auto-load on page refresh
+    if (id) {
+      localStorage.setItem('currentProjectId', id);
+      localStorage.setItem('currentProjectName', name);
+    } else {
+      localStorage.removeItem('currentProjectId');
+      localStorage.removeItem('currentProjectName');
+    }
+  },
 }));

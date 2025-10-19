@@ -57,11 +57,12 @@ export function ProjectManager() {
           description: `"${name}" has been updated successfully.`,
         });
       } else {
-        const project = await createProject.mutateAsync({
+        const response = await createProject.mutateAsync({
           name,
           canvasState,
           tileMap,
         });
+        const project = await response.json();
         setCurrentProject(project.id, project.name);
         toast({
           title: 'Project Saved',

@@ -23,8 +23,9 @@ const USER_COLORS = [
 ];
 
 export default function Board() {
-  const { setCurrentUser, setTool, undo, redo } = useCanvasStore();
+  const { setCurrentUser, setTool, undo, redo, setCurrentProject, currentProjectId, tiles, shapes } = useCanvasStore();
   const collaborationRef = useRef<ReturnType<typeof getCollaborationService> | null>(null);
+  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Initialize current user
@@ -48,6 +49,37 @@ export default function Board() {
     
     // Make collaboration service globally available for store to use
     (window as any).__collaborationService = collaborationRef.current;
+    
+    // Auto-load last project from localStorage
+    const savedProjectId = localStorage.getItem('currentProjectId');
+    const savedProjectName = localStorage.getItem('currentProjectName');
+    if (savedProjectId && savedProjectName) {
+      setCurrentProject(savedProjectId, savedProjectName);
+      
+      // Fetch and load the project
+      fetch(`/api/projects/${savedProjectId}`)
+        .then(res => res.json())
+        .then(project => {
+          useCanvasStore.setState({
+            shapes: project.canvasState.shapes,
+            tiles: project.tileMap.tiles,
+            zoom: project.canvasState.zoom,
+            pan: project.canvasState.pan,
+            gridSize: project.canvasState.gridSize,
+          });
+          
+          // Sync loaded data to collaboration document
+          if ((window as any).__collaborationService) {
+            (window as any).__collaborationService.syncFromLocal();
+          }
+        })
+        .catch(err => {
+          console.error('Failed to auto-load project:', err);
+          // Clear invalid project from localStorage
+          localStorage.removeItem('currentProjectId');
+          localStorage.removeItem('currentProjectName');
+        });
+    }
 
     return () => {
       if (collaborationRef.current) {
@@ -55,7 +87,54 @@ export default function Board() {
         (window as any).__collaborationService = null;
       }
     };
-  }, [setCurrentUser]);
+  }, [setCurrentUser, setCurrentProject]);
+
+  // Auto-save when tiles or shapes change
+  useEffect(() => {
+    if (!currentProjectId) return;
+    
+    // Debounce auto-save to avoid too many requests
+    if (autoSaveTimeoutRef.current) {
+      clearTimeout(autoSaveTimeoutRef.current);
+    }
+    
+    autoSaveTimeoutRef.current = setTimeout(async () => {
+      const state = useCanvasStore.getState();
+      const canvasState = {
+        shapes: state.shapes,
+        selectedIds: [],
+        tool: 'select' as const,
+        zoom: state.zoom,
+        pan: state.pan,
+        gridSize: state.gridSize,
+        gridVisible: true,
+        snapToGrid: false,
+      };
+
+      const tileMap = {
+        gridSize: state.gridSize,
+        tiles: state.tiles,
+      };
+
+      try {
+        await fetch(`/api/projects/${currentProjectId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ canvasState, tileMap }),
+          credentials: 'include',
+        });
+        console.log('Auto-saved project');
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    }, 1000); // Wait 1 second after last change before saving
+
+    return () => {
+      if (autoSaveTimeoutRef.current) {
+        clearTimeout(autoSaveTimeoutRef.current);
+      }
+    };
+  }, [tiles, shapes, currentProjectId]);
 
   // Keyboard shortcuts
   useEffect(() => {
