@@ -24,8 +24,10 @@ This is a real-time collaborative game development board built with:
 
 ### Tile Mapping
 - Tile palette system with visual previews
+- **Continuous Brush Painting**: Paint while dragging with adjustable brush sizes (1x1 to 3x3+)
 - Paint and erase tools with auto-tiling
 - **3x3 Auto-Tiling System**: Automatically selects correct tile variants (corners, edges, center) based on neighbor configuration
+- **Optimized Performance**: Entire brush strokes batched into single undo entry
 - Tileset upload to Replit object storage
 - Three demo tilesets included (dirt, grass, water)
 - Grid-based tile placement with snap-to-grid
@@ -107,6 +109,15 @@ shared/schema.ts   # Shared TypeScript types and schemas
 - **Shift+G**: Toggle snap to grid
 
 ## Recent Changes
+
+### 2025-10-19 - Advanced Brush Painting System Complete
+- ✅ Implemented continuous brush-based tile painting (paint while dragging, not just clicking)
+- ✅ Added adjustable brush sizes with UI selector (1x1, 2x2, 2x3, 3x3, and more)
+- ✅ Fixed CRITICAL BUG: Tile painting now works when clicking on existing tiles/shapes
+- ✅ Implemented tile batching system: entire brush stroke creates single undo entry
+- ✅ Optimized painting performance by batching all tile operations per stroke
+- ✅ Brush tiles properly merge with auto-tiling results (no tile loss edge cases)
+- ✅ Stage-target guard correctly placed: tile tools bypass check, shape tools validate
 
 ### 2025-10-19 - Texture-Based Tile Rendering Complete
 - ✅ Implemented texture-based rendering using Konva.Image with crop
