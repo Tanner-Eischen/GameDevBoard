@@ -17,6 +17,9 @@ import {
   ZoomIn,
   ZoomOut,
   User,
+  Type,
+  Group,
+  Ungroup,
 } from 'lucide-react';
 import type { ToolType } from '@shared/schema';
 
@@ -28,6 +31,7 @@ const tools: Array<{ type: ToolType | 'sprite'; icon: typeof MousePointer; label
   { type: 'polygon', icon: Hexagon, label: 'Polygon (P)' },
   { type: 'star', icon: Star, label: 'Star (S)' },
   { type: 'line', icon: Minus, label: 'Line (L)' },
+  { type: 'text', icon: Type, label: 'Text' },
   { type: 'tile-paint', icon: Paintbrush, label: 'Paint Tile (T)' },
   { type: 'tile-erase', icon: Eraser, label: 'Erase Tile (E)' },
   { type: 'sprite' as any, icon: User, label: 'Sprite (X)' },
@@ -48,11 +52,19 @@ export function Toolbar() {
     setGridVisible,
     snapToGrid,
     setSnapToGrid,
+    selectedIds,
+    shapes,
+    groupSelectedShapes,
+    ungroupSelectedShapes,
   } = useCanvasStore();
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
-  
+  const canGroup = selectedIds.length >= 2;
+  const canUngroup = selectedIds.some((id) =>
+    shapes.find((shape) => shape.id === id)?.metadata.groupId
+  );
+
   // Get viewport dimensions for zooming to center
   const handleZoom = (newZoom: number) => {
     const viewportWidth = window.innerWidth;
@@ -104,6 +116,36 @@ export function Toolbar() {
             <Icon className="h-4 w-4" />
           </Button>
         ))}
+      </div>
+
+      <Separator orientation="vertical" className="h-6" />
+
+      {/* Advanced Shape Operations */}
+      <div className="flex items-center gap-1">
+        <Button
+          size="icon"
+          variant={canGroup ? 'default' : 'ghost'}
+          onClick={groupSelectedShapes}
+          disabled={!canGroup}
+          title="Group Selected (Ctrl+G)"
+          data-testid="button-group"
+          className="toggle-elevate"
+          data-active={canGroup}
+        >
+          <Group className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant={canUngroup ? 'default' : 'ghost'}
+          onClick={ungroupSelectedShapes}
+          disabled={!canUngroup}
+          title="Ungroup (Ctrl+Shift+G)"
+          data-testid="button-ungroup"
+          className="toggle-elevate"
+          data-active={canUngroup}
+        >
+          <Ungroup className="h-4 w-4" />
+        </Button>
       </div>
 
       <Separator orientation="vertical" className="h-6" />

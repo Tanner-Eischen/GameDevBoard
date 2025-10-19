@@ -4,8 +4,6 @@ import { CursorOverlay } from '@/components/CursorOverlay';
 import { Toolbar } from '@/components/Toolbar';
 import { PropertiesPanel } from '@/components/PropertiesPanel';
 import { LayersPanelWithPacks } from '@/components/LayersPanel';
-import { TilesetPanel } from '@/components/TilesetPanel';
-import { SpritePanel } from '@/components/SpritePanel';
 import { UserPresence } from '@/components/UserPresence';
 import { ProjectManager } from '@/components/ProjectManager';
 import { AiChat } from '@/components/AiChat';
@@ -15,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { PanelLeft, PanelRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ResourceSidebar } from '@/components/ResourceSidebar';
 
 const USER_COLORS = [
   'hsl(217 91% 60%)',
@@ -29,7 +29,7 @@ const USER_COLORS = [
 
 export default function Board() {
   const { user } = useAuth();
-  const { setCurrentUser, setTool, undo, redo, setCurrentProject, currentProjectId, tiles, shapes } = useCanvasStore();
+  const { setCurrentUser, setTool, undo, redo, setCurrentProject, currentProjectId, tiles, shapes, groupSelectedShapes, ungroupSelectedShapes } = useCanvasStore();
   const collaborationRef = useRef<ReturnType<typeof getCollaborationService> | null>(null);
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
@@ -160,12 +160,18 @@ export default function Board() {
 
       // Undo/Redo
       if (e.ctrlKey || e.metaKey) {
-        if (e.shiftKey && e.key === 'z') {
+        if (e.shiftKey && e.key.toLowerCase() === 'z') {
           e.preventDefault();
           redo();
-        } else if (e.key === 'z') {
+        } else if (!e.shiftKey && e.key.toLowerCase() === 'z') {
           e.preventDefault();
           undo();
+        } else if (e.shiftKey && e.key.toLowerCase() === 'g') {
+          e.preventDefault();
+          ungroupSelectedShapes();
+        } else if (e.key.toLowerCase() === 'g') {
+          e.preventDefault();
+          groupSelectedShapes();
         }
       }
 
@@ -192,6 +198,9 @@ export default function Board() {
         case 'l':
           setTool('line');
           break;
+        case 'y':
+          setTool('text');
+          break;
         case 't':
           setTool('tile-paint');
           break;
@@ -208,7 +217,7 @@ export default function Board() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setTool, undo, redo]);
+  }, [setTool, undo, redo, groupSelectedShapes, ungroupSelectedShapes]);
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
@@ -270,12 +279,17 @@ export default function Board() {
 
         {/* Left Sidebar */}
         <aside className={cn(
-          "w-64 bg-card border-r border-card-border overflow-auto transition-all duration-300",
+          "w-72 bg-card border-r border-card-border overflow-hidden transition-all duration-300",
           "absolute md:relative inset-y-0 left-0 z-20 md:z-auto shadow-lg md:shadow-none",
           leftPanelOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0"
         )}>
-          <div className="p-4 space-y-4 min-w-64">
-            <LayersPanelWithPacks />
+          <div className="h-full min-w-72 flex flex-col gap-4 p-4">
+            <PropertiesPanel className="flex-shrink-0 max-h-[50vh]" />
+            <ScrollArea className="flex-1 pr-2">
+              <div className="space-y-4 pb-4">
+                <LayersPanelWithPacks />
+              </div>
+            </ScrollArea>
           </div>
         </aside>
 
@@ -287,14 +301,12 @@ export default function Board() {
 
         {/* Right Sidebar */}
         <aside className={cn(
-          "w-80 bg-card border-l border-card-border overflow-auto transition-all duration-300",
+          "w-80 bg-card border-l border-card-border overflow-hidden transition-all duration-300",
           "absolute md:relative inset-y-0 right-0 z-20 md:z-auto shadow-lg md:shadow-none",
           rightPanelOpen ? "translate-x-0" : "translate-x-full md:translate-x-0 md:w-0 md:border-l-0"
         )}>
-          <div className="p-4 space-y-4 min-w-80">
-            <PropertiesPanel />
-            <TilesetPanel />
-            <SpritePanel />
+          <div className="h-full min-w-80 p-4">
+            <ResourceSidebar />
           </div>
         </aside>
       </div>

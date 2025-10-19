@@ -20,7 +20,20 @@ export function ProjectManager() {
   const [showSave, setShowSave] = useState(false);
   const [showLoad, setShowLoad] = useState(false);
   const [projectName, setProjectName] = useState('');
-  const { currentProjectName, currentProjectId, setCurrentProject, shapes, tiles, zoom, pan, gridSize } = useCanvasStore();
+  const {
+    currentProjectName,
+    currentProjectId,
+    setCurrentProject,
+    shapes,
+    sprites,
+    tiles,
+    spriteDefinitions,
+    zoom,
+    pan,
+    gridSize,
+    gridVisible,
+    snapToGrid,
+  } = useCanvasStore();
   const { toast } = useToast();
 
   const { data: projects, isLoading: projectsLoading } = useProjects();
@@ -30,18 +43,20 @@ export function ProjectManager() {
   const handleSave = async () => {
     const canvasState = {
       shapes,
+      sprites,
       selectedIds: [],
       tool: 'select' as const,
       zoom,
       pan,
       gridSize,
-      gridVisible: true,
-      snapToGrid: false,
+      gridVisible,
+      snapToGrid,
     };
 
     const tileMap = {
       gridSize,
       tiles,
+      spriteDefinitions,
     };
 
     const name = projectName || currentProjectName;
@@ -86,10 +101,14 @@ export function ProjectManager() {
     if (project) {
       useCanvasStore.setState({
         shapes: project.canvasState.shapes,
+        sprites: project.canvasState.sprites,
         tiles: project.tileMap.tiles,
         zoom: project.canvasState.zoom,
         pan: project.canvasState.pan,
         gridSize: project.canvasState.gridSize,
+        gridVisible: project.canvasState.gridVisible,
+        snapToGrid: project.canvasState.snapToGrid,
+        spriteDefinitions: project.tileMap.spriteDefinitions,
       });
       setCurrentProject(project.id, project.name);
       
@@ -110,12 +129,16 @@ export function ProjectManager() {
     const state = useCanvasStore.getState();
     const data = {
       shapes: state.shapes,
+      sprites: state.sprites,
       tiles: state.tiles,
       canvasState: {
         zoom: state.zoom,
         pan: state.pan,
         gridSize: state.gridSize,
+        gridVisible: state.gridVisible,
+        snapToGrid: state.snapToGrid,
       },
+      spriteDefinitions: state.spriteDefinitions,
     };
 
     const blob = new Blob([JSON.stringify(data, null, 2)], {

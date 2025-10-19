@@ -5,16 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { Trash2, Lock, Unlock } from 'lucide-react';
 
-export function PropertiesPanel() {
+interface PropertiesPanelProps {
+  className?: string;
+}
+
+export function PropertiesPanel({ className }: PropertiesPanelProps) {
   const { shapes, selectedIds, updateShape, deleteShapes } = useCanvasStore();
 
   const selectedShapes = shapes.filter((s) => selectedIds.includes(s.id));
 
   if (selectedShapes.length === 0) {
     return (
-      <Card className="h-full">
+      <Card className={cn('overflow-hidden', className)}>
         <CardHeader>
           <CardTitle className="text-sm">Properties</CardTitle>
         </CardHeader>
@@ -46,6 +52,12 @@ export function PropertiesPanel() {
     });
   };
 
+  const handleTextChange = (value: string) => {
+    selectedShapes.forEach((s) => {
+      updateShape(s.id, { text: value });
+    });
+  };
+
   const handleDelete = () => {
     deleteShapes(selectedIds);
   };
@@ -58,8 +70,11 @@ export function PropertiesPanel() {
     });
   };
 
+  const activeGroupId = shape.metadata.groupId;
+  const allInSameGroup = activeGroupId && selectedShapes.every((s) => s.metadata.groupId === activeGroupId);
+
   return (
-    <Card className="h-full overflow-auto">
+    <Card className={cn('overflow-auto', className)}>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">
@@ -94,6 +109,12 @@ export function PropertiesPanel() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {allInSameGroup && (
+          <div className="rounded-md border border-dashed border-primary/40 bg-primary/5 p-2 text-[11px] text-muted-foreground">
+            Group ID: {activeGroupId.slice(0, 8)}
+          </div>
+        )}
+
         {/* Transform */}
         <div className="space-y-3">
           <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -267,6 +288,35 @@ export function PropertiesPanel() {
             />
           </div>
         </div>
+
+        {shape.type === 'text' && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Text
+              </Label>
+              <Textarea
+                value={shape.text ?? ''}
+                onChange={(e) => handleTextChange(e.target.value)}
+                placeholder="Enter text content"
+                className="min-h-[80px] text-sm"
+              />
+              <div className="space-y-1">
+                <Label htmlFor="font-size" className="text-xs">
+                  Font Size
+                </Label>
+                <Input
+                  id="font-size"
+                  type="number"
+                  value={Math.round(shape.style.fontSize ?? 28)}
+                  onChange={(e) => handleStyleChange('fontSize', parseFloat(e.target.value))}
+                  className="h-8 font-mono text-xs"
+                />
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
