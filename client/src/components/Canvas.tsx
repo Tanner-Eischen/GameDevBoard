@@ -106,12 +106,15 @@ export function Canvas() {
       const tilesToAdd: Tile[] = [];
       
       // Place all tiles from the multi-tile configuration
-      selectedTileset.multiTileConfig.tiles.forEach((tilePos, index) => {
+      selectedTileset.multiTileConfig.tiles.forEach((tilePos) => {
+        // Calculate tileIndex based on grid position: row * columns + col
+        const tileIndex = tilePos.y * selectedTileset.columns + tilePos.x;
+        
         tilesToAdd.push({
           x: gridX + tilePos.x,
           y: gridY + tilePos.y,
           tilesetId: selectedTileset.id,
-          tileIndex: index, // Each tile in the configuration gets its own index
+          tileIndex: tileIndex,
           layer: 'props', // Props layer for trees, flowers, etc.
         });
       });
