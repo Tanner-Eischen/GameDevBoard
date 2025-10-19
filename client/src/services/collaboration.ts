@@ -8,6 +8,7 @@ export class CollaborationService {
   private ws: WebSocket | null = null;
   private shapesArray: Y.Array<any>;
   private tilesArray: Y.Array<any>;
+  private spritesArray: Y.Array<any>;
   private awareness: Awareness;
   private roomId: string;
 
@@ -16,6 +17,7 @@ export class CollaborationService {
     this.doc = new Y.Doc();
     this.shapesArray = this.doc.getArray('shapes');
     this.tilesArray = this.doc.getArray('tiles');
+    this.spritesArray = this.doc.getArray('sprites');
     this.awareness = new Awareness(this.doc);
   }
 
@@ -101,8 +103,18 @@ export class CollaborationService {
       }
     });
 
+    // Listen to sprites changes
+    this.spritesArray.observe((event) => {
+      if (event.transaction.origin !== 'local') {
+        isRemoteChange = true;
+        const sprites = this.spritesArray.toArray();
+        useCanvasStore.setState({ sprites });
+        isRemoteChange = false;
+      }
+    });
+
     // Only sync from local if arrays are empty (first connection)
-    if (this.shapesArray.length === 0 && this.tilesArray.length === 0) {
+    if (this.shapesArray.length === 0 && this.tilesArray.length === 0 && this.spritesArray.length === 0) {
       this.syncFromLocal();
     }
 
@@ -129,6 +141,12 @@ export class CollaborationService {
     this.doc.transact(() => {
       this.tilesArray.delete(0, this.tilesArray.length);
       this.tilesArray.push(state.tiles);
+    }, 'local');
+
+    // Sync sprites
+    this.doc.transact(() => {
+      this.spritesArray.delete(0, this.spritesArray.length);
+      this.spritesArray.push(state.sprites);
     }, 'local');
   }
 
@@ -174,6 +192,29 @@ export class CollaborationService {
     this.doc.transact(() => {
       if (index < this.tilesArray.length) {
         this.tilesArray.delete(index, 1);
+      }
+    }, 'local');
+  }
+
+  addSprite(sprite: any) {
+    this.doc.transact(() => {
+      this.spritesArray.push([sprite]);
+    }, 'local');
+  }
+
+  updateSprite(index: number, sprite: any) {
+    this.doc.transact(() => {
+      if (index < this.spritesArray.length) {
+        this.spritesArray.delete(index, 1);
+        this.spritesArray.insert(index, [sprite]);
+      }
+    }, 'local');
+  }
+
+  deleteSprite(index: number) {
+    this.doc.transact(() => {
+      if (index < this.spritesArray.length) {
+        this.spritesArray.delete(index, 1);
       }
     }, 'local');
   }

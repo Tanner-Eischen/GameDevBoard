@@ -395,18 +395,35 @@ export const useCanvasStore = create<CanvasStore>((set, get) => ({
   },
 
   updateSprite: (id, updates) => {
-    set((state) => ({
-      sprites: state.sprites.map((s) =>
+    set((state) => {
+      const index = state.sprites.findIndex((s) => s.id === id);
+      const updatedSprites = state.sprites.map((s) =>
         s.id === id ? { ...s, ...updates } : s
-      ),
-    }));
+      );
+      
+      // Notify collaboration service
+      if (index >= 0 && (window as any).__collaborationService) {
+        (window as any).__collaborationService.updateSprite(index, updatedSprites[index]);
+      }
+      
+      return { sprites: updatedSprites };
+    });
   },
 
   deleteSprite: (id) => {
-    set((state) => ({
-      sprites: state.sprites.filter((s) => s.id !== id),
-      selectedSpriteId: state.selectedSpriteId === id ? null : state.selectedSpriteId,
-    }));
+    set((state) => {
+      const index = state.sprites.findIndex((s) => s.id === id);
+      
+      // Notify collaboration service before deleting
+      if (index >= 0 && (window as any).__collaborationService) {
+        (window as any).__collaborationService.deleteSprite(index);
+      }
+      
+      return {
+        sprites: state.sprites.filter((s) => s.id !== id),
+        selectedSpriteId: state.selectedSpriteId === id ? null : state.selectedSpriteId,
+      };
+    });
     get().pushHistory();
   },
 

@@ -118,6 +118,13 @@ These services are integrated and managed by Replit:
   - All sprites use down-facing direction (row 0) from multi-directional sprite sheets
   - Sprite sheets copied to public/sprites/ directory
   - Now have 4 total sprite definitions available: Knight, Swordsman (Idle), Swordsman (Walk), Swordsman (Attack)
+- **Fixed Sprite Collaboration Bug**:
+  - Added missing `spritesArray` to Y.js CollaborationService
+  - Implemented `addSprite()`, `updateSprite()`, and `deleteSprite()` methods in collaboration service
+  - Added sprite observer to sync remote sprite changes to local store
+  - Updated store methods to properly notify collaboration service with sprite index
+  - Fixed "Unexpected end of array" error when adding sprites to canvas
+  - Sprites now fully synchronized across multiple users in real-time
 - **Enhanced AI Assistant with Advanced Natural Language Understanding**:
   - Added 5 new terrain patterns: `horizontal_path`, `vertical_path`, `diagonal_path`, `winding_path`, `curved_path`
   - Implemented Catmull-Rom spline algorithm for realistic curved/winding paths (rivers, roads)
