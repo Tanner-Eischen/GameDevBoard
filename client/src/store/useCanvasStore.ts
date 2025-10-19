@@ -59,7 +59,7 @@ const initialState: CanvasState = {
   tool: 'select',
   zoom: 1,
   pan: { x: 0, y: 0 },
-  gridSize: 32,
+  gridSize: 16,
   gridVisible: true,
   snapToGrid: false,
 };
