@@ -132,6 +132,14 @@ shared/schema.ts   # Shared TypeScript types and schemas
 
 ## Recent Changes
 
+### 2025-10-19 - Canvas Painting Fixes: Pan Sync & Continuous Brush Complete
+- ✅ Fixed CRITICAL BUG: Painting offset after panning - added Stage onDragEnd to sync pan position
+- ✅ Fixed coordinate transformation: maintained correct formula `(pos.x - pan.x) / zoom`
+- ✅ Improved continuous brush painting: linear interpolation fills gaps during fast cursor movement
+- ✅ Optimized tile painting: Set-based deduplication prevents redundant auto-tiling calculations
+- ✅ Verified trees can be placed on grass (tiles stack by grid position - already working)
+- ✅ Architect-approved all canvas coordinate and painting improvements
+
 ### 2025-10-19 - Multi-Tile Object System Complete
 - ✅ Extended schema with tilesetType ('auto-tiling' | 'multi-tile') and multiTileConfig fields
 - ✅ Added 5 new tilesets: Flower, Sand, Stone (3x3 auto-tiling), Tree1, Tree2 (16x33 multi-tile)
