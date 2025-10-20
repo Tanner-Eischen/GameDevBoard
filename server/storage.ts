@@ -30,6 +30,7 @@ export interface IStorage {
   getTileset(id: string): Promise<TilesetData | undefined>;
   getAllTilesets(): Promise<TilesetData[]>;
   createTileset(tileset: InsertTileset): Promise<TilesetData>;
+  createTilesetsBatch(tilesets: InsertTileset[]): Promise<TilesetData[]>;
   updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined>;
   deleteTileset(id: string): Promise<boolean>;
 
@@ -196,6 +197,29 @@ export class MemStorage implements IStorage {
     } as TilesetData;
     this.tilesets.set(id, tileset);
     return tileset;
+  }
+
+  async createTilesetsBatch(insertTilesets: InsertTileset[]): Promise<TilesetData[]> {
+    const createdTilesets = insertTilesets.map((tilesetData) => {
+      const id = randomUUID();
+      const createdTileset = {
+        id,
+        name: tilesetData.name,
+        tileSize: tilesetData.tileSize ?? 32,
+        spacing: tilesetData.spacing ?? 0,
+        imageUrl: tilesetData.imageUrl,
+        columns: tilesetData.columns,
+        rows: tilesetData.rows,
+        tilesetType: (tilesetData.tilesetType ?? 'auto-tiling') as 'auto-tiling' | 'multi-tile' | 'variant_grid',
+        multiTileConfig: (tilesetData.multiTileConfig ?? null) as MultiTileConfig | null,
+        packId: tilesetData.packId ?? null,
+        createdAt: new Date(),
+      } as TilesetData;
+      this.tilesets.set(id, createdTileset);
+      return createdTileset;
+    });
+
+    return createdTilesets;
   }
 
   async updateTileset(
@@ -377,6 +401,19 @@ export class DbStorage implements IStorage {
   async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
     const [tileset] = await db.insert(tilesetsTable).values(insertTileset as any).returning();
     return tileset as TilesetData;
+  }
+
+  async createTilesetsBatch(insertTilesets: InsertTileset[]): Promise<TilesetData[]> {
+    if (insertTilesets.length === 0) {
+      return [];
+    }
+
+    const createdTilesets = await db
+      .insert(tilesetsTable)
+      .values(insertTilesets as any)
+      .returning();
+
+    return createdTilesets as TilesetData[];
   }
 
   async updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined> {
