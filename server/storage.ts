@@ -30,6 +30,7 @@ export interface IStorage {
   getTileset(id: string): Promise<TilesetData | undefined>;
   getAllTilesets(): Promise<TilesetData[]>;
   createTileset(tileset: InsertTileset): Promise<TilesetData>;
+  createTilesetsBatch(tilesets: InsertTileset[]): Promise<TilesetData[]>;
   updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined>;
   deleteTileset(id: string): Promise<boolean>;
 
@@ -196,6 +197,16 @@ export class MemStorage implements IStorage {
     } as TilesetData;
     this.tilesets.set(id, tileset);
     return tileset;
+  }
+
+  async createTilesetsBatch(
+    insertTilesets: InsertTileset[]
+  ): Promise<TilesetData[]> {
+    const created: TilesetData[] = [];
+    for (const tileset of insertTilesets) {
+      created.push(await this.createTileset(tileset));
+    }
+    return created;
   }
 
   async updateTileset(
@@ -377,6 +388,21 @@ export class DbStorage implements IStorage {
   async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
     const [tileset] = await db.insert(tilesetsTable).values(insertTileset as any).returning();
     return tileset as TilesetData;
+  }
+
+  async createTilesetsBatch(
+    insertTilesets: InsertTileset[]
+  ): Promise<TilesetData[]> {
+    if (insertTilesets.length === 0) {
+      return [];
+    }
+
+    const created = await db
+      .insert(tilesetsTable)
+      .values(insertTilesets as any)
+      .returning();
+
+    return created as TilesetData[];
   }
 
   async updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined> {
