@@ -199,14 +199,27 @@ export class MemStorage implements IStorage {
     return tileset;
   }
 
-  async createTilesetsBatch(
-    insertTilesets: InsertTileset[]
-  ): Promise<TilesetData[]> {
-    const created: TilesetData[] = [];
-    for (const tileset of insertTilesets) {
-      created.push(await this.createTileset(tileset));
-    }
-    return created;
+  async createTilesetsBatch(insertTilesets: InsertTileset[]): Promise<TilesetData[]> {
+    const createdTilesets = insertTilesets.map((tilesetData) => {
+      const id = randomUUID();
+      const createdTileset = {
+        id,
+        name: tilesetData.name,
+        tileSize: tilesetData.tileSize ?? 32,
+        spacing: tilesetData.spacing ?? 0,
+        imageUrl: tilesetData.imageUrl,
+        columns: tilesetData.columns,
+        rows: tilesetData.rows,
+        tilesetType: (tilesetData.tilesetType ?? 'auto-tiling') as 'auto-tiling' | 'multi-tile' | 'variant_grid',
+        multiTileConfig: (tilesetData.multiTileConfig ?? null) as MultiTileConfig | null,
+        packId: tilesetData.packId ?? null,
+        createdAt: new Date(),
+      } as TilesetData;
+      this.tilesets.set(id, createdTileset);
+      return createdTileset;
+    });
+
+    return createdTilesets;
   }
 
   async updateTileset(
@@ -390,19 +403,17 @@ export class DbStorage implements IStorage {
     return tileset as TilesetData;
   }
 
-  async createTilesetsBatch(
-    insertTilesets: InsertTileset[]
-  ): Promise<TilesetData[]> {
+  async createTilesetsBatch(insertTilesets: InsertTileset[]): Promise<TilesetData[]> {
     if (insertTilesets.length === 0) {
       return [];
     }
 
-    const created = await db
+    const createdTilesets = await db
       .insert(tilesetsTable)
       .values(insertTilesets as any)
       .returning();
 
-    return created as TilesetData[];
+    return createdTilesets as TilesetData[];
   }
 
   async updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined> {
