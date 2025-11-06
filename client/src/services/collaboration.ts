@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
 import { Awareness } from 'y-protocols/awareness';
+import { encodeAwarenessUpdate, applyAwarenessUpdate } from 'y-protocols/awareness';
 import type { Shape, UserPresence } from '@shared/schema';
 import { useCanvasStore } from '@/store/useCanvasStore';
 
@@ -112,30 +113,36 @@ export class CollaborationService {
     }
 
     this.ws.onopen = () => {
-      console.log('WebSocket connected, waiting for authentication...');
+      console.log('WebSocket connected');
+      // Send initial state
+      const stateVector = Y.encodeStateVector(this.doc);
+      if (this.ws) {
+        this.ws.send(stateVector);
+      }
       
-      // Don't set as fully connected until authentication succeeds
-      this.updateConnectionState({
-        status: 'connecting'
-      });
-      
-      // Start heartbeat mechanism
-      this.startHeartbeat();
+      // Set local user state AFTER WebSocket is connected
+      const currentUser = useCanvasStore.getState().currentUser;
+      if (currentUser) {
+        this.awareness.setLocalState({
+          user: currentUser,
+        });
+      }
     };
 
     this.ws.onmessage = (event) => {
-      try {
-        if (event.data instanceof ArrayBuffer) {
-          // Binary Y.js update message
-          this.handleBinaryMessage(new Uint8Array(event.data));
+      if (event.data instanceof ArrayBuffer) {
+        const update = new Uint8Array(event.data);
+        // Check if this is an awareness update (first byte is 1) or doc update (first byte is 0)
+        if (update.length > 0 && update[0] === 1) {
+          // This is an awareness update - strip the prefix byte
+          applyAwarenessUpdate(this.awareness, update.slice(1), null);
+        } else if (update.length > 0 && update[0] === 0) {
+          // This is a document update - strip the prefix byte
+          Y.applyUpdate(this.doc, update.slice(1));
         } else {
-          // JSON message
-          const message: WebSocketMessage = JSON.parse(event.data);
-          this.handleJsonMessage(message);
+          // Legacy message without prefix (for backwards compatibility during initial handshake)
+          Y.applyUpdate(this.doc, update);
         }
-      } catch (error) {
-        console.error('Error processing WebSocket message:', error);
-        this.notifyError('Failed to process message', 'MESSAGE_PARSE_ERROR');
       }
     };
 
@@ -149,108 +156,33 @@ export class CollaborationService {
       this.notifyError('WebSocket connection error', 'CONNECTION_ERROR');
     };
 
-    this.ws.onclose = (event) => {
-      console.log('WebSocket disconnected', event.code, event.reason);
-      console.log('WebSocket close event details:', {
-        code: event.code,
-        reason: event.reason,
-        wasClean: event.wasClean,
-        timestamp: new Date().toISOString(),
-        readyState: this.ws?.readyState,
-        url: this.ws?.url
-      });
-      
-      // Log stack trace to see what triggered the close
-      if (event.code === 1001) {
-        console.log('Code 1001 close - stack trace:', new Error().stack);
-      }
-      
-      // Stop heartbeat
-      this.stopHeartbeat();
-      
-      // Update connection state based on close code
-      let shouldReconnect = true;
-      let errorMessage = '';
-      let errorCode = '';
-
-      switch (event.code) {
-        case 1000: // Normal closure
-          shouldReconnect = false;
-          this.updateConnectionState({ status: 'disconnected' });
-          break;
-        case 1008: // Policy violation (auth failed, rate limited, etc.)
-          shouldReconnect = false;
-          errorMessage = event.reason || 'Connection rejected by server';
-          errorCode = 'AUTH_FAILED';
-          this.updateConnectionState({
-            status: 'auth_failed',
-            error: errorMessage,
-            errorCode
-          });
-          this.notifyError(errorMessage, errorCode);
-          break;
-        case 1011: // Server error
-          errorMessage = 'Server error occurred';
-          errorCode = 'SERVER_ERROR';
-          this.updateConnectionState({
-            status: 'error',
-            error: errorMessage,
-            errorCode
-          });
-          break;
-        default:
-          this.updateConnectionState({
-            status: 'disconnected',
-            error: event.reason || 'Connection lost',
-            errorCode: 'CONNECTION_LOST'
-          });
-      }
-      
-      // Attempt reconnection if appropriate and under retry limit
-      if (shouldReconnect && this.connectionState.reconnectAttempts < this.maxReconnectAttempts) {
-        this.scheduleReconnect();
-      } else if (this.connectionState.reconnectAttempts >= this.maxReconnectAttempts) {
-        this.updateConnectionState({
-          status: 'error',
-          error: 'Maximum reconnection attempts exceeded',
-          errorCode: 'MAX_RETRIES_EXCEEDED'
-        });
-        this.notifyError('Maximum reconnection attempts exceeded', 'MAX_RETRIES_EXCEEDED');
-      }
+    this.ws.onclose = () => {
+      console.log('WebSocket disconnected');
     };
 
-    // Enhanced Y.js update handling with batching for all boards
-    this.docs.forEach((doc, boardId) => {
-      doc.on('update', (update: Uint8Array, origin: any) => {
-        if (origin !== 'remote' && this.ws && this.ws.readyState === WebSocket.OPEN) {
-          // Send board-specific update with board ID
-          const message = JSON.stringify({ boardId, update: Array.from(update) });
-          this.ws.send(message);
-        } else if (origin !== 'remote') {
-          // Queue update if not connected
-          this.queueUpdate(() => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-              const message = JSON.stringify({ boardId, update: Array.from(update) });
-              this.ws.send(message);
-            }
-          });
-        }
-      });
+    // Send document updates to the server
+    this.doc.on('update', (update: Uint8Array) => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        // Prepend 0 to indicate this is a document update
+        const message = new Uint8Array(update.length + 1);
+        message[0] = 0;
+        message.set(update, 1);
+        this.ws.send(message);
+      }
     });
 
-    // Set local user state with enhanced presence
-    const currentUser = useCanvasStore.getState().currentUser;
-    if (currentUser) {
-      this.awareness.setLocalState({
-        user: {
-          ...currentUser,
-          lastSeen: Date.now(),
-          cursor: { x: 0, y: 0 },
-          selection: [],
-          tool: 'select'
-        },
-      });
-    }
+    // Send awareness updates to the server
+    this.awareness.on('update', ({ added, updated, removed }: any) => {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        const changedClients = added.concat(updated).concat(removed);
+        const update = encodeAwarenessUpdate(this.awareness, changedClients);
+        // Prepend 1 to indicate this is an awareness update
+        const message = new Uint8Array(update.length + 1);
+        message[0] = 1;
+        message.set(update, 1);
+        this.ws.send(message);
+      }
+    });
 
     // Enhanced awareness change handling
     this.awareness.on('change', () => {
@@ -601,13 +533,12 @@ export class CollaborationService {
   updateUserPresence(updates: Partial<UserPresence>) {
     if (this.awareness) {
       const currentState = this.awareness.getLocalState();
+      const updatedUser = {
+        ...currentState?.user,
+        ...updates,
+      };
       this.awareness.setLocalState({
-        ...currentState,
-        user: {
-          ...currentState?.user,
-          ...updates,
-          lastSeen: Date.now(),
-        },
+        user: updatedUser,
       });
     }
   }

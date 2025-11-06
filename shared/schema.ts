@@ -1,13 +1,13 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, jsonb, integer, boolean, timestamp, real, index, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, jsonb, integer, boolean, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Shape types for canvas
-export const shapeTypeEnum = z.enum(['rectangle', 'circle', 'polygon', 'star', 'line']);
+export const shapeTypeEnum = z.enum(['rectangle', 'circle', 'polygon', 'star', 'line', 'text']);
 export type ShapeType = z.infer<typeof shapeTypeEnum>;
 
-export const toolTypeEnum = z.enum(['select', 'rectangle', 'circle', 'polygon', 'star', 'line', 'pan', 'tile-paint', 'auto-tile-paint', 'tile-erase', 'sprite']);
+export const toolTypeEnum = z.enum(['select', 'rectangle', 'circle', 'polygon', 'star', 'line', 'text', 'pan', 'tile-paint', 'tile-erase', 'sprite']);
 export type ToolType = z.infer<typeof toolTypeEnum>;
 
 // Sprite animation state enum
@@ -141,6 +141,9 @@ export interface ShapeStyle {
   stroke: string;
   strokeWidth: number;
   opacity: number;
+  fontSize?: number;
+  fontFamily?: string;
+  textAlign?: 'left' | 'center' | 'right';
 }
 
 // Shape interface
@@ -149,11 +152,13 @@ export interface Shape {
   type: ShapeType;
   transform: Transform;
   style: ShapeStyle;
+  text?: string;
   metadata: {
     createdBy: string;
     createdAt: number;
     locked: boolean;
     layer: number;
+    groupId?: string;
   };
   points?: number[]; // For polygon, star, line
 }
@@ -491,50 +496,35 @@ export const projects = pgTable("projects", {
   isPublic: boolean("is_public").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdIdx: index("projects_user_id_idx").on(table.userId),
-  nameIdx: index("projects_name_idx").on(table.name),
-  createdAtIdx: index("projects_created_at_idx").on(table.createdAt),
-}));
+});
 
-// Boards table - separate table for better scalability
-export const boards = pgTable("boards", {
+export const insertProjectSchema = createInsertSchema(projects).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type Project = typeof projects.$inferSelect;
+
+// Tileset Pack schema
+export const tilesetPacks = pgTable("tileset_packs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  projectId: varchar("project_id").notNull().references(() => projects.id, { onDelete: 'cascade' }),
   name: text("name").notNull(),
-  type: text("type").notNull().$type<BoardType>().default('topdown'),
-  tilesets: jsonb("tilesets").$type<string[]>().default([]),
-  physics: jsonb("physics").$type<PhysicsConfig>().default({
-    gravity: { x: 0, y: 0 },
-    airResistance: 0.01,
-    terminalVelocity: 1000,
-    physicsScale: 1.0,
-    enabled: true
-  }),
-  canvasState: jsonb("canvas_state").$type<CanvasState>().default({
-    shapes: [],
-    sprites: [],
-    selectedIds: [],
-    tool: 'select',
-    zoom: 1,
-    pan: { x: 0, y: 0 },
-    gridSize: 32,
-    gridVisible: true,
-    snapToGrid: false
-  }),
-  tileMap: jsonb("tile_map").$type<TileMap>().default({
-    gridSize: 32,
-    tiles: [],
-    spriteDefinitions: []
-  }),
+  description: text("description"),
+  tags: jsonb("tags").$type<string[]>().default(sql`'[]'::jsonb`),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  projectIdIdx: index("boards_project_id_idx").on(table.projectId),
-  nameIdx: index("boards_name_idx").on(table.name),
-  typeIdx: index("boards_type_idx").on(table.type),
-  createdAtIdx: index("boards_created_at_idx").on(table.createdAt),
-}));
+});
+
+export const insertTilesetPackSchema = createInsertSchema(tilesetPacks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertTilesetPack = z.infer<typeof insertTilesetPackSchema>;
+export type TilesetPack = typeof tilesetPacks.$inferSelect;
 
 // Tilesets table
 export const tilesets = pgTable("tilesets", {
@@ -548,38 +538,7 @@ export const tilesets = pgTable("tilesets", {
   rows: integer("rows").notNull(),
   tilesetType: text("tileset_type").notNull().default('auto-tiling').$type<TilesetType>(),
   multiTileConfig: jsonb("multi_tile_config").$type<MultiTileConfig | null>(),
-  tags: jsonb("tags").$type<string[]>().default([]),
-  isPublic: boolean("is_public").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdIdx: index("tilesets_user_id_idx").on(table.userId),
-  nameIdx: index("tilesets_name_idx").on(table.name),
-  typeIdx: index("tilesets_type_idx").on(table.tilesetType),
-  publicIdx: index("tilesets_public_idx").on(table.isPublic),
-}));
-
-// Physics configuration table
-export const physicsConfigs = pgTable("physics_configs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  boardId: varchar("board_id").notNull().references(() => boards.id, { onDelete: 'cascade' }),
-  gravity: jsonb("gravity").$type<Vector2>().default({ x: 0, y: 980 }),
-  airResistance: real("air_resistance").notNull().default(0.01),
-  terminalVelocity: real("terminal_velocity").notNull().default(1000),
-  physicsScale: real("physics_scale").notNull().default(1.0),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-// Material configuration table
-export const materialConfigs = pgTable("material_configs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  physicsConfigId: varchar("physics_config_id").notNull().references(() => physicsConfigs.id, { onDelete: 'cascade' }),
-  materialId: varchar("material_id", { length: 50 }).notNull(),
-  friction: real("friction").notNull().default(0.7),
-  restitution: real("restitution").notNull().default(0.3),
-  density: real("density").notNull().default(1.0),
-  collisionType: text("collision_type").notNull().default('solid').$type<'solid' | 'platform' | 'trigger' | 'hazard'>(),
+  packId: varchar("pack_id"), // Optional reference to tileset pack
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -693,125 +652,34 @@ export const insertMaterialConfigSchema = createInsertSchema(materialConfigs).om
   createdAt: true,
 });
 
-export const insertPhysicsEntitySchema = createInsertSchema(physicsEntities).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export type InsertTileset = z.infer<typeof insertTilesetSchema>;
+export type TilesetData = typeof tilesets.$inferSelect;
 
-// Sprite database tables
-export const sprites = pgTable("sprites", {
+// Session storage table for Replit Auth
+// Reference: blueprint:javascript_log_in_with_replit
+export const sessions = pgTable(
+  "sessions",
+  {
+    sid: varchar("sid").primaryKey(),
+    sess: jsonb("sess").notNull(),
+    expire: timestamp("expire").notNull(),
+  },
+  (table) => [index("IDX_session_expire").on(table.expire)],
+);
+
+// User storage table for Replit Auth
+// Reference: blueprint:javascript_log_in_with_replit
+export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").references(() => users.id, { onDelete: 'set null' }), // Allow shared sprites
-  name: text("name").notNull(),
-  imageUrl: text("image_url").notNull(),
-  frameWidth: integer("frame_width").notNull(),
-  frameHeight: integer("frame_height").notNull(),
-  totalFrames: integer("total_frames").notNull(),
-  category: text("category").notNull().default('general'),
-  tags: jsonb("tags").$type<string[]>().default([]),
-  spritesheetData: jsonb("spritesheet_data").$type<SpritesheetData | null>(),
-  physicsEnabled: boolean("physics_enabled").notNull().default(false),
-  isPublic: boolean("is_public").notNull().default(false),
-  metadata: jsonb("metadata").$type<{
-    author?: string;
-    version: string;
-    description?: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }>().default({
-    version: '1.0.0',
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-}, (table) => ({
-  userIdIdx: index("sprites_user_id_idx").on(table.userId),
-  nameIdx: index("sprites_name_idx").on(table.name),
-  categoryIdx: index("sprites_category_idx").on(table.category),
-  publicIdx: index("sprites_public_idx").on(table.isPublic),
-  createdAtIdx: index("sprites_created_at_idx").on(table.createdAt),
-}));
-
-export const animations = pgTable("animations", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  spriteId: varchar("sprite_id").notNull().references(() => sprites.id, { onDelete: 'cascade' }),
-  name: text("name").notNull(),
-  state: text("state").notNull().$type<AnimationState>(),
-  frames: jsonb("frames").$type<AnimationFrame[]>().default([]),
-  fps: integer("fps").notNull().default(12),
-  loop: boolean("loop").notNull().default(true),
-  easing: text("easing").notNull().default('linear').$type<EasingType>(),
-  totalDuration: integer("total_duration").notNull().default(0),
-  metadata: jsonb("metadata").$type<{
-    tags: string[];
-    description?: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }>().default({
-    tags: [],
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  email: varchar("email").unique(),
+  firstName: varchar("first_name"),
+  lastName: varchar("last_name"),
+  profileImageUrl: varchar("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const stateMachines = pgTable("state_machines", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  spriteId: varchar("sprite_id").notNull().references(() => sprites.id, { onDelete: 'cascade' }),
-  name: text("name").notNull(),
-  states: jsonb("states").$type<AnimationState[]>().default([]),
-  transitions: jsonb("transitions").$type<AnimationTransition[]>().default([]),
-  defaultState: text("default_state").notNull().$type<AnimationState>().default('idle'),
-  currentState: text("current_state").notNull().$type<AnimationState>().default('idle'),
-  variables: jsonb("variables").$type<Record<string, any>>().default({}),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-export const timelines = pgTable("timelines", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  spriteId: varchar("sprite_id").notNull().references(() => sprites.id, { onDelete: 'cascade' }),
-  name: text("name").notNull(),
-  duration: integer("duration").notNull().default(1000),
-  fps: integer("fps").notNull().default(24),
-  tracks: jsonb("tracks").$type<TimelineTrack[]>().default([]),
-  playhead: integer("playhead").notNull().default(0),
-  isPlaying: boolean("is_playing").notNull().default(false),
-  loop: boolean("loop").notNull().default(true),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
-
-// Zod schemas for sprite system
-export const insertSpriteSchema = createInsertSchema(sprites).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAnimationSchema = createInsertSchema(animations).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertStateMachineSchema = createInsertSchema(stateMachines).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertTimelineSchema = createInsertSchema(timelines).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-// TypeScript types
-export type InsertUser = z.infer<typeof insertUserSchema>;
+export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
 // Public user type (without sensitive information)

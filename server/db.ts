@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
-import { users, sessions, projects, tilesets, boards, physicsConfigs, materialConfigs, physicsEntities } from "../shared/schema";
+import { users, sessions, projects, tilesets, tilesetPacks, boards, physicsConfigs, materialConfigs, physicsEntities } from "../shared/schema";
 import { config } from 'dotenv';
 
 // Load environment variables
@@ -27,4 +27,4 @@ if (process.env.USE_MEMORY_STORAGE === 'true') {
   db = drizzle(sql);
 }
 
-export { db, users, sessions, projects, tilesets, boards, physicsConfigs, materialConfigs, physicsEntities };
+export { db, users, sessions, projects, tilesets, tilesetPacks, boards, physicsConfigs, materialConfigs, physicsEntities };

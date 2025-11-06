@@ -20,10 +20,22 @@ const USER_COLORS = [
 export function UserPresence() {
   const { users, currentUser } = useCanvasStore();
 
-  const allUsers = [
-    ...(currentUser ? [currentUser] : []),
-    ...Array.from(users.values()),
-  ];
+  // Combine current user with remote users, ensuring no duplicates
+  const userMap = new Map<string, NonNullable<typeof currentUser>>();
+  
+  // Add current user first
+  if (currentUser) {
+    userMap.set(currentUser.id, currentUser);
+  }
+  
+  // Add remote users (they shouldn't include current user, but filter just in case)
+  users.forEach((user, id) => {
+    if (!currentUser || id !== currentUser.id) {
+      userMap.set(id, user);
+    }
+  });
+  
+  const allUsers = Array.from(userMap.values());
 
   if (allUsers.length === 0) return null;
 

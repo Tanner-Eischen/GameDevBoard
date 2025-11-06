@@ -6,17 +6,23 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AuthGuard } from "@/components/AuthGuard";
 import Board from "@/pages/Board";
+import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
+import { useAuth } from "@/hooks/useAuth";
 
+// Reference: blueprint:javascript_log_in_with_replit
 function Router() {
-  console.log('Router rendering');
+  const { isAuthenticated, isLoading } = useAuth();
+
   return (
-    <AuthGuard>
-      <Switch>
+    <Switch>
+      {isLoading || !isAuthenticated ? (
+        <Route path="/" component={Landing} />
+      ) : (
         <Route path="/" component={Board} />
-        <Route component={NotFound} />
-      </Switch>
-    </AuthGuard>
+      )}
+      <Route component={NotFound} />
+    </Switch>
   );
 }
 
