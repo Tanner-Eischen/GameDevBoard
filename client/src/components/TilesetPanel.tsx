@@ -18,7 +18,6 @@ import { TileUploadModal, TileUploadConfig } from '@/components/TileUploadModal'
 import { TileExtractionService, ExtractedTile } from '@/services/tileExtraction';
 import { ExtractionItem } from '@/types/extractionQueue';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { EnhancedAutoTilingClient } from '@/utils/enhancedAutoTiling';
 import { Badge } from '@/components/ui/badge';
 import { DebugTilesPanel } from './DebugTilesPanel';
 import { createDebugTilesetPack } from '@/utils/debugTilesets';
@@ -55,15 +54,8 @@ export function TilesetPanel() {
   const [selectedTiles, setSelectedTiles] = useState<Array<{ x: number; y: number }>>([]);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(true);
-  const [enhancedMode, setEnhancedMode] = useState(true);
   const { toast } = useToast();
   const [libraryTab, setLibraryTab] = useState<'single' | 'auto'>('single');
-
-  // Check enhanced autotiling status
-  useEffect(() => {
-    const client = EnhancedAutoTilingClient.getInstance();
-    setEnhancedMode(client.isEnhancedMode());
-  }, []);
 
   // Auto-load debug tilesets on mount (only once)
   useEffect(() => {
@@ -649,7 +641,7 @@ export function TilesetPanel() {
                                   const tag = tileset.tags.find((t: string) => t.startsWith('tile-urls:'));
                                   if (tag) {
                                     try {
-                                      const urls = JSON.parse(tag.replace('tile-urls:', ''));
+                                      const urls = JSON.parse(tag.replace('tile-urls:', '')) as string[];
                                       if (Array.isArray(urls) && urls[index]) {
                                         individualImageUrl = urls[index];
                                         useBackgroundPosition = false;
@@ -767,17 +759,6 @@ export function TilesetPanel() {
                 ))}
               </div>
             </div>
-
-            {!enhancedMode && (
-              <div className="pt-4 border-t">
-                <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <div className="text-xs text-yellow-800 flex items-center gap-2">
-                    <span>⚠️</span>
-                    <span>Using fallback autotiling mode</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="pt-4 border-t">
               <DebugTilesPanel />
