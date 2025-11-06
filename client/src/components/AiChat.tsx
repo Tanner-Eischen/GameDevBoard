@@ -96,6 +96,40 @@ export function AiChat() {
 
   const chatMutation = useMutation({
     mutationFn: async (userMessage: string) => {
+      const token = localStorage.getItem('auth_token');
+      
+      // Check if user is authenticated before making request
+      if (!token) {
+        throw new Error('You must be logged in to use AI chat. Please sign in first.');
+      }
+
+      // Limit conversation history to last 20 messages to avoid exceeding server's 50-message limit
+      const maxHistoryMessages = 20;
+      let messagesToSend = messages.length > maxHistoryMessages 
+        ? messages.slice(-maxHistoryMessages)
+        : messages;
+      
+      // Filter out empty messages (like the loading placeholder) from the request
+      messagesToSend = messagesToSend.filter(msg => msg.content.trim().length > 0);
+      
+      // Remove duplicate consecutive messages (same role and content)
+      messagesToSend = messagesToSend.filter((msg, index) => {
+        if (index === 0) return true;
+        const prev = messagesToSend[index - 1];
+        return !(prev.role === msg.role && prev.content === msg.content);
+      });
+      
+      // Ensure we have at least one valid message
+      if (messagesToSend.length === 0 && !userMessage.trim()) {
+        throw new Error('Cannot send empty message');
+      }
+      
+      // Remove duplicate if the new user message is the same as the last message
+      const lastMessage = messagesToSend[messagesToSend.length - 1];
+      if (lastMessage && lastMessage.role === 'user' && lastMessage.content === userMessage) {
+        messagesToSend = messagesToSend.slice(0, -1);
+      }
+
       const canvasState = {
         shapes,
         selectedIds,
@@ -112,19 +146,50 @@ export function AiChat() {
         tiles
       };
 
+      const requestPayload = {
+        messages: [...messagesToSend, { role: 'user', content: userMessage }],
+        canvasState,
+        tileMap
+      };
+
+      console.log('Sending AI chat request:', JSON.stringify(requestPayload, null, 2));
+
       const response = await fetch('/api/ai/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...messages, { role: 'user', content: userMessage }],
-          canvasState,
-          tileMap
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestPayload),
         credentials: 'include'
       });
 
+      if (response.status === 401) {
+        throw new Error('Unauthorized: Your session may have expired. Please sign in again.');
+      }
+
+      if (response.status === 404) {
+        throw new Error('AI chat service not found. Please check your server configuration.');
+      }
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Try to get error details from response
+        try {
+          const errorText = await response.text();
+          console.error('Server error response:', errorText);
+          
+          // Try to parse as JSON
+          try {
+            const errorData = JSON.parse(errorText);
+            const errorMessage = errorData.error || errorData.message || response.statusText;
+            throw new Error(`HTTP ${response.status}: ${errorMessage}`);
+          } catch (parseError) {
+            // If not JSON, use raw text
+            throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+          }
+        } catch (readError) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
       }
 
       const reader = response.body?.getReader();
@@ -138,7 +203,7 @@ export function AiChat() {
       let buffer = ''; // Buffer for incomplete SSE frames
 
       // Add assistant message placeholder
-      const assistantMessageIndex = messages.length + 1;
+      const assistantMessageIndex = messagesToSend.length + 1;
       setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
@@ -170,9 +235,48 @@ export function AiChat() {
                   return newMessages;
                 });
               } else if (data.type === 'execution') {
-                executionResults = data.results;
+                const results = data.results || [];
+                const summary = data.summary || {};
+                const successCount = summary.successful ?? results.filter((r: ExecutionResult) => r.success).length;
+                const failureCount = summary.failed ?? results.filter((r: ExecutionResult) => !r.success).length;
+                
+                console.log('[AI_CHAT_CLIENT] Received execution results:', {
+                  resultCount: results.length,
+                  successCount,
+                  failureCount,
+                  summary
+                });
+                
+                // Log detailed error messages for failed executions
+                results.forEach((result: ExecutionResult, index: number) => {
+                  if (!result.success) {
+                    console.error(`[AI_CHAT_CLIENT] Execution ${index} failed:`, {
+                      message: result.message,
+                      requiresConfirmation: result.requiresConfirmation,
+                      hasCanvasUpdates: !!result.canvasUpdates
+                    });
+                  } else {
+                    console.log(`[AI_CHAT_CLIENT] Execution ${index} succeeded:`, {
+                      message: result.message?.substring(0, 100),
+                      hasCanvasUpdates: !!result.canvasUpdates,
+                      requiresConfirmation: result.requiresConfirmation
+                    });
+                  }
+                });
+                
+                executionResults = results;
               } else if (data.type === 'error') {
-                throw new Error(data.details || data.error);
+                console.error('[AI_CHAT_CLIENT] Received error from server:', {
+                  error: data.error || data.details,
+                  code: data.code,
+                  statusCode: data.statusCode,
+                  type: data.type
+                });
+                // This is a fatal error (not an execution failure), throw it
+                throw new Error(data.details || data.error || 'An error occurred during AI chat processing');
+              } else if (data.type === 'warning') {
+                console.warn('[AI_CHAT_CLIENT] Received warning from server:', data.message);
+                // Warnings are non-fatal, log but continue
               }
             } catch (parseError) {
               // Skip malformed JSON
@@ -189,6 +293,44 @@ export function AiChat() {
       };
     },
     onSuccess: (data) => {
+      // Check for execution failures vs successes
+      const failures = data.executionResults.filter(r => !r.success);
+      const successes = data.executionResults.filter(r => r.success);
+      
+      // If there are failures, append error messages to the AI response
+      // But only if there are actual failures (not just warnings)
+      if (failures.length > 0) {
+        const errorMessages = failures
+          .map(f => f.message)
+          .filter(msg => msg && msg.trim().length > 0)
+          .join('\n');
+        
+        if (errorMessages) {
+          // Only append if we have actual error messages
+          const updatedMessage = data.message + 
+            (data.message.trim() ? '\n\n' : '') + 
+            `⚠️ Some operations failed:\n${errorMessages}`;
+          
+          // Update the last assistant message with error details
+          setMessages(prev => {
+            const newMessages = [...prev];
+            const lastIndex = newMessages.length - 1;
+            if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
+              newMessages[lastIndex] = {
+                role: 'assistant',
+                content: updatedMessage
+              };
+            }
+            return newMessages;
+          });
+          
+          console.error('[AI_CHAT_CLIENT] Execution failures detected:', {
+            failureCount: failures.length,
+            errors: failures.map(f => f.message)
+          });
+        }
+      }
+      
       // Check if any results require confirmation
       const needsConfirmation = data.executionResults.some(r => r.requiresConfirmation);
       
@@ -198,10 +340,14 @@ export function AiChat() {
           results: data.executionResults,
           aiMessage: data.message
         });
-      } else {
-        // Apply canvas updates immediately
-        applyCanvasUpdates(data.executionResults);
+      } else if (successes.length > 0) {
+        // Only apply canvas updates for successful executions
+        applyCanvasUpdates(successes);
       }
+    },
+    onError: (error: any) => {
+      const message = error?.message || 'Something went wrong while contacting the AI.';
+      setMessages(prev => [...prev, { role: 'assistant', content: message }]);
     }
   });
 

@@ -50,19 +50,16 @@ export function ProjectManager() {
       if (currentProjectId) {
         await updateProject.mutateAsync({
           id: currentProjectId,
-          data: { name, canvasState, tileMap },
+          data: { name },
         });
         toast({
           title: 'Project Updated',
           description: `"${name}" has been updated successfully.`,
         });
       } else {
-        const response = await createProject.mutateAsync({
+        const project = await createProject.mutateAsync({
           name,
-          canvasState,
-          tileMap,
         });
-        const project = await response.json();
         setCurrentProject(project.id, project.name);
         toast({
           title: 'Project Saved',
@@ -84,13 +81,27 @@ export function ProjectManager() {
     // Project loading will update the canvas state
     const project = projects?.find(p => p.id === projectId);
     if (project) {
-      useCanvasStore.setState({
-        shapes: project.canvasState.shapes,
-        tiles: project.tileMap.tiles,
-        zoom: project.canvasState.zoom,
-        pan: project.canvasState.pan,
-        gridSize: project.canvasState.gridSize,
-      });
+      // For projects with boards, load the first board's state
+      const projectWithBoards = project as any;
+      if (projectWithBoards.boards && projectWithBoards.boards.length > 0) {
+        const firstBoard = projectWithBoards.boards[0];
+        useCanvasStore.setState({
+          shapes: firstBoard.canvasState?.shapes || [],
+          tiles: firstBoard.tileMap?.tiles || [],
+          zoom: firstBoard.canvasState?.zoom || 1,
+          pan: firstBoard.canvasState?.pan || { x: 0, y: 0 },
+          gridSize: firstBoard.canvasState?.gridSize || 32,
+        });
+      } else {
+        // Fallback for legacy projects without boards
+        useCanvasStore.setState({
+          shapes: [],
+          tiles: [],
+          zoom: 1,
+          pan: { x: 0, y: 0 },
+          gridSize: 32,
+        });
+      }
       setCurrentProject(project.id, project.name);
       
       // Sync loaded data to collaboration document
@@ -112,9 +123,15 @@ export function ProjectManager() {
       shapes: state.shapes,
       tiles: state.tiles,
       canvasState: {
+        shapes: state.shapes,
+        sprites: state.sprites,
+        selectedIds: state.selectedIds,
+        tool: state.tool,
         zoom: state.zoom,
         pan: state.pan,
         gridSize: state.gridSize,
+        gridVisible: state.gridVisible,
+        snapToGrid: state.snapToGrid,
       },
     };
 

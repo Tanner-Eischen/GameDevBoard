@@ -1,10 +1,14 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { Project, InsertProject } from '@shared/schema';
+import { useAuth } from '@/contexts/AuthContext';
 
 export function useProjects() {
+  const { user } = useAuth();
+  
   return useQuery<Project[]>({
     queryKey: ['/api/projects'],
+    enabled: !!user, // Only fetch when user is authenticated
   });
 }
 

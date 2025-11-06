@@ -11,6 +11,7 @@ export interface ExecutionResult {
   canvasUpdates?: {
     shapes?: Shape[];
     tiles?: Tile[];
+    sprites?: any[];
   };
 }
 
@@ -133,12 +134,25 @@ export function executePaintTerrain(
   tileMap: TileMap,
   tilesets: Array<{ id: string; name: string }>
 ): ExecutionResult {
-  const tileset = tilesets.find(t => t.name === params.tilesetName);
-  
-  if (!tileset) {
+  // Guard against undefined or null tilesets
+  if (!tilesets || !Array.isArray(tilesets)) {
     return {
       success: false,
-      message: `Tileset "${params.tilesetName}" not found`
+      message: 'Tilesets not available. Please ensure tilesets are loaded.'
+    };
+  }
+
+  // Map "Water Terrain" to "Lake" (they are equivalent)
+  const normalizedTilesetName = params.tilesetName === "Water Terrain" ? "Lake" : params.tilesetName;
+  
+  const tileset = tilesets.find(t => t.name === normalizedTilesetName);
+  
+  if (!tileset) {
+    const availableTilesets = tilesets.map(t => t.name).slice(0, 20).join(', ');
+    const moreText = tilesets.length > 20 ? ` (and ${tilesets.length - 20} more)` : '';
+    return {
+      success: false,
+      message: `Tileset "${params.tilesetName}" not found. Available tilesets: ${availableTilesets}${moreText}`
     };
   }
 
@@ -411,6 +425,14 @@ export function executePlaceObject(
   tileMap: TileMap,
   availableTilesets: any[]
 ): ExecutionResult {
+  // Guard against undefined or null tilesets
+  if (!availableTilesets || !Array.isArray(availableTilesets)) {
+    return {
+      success: false,
+      message: 'Tilesets not available. Please ensure tilesets are loaded.'
+    };
+  }
+
   // Find the tileset by name
   const tileset = availableTilesets.find(t => t.name === params.objectName);
   
@@ -504,14 +526,38 @@ export function executeClearCanvas(
   canvasState: CanvasState,
   tileMap: TileMap
 ): ExecutionResult {
-  // Calculate what will be cleared
+  // Guard against undefined/null inputs
+  if (!canvasState) {
+    return {
+      success: false,
+      message: 'Canvas state is not available'
+    };
+  }
+  
+  if (!tileMap) {
+    return {
+      success: false,
+      message: 'Tile map is not available'
+    };
+  }
+
+  // Validate target parameter
+  const validTargets = ['all', 'shapes', 'tiles'];
+  if (!params.target || !validTargets.includes(params.target)) {
+    return {
+      success: false,
+      message: `Invalid target "${params.target}". Valid targets are: ${validTargets.join(', ')}`
+    };
+  }
+
+  // Calculate what will be cleared (with safe array access)
   let itemCount = 0;
   if (params.target === "all") {
-    itemCount = canvasState.shapes.length + tileMap.tiles.length;
+    itemCount = (canvasState.shapes?.length || 0) + (tileMap.tiles?.length || 0);
   } else if (params.target === "shapes") {
-    itemCount = canvasState.shapes.length;
+    itemCount = canvasState.shapes?.length || 0;
   } else if (params.target === "tiles") {
-    itemCount = tileMap.tiles.length;
+    itemCount = tileMap.tiles?.length || 0;
   }
 
   const updates: { shapes?: Shape[]; tiles?: Tile[] } = {};
@@ -526,7 +572,7 @@ export function executeClearCanvas(
 
   return {
     success: true,
-    message: `Cleared ${params.target} from canvas`,
+    message: `Cleared ${params.target} from canvas (${itemCount} items)`,
     requiresConfirmation: true,
     confirmationPrompt: `This will delete ${itemCount} ${params.target === "all" ? "items" : params.target}. Are you sure?`,
     canvasUpdates: updates
@@ -615,5 +661,444 @@ export function executePlaceSprites(
     success: true,
     message: `Placed ${params.count} ${params.spriteType} sprite(s) in ${params.layout} layout with ${animation} animation`,
     canvasUpdates: { sprites: newSprites }
+  };
+}
+
+// NEW PR6 ENHANCED EXECUTOR FUNCTIONS
+
+// Create a single sprite with advanced animation and physics
+export function executeCreateSprite(
+  params: {
+    spriteType: string;
+    position: { x: number; y: number };
+    animation?: string;
+    physics?: {
+      mass?: number;
+      friction?: number;
+      restitution?: number;
+      collision?: boolean;
+    };
+    scale?: number;
+    rotation?: number;
+  },
+  canvasState: CanvasState
+): ExecutionResult {
+  const animation = params.animation || 'idle';
+  const scale = params.scale || 1.0;
+  const rotation = params.rotation || 0;
+  const physics = params.physics || {};
+
+  // Create sprite with enhanced properties
+  const sprite = {
+    id: uuidv4(),
+    spriteDefId: params.spriteType,
+    x: params.position.x,
+    y: params.position.y,
+    scale,
+    rotation,
+    flipX: false,
+    flipY: false,
+    currentAnimation: animation,
+    animationState: {
+      currentFrame: 0,
+      frameTime: 0,
+      isPlaying: true,
+      loop: animation !== 'jump' && animation !== 'attack' && animation !== 'hurt' && animation !== 'die'
+    },
+    physics: {
+      enabled: physics.collision !== false,
+      mass: physics.mass || 1.0,
+      friction: physics.friction || 0.5,
+      restitution: physics.restitution || 0.0,
+      collision: physics.collision !== false,
+      velocity: { x: 0, y: 0 },
+      acceleration: { x: 0, y: 0 }
+    },
+    metadata: {
+      createdBy: "ai-agent",
+      createdAt: Date.now(),
+      locked: false,
+      layer: 1,
+      enhanced: true
+    }
+  };
+
+  return {
+    success: true,
+    message: `Created ${params.spriteType} sprite at (${params.position.x}, ${params.position.y}) with ${animation} animation and physics integration`,
+    canvasUpdates: { sprites: [sprite] }
+  };
+}
+
+// Configure physics properties for tiles
+export function executeSetPhysics(
+  params: {
+    tileCoordinates: Array<{ x: number; y: number }>;
+    materialType: string;
+    friction?: number;
+    restitution?: number;
+    collisionType: string;
+  },
+  canvasState: CanvasState,
+  tileMap: TileMap
+): ExecutionResult {
+  const physicsEntities: any[] = [];
+  
+  // Material type defaults
+  const materialDefaults = {
+    solid: { friction: 0.7, restitution: 0.0 },
+    platform: { friction: 0.6, restitution: 0.0 },
+    bouncy: { friction: 0.3, restitution: 0.8 },
+    slippery: { friction: 0.1, restitution: 0.0 },
+    hazard: { friction: 0.5, restitution: 0.0 }
+  };
+
+  const defaults = materialDefaults[params.materialType as keyof typeof materialDefaults] || materialDefaults.solid;
+  const friction = params.friction !== undefined ? params.friction : defaults.friction;
+  const restitution = params.restitution !== undefined ? params.restitution : defaults.restitution;
+
+  // Create physics entities for each tile coordinate
+  for (const coord of params.tileCoordinates) {
+    const physicsEntity = {
+      id: uuidv4(),
+      tileX: coord.x,
+      tileY: coord.y,
+      materialType: params.materialType,
+      collisionType: params.collisionType,
+      friction,
+      restitution,
+      isDamaging: params.materialType === 'hazard',
+      isOneWay: params.collisionType === 'platform',
+      isTrigger: params.collisionType === 'trigger',
+      metadata: {
+        createdBy: "ai-agent",
+        createdAt: Date.now()
+      }
+    };
+
+    physicsEntities.push(physicsEntity);
+  }
+
+  return {
+    success: true,
+    message: `Configured physics for ${params.tileCoordinates.length} tiles with ${params.materialType} material and ${params.collisionType} collision`,
+    canvasUpdates: { physicsEntities }
+  };
+}
+
+// Generate complete platformer terrain and level layout
+export function executePlatformerTerrain(
+  params: {
+    difficulty: string;
+    theme: string;
+    size: string;
+    features?: string[];
+    enemyDensity?: number;
+  },
+  canvasState: CanvasState,
+  tileMap: TileMap,
+  tilesets: Array<{ id: string; name: string }>
+): ExecutionResult {
+  const newTiles: Tile[] = [];
+  const newSprites: any[] = [];
+  const physicsEntities: any[] = [];
+  
+  // Size configurations
+  const sizeConfigs = {
+    small: { width: 30, height: 20 },
+    medium: { width: 50, height: 30 },
+    large: { width: 80, height: 40 },
+    massive: { width: 120, height: 60 }
+  };
+
+  const { width, height } = sizeConfigs[params.size as keyof typeof sizeConfigs] || sizeConfigs.medium;
+  
+  // Theme-based tileset selection
+  const themeMapping = {
+    forest: "Grass Terrain",
+    cave: "Dirt Terrain", 
+    castle: "Dirt Terrain",
+    sky: "Grass Terrain"
+  };
+
+  // Guard against undefined or null tilesets
+  if (!tilesets || !Array.isArray(tilesets)) {
+    return {
+      success: false,
+      message: 'Tilesets not available. Please ensure tilesets are loaded.'
+    };
+  }
+
+  const terrainTileset = tilesets.find(t => t.name === themeMapping[params.theme as keyof typeof themeMapping]);
+  if (!terrainTileset) {
+    return {
+      success: false,
+      message: `Could not find appropriate tileset for ${params.theme} theme`
+    };
+  }
+
+  // Generate base terrain (ground level)
+  const groundLevel = Math.floor(height * 0.7); // Ground at 70% down
+  
+  // Create ground
+  for (let x = 0; x < width; x++) {
+    for (let y = groundLevel; y < height; y++) {
+      newTiles.push({
+        x,
+        y,
+        tilesetId: terrainTileset.id,
+        tileIndex: 4,
+        layer: 'terrain'
+      });
+      
+      // Add physics to ground tiles
+      if (y === groundLevel) {
+        physicsEntities.push({
+          id: uuidv4(),
+          tileX: x,
+          tileY: y,
+          materialType: 'solid',
+          collisionType: 'solid',
+          friction: 0.7,
+          restitution: 0.0,
+          metadata: { createdBy: "ai-agent", createdAt: Date.now() }
+        });
+      }
+    }
+  }
+
+  // Generate platforms based on difficulty
+  const platformCount = {
+    easy: Math.floor(width / 8),
+    medium: Math.floor(width / 6),
+    hard: Math.floor(width / 4),
+    expert: Math.floor(width / 3)
+  }[params.difficulty] || 5;
+
+  for (let i = 0; i < platformCount; i++) {
+    const platformX = Math.floor((i + 1) * (width / (platformCount + 1)));
+    const platformY = Math.floor(groundLevel - Math.random() * (groundLevel / 2) - 3);
+    const platformWidth = Math.floor(3 + Math.random() * 4); // 3-6 tiles wide
+
+    for (let x = platformX; x < platformX + platformWidth && x < width; x++) {
+      newTiles.push({
+        x,
+        y: platformY,
+        tilesetId: terrainTileset.id,
+        tileIndex: 4,
+        layer: 'terrain'
+      });
+
+      // Add platform physics (one-way collision)
+      physicsEntities.push({
+        id: uuidv4(),
+        tileX: x,
+        tileY: platformY,
+        materialType: 'platform',
+        collisionType: 'platform',
+        friction: 0.6,
+        restitution: 0.0,
+        isOneWay: true,
+        metadata: { createdBy: "ai-agent", createdAt: Date.now() }
+      });
+    }
+  }
+
+  // Add hazards if requested
+  if (params.features?.includes('hazards')) {
+    const hazardCount = {
+      easy: 2,
+      medium: 4,
+      hard: 6,
+      expert: 8
+    }[params.difficulty] || 3;
+
+    for (let i = 0; i < hazardCount; i++) {
+      const hazardX = Math.floor(Math.random() * (width - 2)) + 1;
+      const hazardY = groundLevel - 1;
+
+      // Create hazard tile (using different tile index for visual distinction)
+      newTiles.push({
+        x: hazardX,
+        y: hazardY,
+        tilesetId: terrainTileset.id,
+        tileIndex: 8, // Different tile for hazards
+        layer: 'terrain'
+      });
+
+      // Add hazard physics
+      physicsEntities.push({
+        id: uuidv4(),
+        tileX: hazardX,
+        tileY: hazardY,
+        materialType: 'hazard',
+        collisionType: 'trigger',
+        friction: 0.5,
+        restitution: 0.0,
+        isDamaging: true,
+        metadata: { createdBy: "ai-agent", createdAt: Date.now() }
+      });
+    }
+  }
+
+  // Add enemies based on density
+  const enemyDensity = params.enemyDensity || 0.3;
+  const enemyCount = Math.floor(width * enemyDensity / 10);
+  
+  for (let i = 0; i < enemyCount; i++) {
+    const enemyX = Math.floor(Math.random() * (width - 4)) + 2;
+    const enemyY = groundLevel - 2; // Place above ground
+
+    newSprites.push({
+      id: uuidv4(),
+      spriteDefId: 'enemy-goblin',
+      x: enemyX * 32, // Convert to pixels
+      y: enemyY * 32,
+      scale: 1.0,
+      rotation: 0,
+      flipX: false,
+      flipY: false,
+      currentAnimation: 'idle',
+      animationState: {
+        currentFrame: 0,
+        frameTime: 0,
+        isPlaying: true,
+        loop: true
+      },
+      physics: {
+        enabled: true,
+        mass: 0.8,
+        friction: 0.5,
+        restitution: 0.0,
+        collision: true,
+        velocity: { x: 0, y: 0 },
+        acceleration: { x: 0, y: 0 }
+      },
+      metadata: {
+        createdBy: "ai-agent",
+        createdAt: Date.now(),
+        locked: false,
+        layer: 1,
+        aiControlled: true
+      }
+    });
+  }
+
+  // Apply auto-tiling to terrain
+  const autoTiledTiles = applyAutoTiling(newTiles, tileMap.tiles, terrainTileset.id);
+
+  return {
+    success: true,
+    message: `Generated ${params.difficulty} ${params.theme} platformer level (${params.size}) with ${autoTiledTiles.length} terrain tiles, ${physicsEntities.length} physics entities, and ${newSprites.length} enemies`,
+    canvasUpdates: { 
+      tiles: autoTiledTiles,
+      sprites: newSprites,
+      physicsEntities
+    }
+  };
+}
+
+// Control sprite animations and state machine transitions
+export function executeAnimateSprite(
+  params: {
+    spriteId: string;
+    animation: string;
+    loop?: boolean;
+    transitionConditions?: Array<{
+      trigger: string;
+      targetAnimation: string;
+      delay?: number;
+      variable?: string;
+      value?: string;
+    }>;
+  },
+  canvasState: CanvasState
+): ExecutionResult {
+  const targetSprites: any[] = [];
+  const loop = params.loop !== undefined ? params.loop : 
+    !['jump', 'attack', 'hurt', 'die'].includes(params.animation);
+
+  // Find target sprites
+  if (params.spriteId === 'all') {
+    // Apply to all sprites
+    canvasState.sprites?.forEach(sprite => {
+      const updatedSprite = {
+        ...sprite,
+        currentAnimation: params.animation,
+        animationState: {
+          ...sprite.animationState,
+          currentFrame: 0,
+          frameTime: 0,
+          isPlaying: true,
+          loop
+        }
+      };
+
+      // Add state machine transitions if specified
+      if (params.transitionConditions) {
+        updatedSprite.stateMachine = {
+          currentState: params.animation,
+          transitions: params.transitionConditions.map(condition => ({
+            from: params.animation,
+            to: condition.targetAnimation,
+            trigger: condition.trigger,
+            delay: condition.delay,
+            variable: condition.variable,
+            value: condition.value
+          }))
+        };
+      }
+
+      targetSprites.push(updatedSprite);
+    });
+  } else {
+    // Apply to specific sprite
+    const sprite = canvasState.sprites?.find(s => s.id === params.spriteId);
+    if (sprite) {
+      const updatedSprite = {
+        ...sprite,
+        currentAnimation: params.animation,
+        animationState: {
+          ...sprite.animationState,
+          currentFrame: 0,
+          frameTime: 0,
+          isPlaying: true,
+          loop
+        }
+      };
+
+      // Add state machine transitions if specified
+      if (params.transitionConditions) {
+        updatedSprite.stateMachine = {
+          currentState: params.animation,
+          transitions: params.transitionConditions.map(condition => ({
+            from: params.animation,
+            to: condition.targetAnimation,
+            trigger: condition.trigger,
+            delay: condition.delay,
+            variable: condition.variable,
+            value: condition.value
+          }))
+        };
+      }
+
+      targetSprites.push(updatedSprite);
+    }
+  }
+
+  if (targetSprites.length === 0) {
+    return {
+      success: false,
+      message: `No sprites found with ID "${params.spriteId}"`
+    };
+  }
+
+  const transitionInfo = params.transitionConditions ? 
+    ` with ${params.transitionConditions.length} state transitions` : '';
+
+  return {
+    success: true,
+    message: `Updated ${targetSprites.length} sprite(s) to ${params.animation} animation (loop: ${loop})${transitionInfo}`,
+    canvasUpdates: { sprites: targetSprites }
   };
 }

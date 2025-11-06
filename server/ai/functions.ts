@@ -6,12 +6,12 @@ export const canvasFunctions: ChatCompletionTool[] = [
     type: "function",
     function: {
       name: "paintTerrain",
-      description: `Paint terrain tiles (grass, dirt, or water) on the canvas with various patterns.
+      description: `Paint terrain tiles (grass, dirt, sand, stone, water/lake, or paths) on the canvas with various patterns. Note: "Lake" and "Water Terrain" are equivalent - both refer to the same tileset. Use "DirtPath" for paths, roads, and trails.
       
 NATURAL LANGUAGE INTERPRETATION GUIDE:
 - "field" / "area" / "background" → use 'fill' pattern with large area
 - "river" / "winding river" / "stream" → use 'winding_path' pattern with high aspect ratio (width >> height or height >> width)
-- "path" / "road" / "trail" → use 'horizontal_path', 'vertical_path', or 'diagonal_path' based on direction
+- "path" / "road" / "trail" / "dirt path" / "walkway" → use "DirtPath" tileset with 'horizontal_path', 'vertical_path', 'diagonal_path', or 'winding_path' based on direction
 - "border" / "frame" / "outline" → use 'border' pattern
 - "winding" / "curved" / "meandering" / "snaking" → use 'winding_path' pattern with higher curveIntensity (0.4-0.5)
 - "through" / "across" / "traversing" → path should span the full area dimension
@@ -27,8 +27,8 @@ Use this when users ask to add terrain, paint backgrounds, create rivers, roads,
         properties: {
           tilesetName: {
             type: "string",
-            enum: ["Dirt Terrain", "Grass Terrain", "Water Terrain"],
-            description: "The type of terrain to paint"
+            enum: ["Dirt Terrain", "Grass Terrain", "Lake", "Water Terrain", "Sand Terrain", "Stone Terrain", "DirtPath"],
+            description: "The type of terrain to paint. 'Lake' and 'Water Terrain' are equivalent - both map to the Lake tileset. Use 'DirtPath' for paths, roads, and trails. Available: Grass Terrain, Dirt Terrain, Sand Terrain, Stone Terrain, Lake, Water Terrain, DirtPath"
           },
           area: {
             type: "object",
@@ -260,6 +260,291 @@ Use this when users ask to add objects, props, decorations, or natural elements 
           }
         },
         required: ["spriteType", "count", "layout"]
+      }
+    }
+  },
+  // NEW PR6 ENHANCED AI FUNCTIONS
+  {
+    type: "function",
+    function: {
+      name: "createSprite",
+      description: `Create and place a single sprite with advanced animation and physics integration.
+
+SPRITE TYPES:
+- "knight-demo" - Armored knight character with combat animations
+- "platformer-character" - Generic platformer character with movement animations
+- "enemy-goblin" - Enemy goblin with AI behavior patterns
+
+ANIMATION STATES:
+- "idle" - Default standing animation
+- "walk" - Walking/moving animation
+- "run" - Running/fast movement animation
+- "jump" - Jumping animation
+- "attack" - Combat/attack animation
+- "hurt" - Damage taken animation
+- "die" - Death animation
+
+PHYSICS PROPERTIES:
+- mass: Object weight (affects gravity and collisions)
+- friction: Surface interaction (0.0 = slippery, 1.0 = sticky)
+- restitution: Bounce factor (0.0 = no bounce, 1.0 = perfect bounce)
+- collision: Whether sprite participates in physics collisions
+
+Use this when users want to place a specific sprite with detailed control over animation and physics.`,
+      parameters: {
+        type: "object",
+        properties: {
+          spriteType: {
+            type: "string",
+            enum: ["knight-demo", "platformer-character", "enemy-goblin"],
+            description: "Type of sprite to create"
+          },
+          position: {
+            type: "object",
+            properties: {
+              x: { type: "number", description: "X coordinate in pixels" },
+              y: { type: "number", description: "Y coordinate in pixels" }
+            },
+            required: ["x", "y"],
+            description: "Sprite placement position"
+          },
+          animation: {
+            type: "string",
+            enum: ["idle", "walk", "run", "jump", "attack", "hurt", "die"],
+            description: "Initial animation state (default: 'idle')"
+          },
+          physics: {
+            type: "object",
+            properties: {
+              mass: { type: "number", minimum: 0.1, maximum: 10.0, description: "Sprite mass for physics simulation" },
+              friction: { type: "number", minimum: 0.0, maximum: 1.0, description: "Surface friction coefficient" },
+              restitution: { type: "number", minimum: 0.0, maximum: 1.0, description: "Bounce factor" },
+              collision: { type: "boolean", description: "Enable collision detection" }
+            },
+            description: "Physics configuration (optional)"
+          },
+          scale: {
+            type: "number",
+            minimum: 0.5,
+            maximum: 3.0,
+            description: "Sprite scale factor (default: 1.0)"
+          },
+          rotation: {
+            type: "number",
+            minimum: 0,
+            maximum: 360,
+            description: "Rotation angle in degrees (default: 0)"
+          }
+        },
+        required: ["spriteType", "position"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "setPlatformPhysics",
+      description: `Configure physics properties for tiles to create platforms, hazards, and interactive terrain.
+
+MATERIAL TYPES:
+- "solid" - Standard solid collision (walls, floors)
+- "platform" - One-way collision (jump-through platforms)
+- "bouncy" - High restitution surfaces (trampolines, bounce pads)
+- "slippery" - Low friction surfaces (ice, oil)
+- "hazard" - Damage-dealing surfaces (spikes, lava)
+
+COLLISION TYPES:
+- "solid" - Full collision blocking
+- "platform" - One-way collision (can jump through from below)
+- "trigger" - No collision, but detects contact (collectibles, sensors)
+
+Use this when users want to add physics behavior to terrain, create platformer mechanics, or set up interactive level elements.`,
+      parameters: {
+        type: "object",
+        properties: {
+          tileCoordinates: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                x: { type: "number", description: "Tile X coordinate" },
+                y: { type: "number", description: "Tile Y coordinate" }
+              },
+              required: ["x", "y"]
+            },
+            description: "Array of tile positions to configure",
+            minItems: 1,
+            maxItems: 100
+          },
+          materialType: {
+            type: "string",
+            enum: ["solid", "platform", "bouncy", "slippery", "hazard"],
+            description: "Physics material type"
+          },
+          friction: {
+            type: "number",
+            minimum: 0.0,
+            maximum: 1.0,
+            description: "Surface friction coefficient (optional, overrides material default)"
+          },
+          restitution: {
+            type: "number",
+            minimum: 0.0,
+            maximum: 1.0,
+            description: "Bounce factor (optional, overrides material default)"
+          },
+          collisionType: {
+            type: "string",
+            enum: ["solid", "platform", "trigger"],
+            description: "Collision behavior type"
+          }
+        },
+        required: ["tileCoordinates", "materialType", "collisionType"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "createPlatformerLevel",
+      description: `Generate a complete platformer level with terrain, platforms, hazards, and enemies.
+
+DIFFICULTY LEVELS:
+- "easy" - Simple layouts, few hazards, forgiving jumps
+- "medium" - Moderate complexity, some hazards, standard platforming
+- "hard" - Complex layouts, many hazards, precise platforming required
+- "expert" - Extremely challenging, maximum hazards, expert-level design
+
+THEMES:
+- "forest" - Natural environment with trees, grass, wooden platforms
+- "cave" - Underground setting with stone, crystals, dark atmosphere
+- "castle" - Medieval setting with stone blocks, towers, flags
+- "sky" - Floating platforms, clouds, aerial environment
+
+LEVEL SIZES:
+- "small" - 30x20 tiles, quick level
+- "medium" - 50x30 tiles, standard level
+- "large" - 80x40 tiles, extended level
+- "massive" - 120x60 tiles, epic level
+
+SPECIAL FEATURES:
+- "moving-platforms" - Platforms that move in patterns
+- "hazards" - Spikes, lava, dangerous elements
+- "secrets" - Hidden areas and collectibles
+- "checkpoints" - Save points throughout level
+
+Use this when users want to generate complete levels or need inspiration for platformer design.`,
+      parameters: {
+        type: "object",
+        properties: {
+          difficulty: {
+            type: "string",
+            enum: ["easy", "medium", "hard", "expert"],
+            description: "Level difficulty setting"
+          },
+          theme: {
+            type: "string",
+            enum: ["forest", "cave", "castle", "sky"],
+            description: "Visual and gameplay theme"
+          },
+          size: {
+            type: "string",
+            enum: ["small", "medium", "large", "massive"],
+            description: "Level dimensions"
+          },
+          features: {
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["moving-platforms", "hazards", "secrets", "checkpoints"]
+            },
+            description: "Special level features to include (optional)"
+          },
+          enemyDensity: {
+            type: "number",
+            minimum: 0.0,
+            maximum: 1.0,
+            description: "Enemy placement density (0.0 = no enemies, 1.0 = maximum enemies)"
+          }
+        },
+        required: ["difficulty", "theme", "size"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "animateSprite",
+      description: `Control sprite animations and state machine transitions.
+
+ANIMATION STATES:
+- "idle" - Default standing/waiting animation
+- "walk" - Walking movement animation
+- "run" - Running/fast movement animation
+- "jump" - Jumping animation (usually non-looping)
+- "attack" - Combat/attack animation
+- "hurt" - Damage reaction animation
+- "die" - Death animation
+
+TRANSITION CONDITIONS:
+- "onComplete" - Trigger when current animation finishes
+- "onInput" - Trigger on user input/interaction
+- "onCollision" - Trigger when sprite collides with something
+- "onTimer" - Trigger after specified time delay
+- "onVariable" - Trigger when state variable changes
+
+Use this when users want to control sprite behavior, set up animation sequences, or create interactive sprite responses.`,
+      parameters: {
+        type: "object",
+        properties: {
+          spriteId: {
+            type: "string",
+            description: "Target sprite identifier (use 'all' for all sprites, or specific sprite ID)"
+          },
+          animation: {
+            type: "string",
+            enum: ["idle", "walk", "run", "jump", "attack", "hurt", "die"],
+            description: "Animation state to trigger"
+          },
+          loop: {
+            type: "boolean",
+            description: "Whether animation should loop (default: true for most animations, false for jump/attack/hurt/die)"
+          },
+          transitionConditions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                trigger: {
+                  type: "string",
+                  enum: ["onComplete", "onInput", "onCollision", "onTimer", "onVariable"],
+                  description: "Condition that triggers transition"
+                },
+                targetAnimation: {
+                  type: "string",
+                  enum: ["idle", "walk", "run", "jump", "attack", "hurt", "die"],
+                  description: "Animation to transition to"
+                },
+                delay: {
+                  type: "number",
+                  minimum: 0,
+                  description: "Delay in milliseconds (for onTimer trigger)"
+                },
+                variable: {
+                  type: "string",
+                  description: "Variable name to watch (for onVariable trigger)"
+                },
+                value: {
+                  type: "string",
+                  description: "Variable value that triggers transition (for onVariable trigger)"
+                }
+              },
+              required: ["trigger", "targetAnimation"]
+            },
+            description: "Conditions for automatic state transitions (optional)"
+          }
+        },
+        required: ["spriteId", "animation"]
       }
     }
   }

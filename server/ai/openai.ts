@@ -1,10 +1,9 @@
 import OpenAI from "openai";
+import { getEnvironment } from '../config/env.js';
 
-if (!process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
-  throw new Error("AI_INTEGRATIONS_OPENAI_API_KEY is not set");
-}
+const env = getEnvironment();
 
 export const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: env.AI_INTEGRATIONS_OPENAI_API_KEY || env.OPENAI_API_KEY,
+  baseURL: env.AI_INTEGRATIONS_OPENAI_BASE_URL,
 });

@@ -26,6 +26,8 @@ export function SpriteAnimator({
 
   // Load sprite sheet
   useEffect(() => {
+    if (!definition.imageUrl) return;
+    
     const img = new window.Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => setImage(img);
@@ -43,17 +45,36 @@ export function SpriteAnimator({
       return;
     }
 
-    const animation = definition.animations[sprite.currentAnimation];
-    if (!animation || animation.frames.length === 0) return;
+    // Resolve animation or build a fallback if none exists
+    const explicitAnim = definition.animations[sprite.currentAnimation];
+    let frames: number[] | null = null;
+    let fps = 8;
+    let loop = true;
+
+    if (explicitAnim && explicitAnim.frames.length > 0) {
+      frames = explicitAnim.frames;
+      fps = explicitAnim.fps || 8;
+      loop = explicitAnim.loop !== false;
+    } else if (image && definition.frameWidth > 0 && definition.frameHeight > 0) {
+      // Fallback: iterate all frames in the sheet grid
+      const cols = Math.floor(image.width / definition.frameWidth);
+      const rows = Math.floor(image.height / definition.frameHeight);
+      const total = Math.max(1, cols * rows);
+      frames = Array.from({ length: total }, (_, i) => i);
+      fps = 8; // sensible default
+      loop = true;
+    }
+
+    if (!frames || frames.length === 0) return;
 
     let frameIndex = 0;
-    const interval = 1000 / animation.fps;
+    const interval = 1000 / Math.max(1, fps);
 
     const animate = () => {
-      setCurrentFrame(animation.frames[frameIndex]);
-      frameIndex = (frameIndex + 1) % animation.frames.length;
-      
-      if (animation.loop || frameIndex !== 0) {
+      setCurrentFrame(frames![frameIndex]);
+      frameIndex = (frameIndex + 1) % frames!.length;
+
+      if (loop || frameIndex !== 0) {
         animationRef.current = setTimeout(animate, interval);
       }
     };
@@ -65,7 +86,7 @@ export function SpriteAnimator({
         clearTimeout(animationRef.current);
       }
     };
-  }, [sprite.currentAnimation, definition.animations, isPreviewing]);
+  }, [sprite.currentAnimation, definition.animations, isPreviewing, image, definition.frameWidth, definition.frameHeight]);
 
   if (!image) return null;
 

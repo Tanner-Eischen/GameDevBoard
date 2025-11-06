@@ -63,7 +63,8 @@ export function calculateAutoTileIndex(neighbors: NeighborConfig): number {
 
 /**
  * Get the neighbor configuration for a tile at the given position
- * For terrain-layer tiles, considers ANY terrain tile as a neighbor (seamless joins)
+ * For terrain-layer tiles, considers ONLY tiles from the same tileset as neighbors
+ * (different terrain types are treated as empty, producing edges as intended)
  * For props-layer tiles, only considers tiles from the same tileset
  */
 export function getNeighborConfig(
@@ -85,9 +86,9 @@ export function getNeighborConfig(
 
   const hasTileAt = (tx: number, ty: number) => {
     if (isTerrainLayer) {
-      // For terrain tiles: treat ANY terrain tile as a neighbor (seamless joins between different terrain types)
+      // For terrain tiles: neighbors must be the SAME tileset to create edges at boundaries
       return tiles.some(
-        (t) => t.x === tx && t.y === ty && t.layer === 'terrain'
+        (t) => t.x === tx && t.y === ty && t.layer === 'terrain' && t.tilesetId === tilesetId
       );
     } else {
       // For props tiles: only consider tiles from the same tileset
@@ -150,15 +151,22 @@ export function getTilesToUpdate(
       );
       
       for (const tile of tilesAtPosition) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles, 'terrain');
-        const tileIndex = calculateAutoTileIndex(neighbors);
+        const neighborsAny = getNeighborConfig(pos.x, pos.y, tile.tilesetId, tiles, 'terrain');
+        let candidateIndex = calculateAutoTileIndex(neighborsAny);
+
+        // Apply ledge bottom-row rule: only same-type neighbors trigger bottom tiles
+        const neighborsAdjusted = applyLedgeBottomRowRule(pos, tile.tilesetId, tiles, neighborsAny, candidateIndex);
+        const tileIndex = calculateAutoTileIndex(neighborsAdjusted);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId: tile.tilesetId });
       }
       
       // If no tile at position but includeSelf and it's the center, add it
       if (tilesAtPosition.length === 0 && pos.x === x && pos.y === y && includeSelf) {
-        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, tiles, 'terrain');
-        const tileIndex = calculateAutoTileIndex(neighbors);
+        const neighborsAny = getNeighborConfig(pos.x, pos.y, tilesetId, tiles, 'terrain');
+        let candidateIndex = calculateAutoTileIndex(neighborsAny);
+
+        const neighborsAdjusted = applyLedgeBottomRowRule(pos, tilesetId, tiles, neighborsAny, candidateIndex);
+        const tileIndex = calculateAutoTileIndex(neighborsAdjusted);
         updates.push({ x: pos.x, y: pos.y, tileIndex, tilesetId });
       }
     } else {
@@ -176,4 +184,44 @@ export function getTilesToUpdate(
   }
 
   return updates;
+}
+
+/**
+ * Helper: identify tilesets that follow the ledge bottom-row restriction.
+ */
+function isLedgeTileset(tilesetId: string): boolean {
+  return tilesetId.toLowerCase().startsWith('ledge');
+}
+
+/**
+ * Client-side mirror of the ledge bottom-row rule.
+ * Only produce bottom-row indices (6,7,8) when the influencing neighbors
+ * are of the same tileset.
+ */
+function applyLedgeBottomRowRule(
+  pos: { x: number; y: number },
+  tilesetId: string,
+  tiles: Tile[],
+  neighborsAny: NeighborConfig,
+  candidateIndex: number
+): NeighborConfig {
+  if (!isLedgeTileset(tilesetId) || (candidateIndex !== 6 && candidateIndex !== 7 && candidateIndex !== 8)) {
+    return neighborsAny;
+  }
+
+  const sameTileAt = (tx: number, ty: number) =>
+    tiles.some(
+      (t) => t.x === tx && t.y === ty && t.layer === 'terrain' && t.tilesetId === tilesetId
+    );
+
+  const adjusted: NeighborConfig = { ...neighborsAny };
+  adjusted.top = sameTileAt(pos.x, pos.y - 1);
+
+  if (candidateIndex === 6) {
+    adjusted.right = sameTileAt(pos.x + 1, pos.y);
+  } else if (candidateIndex === 8) {
+    adjusted.left = sameTileAt(pos.x - 1, pos.y);
+  }
+
+  return adjusted;
 }

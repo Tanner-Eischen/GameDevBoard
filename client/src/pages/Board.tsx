@@ -7,12 +7,15 @@ import { TilesetPanel } from '@/components/TilesetPanel';
 import { SpritePanel } from '@/components/SpritePanel';
 import { UserPresence } from '@/components/UserPresence';
 import { ProjectManager } from '@/components/ProjectManager';
+import { BoardManager } from '@/components/BoardManager';
 import { AiChat } from '@/components/AiChat';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { getCollaborationService } from '@/services/collaboration';
+import { LayerVisibilityProvider } from '@/contexts/LayerVisibilityContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
-import { PanelLeft, PanelRight } from 'lucide-react';
+import { PanelLeft, PanelRight, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const USER_COLORS = [
@@ -27,17 +30,40 @@ const USER_COLORS = [
 ];
 
 export default function Board() {
-  const { setCurrentUser, setTool, undo, redo, setCurrentProject, currentProjectId, tiles, shapes } = useCanvasStore();
+  const { 
+    setCurrentUser, 
+    setTool, 
+    undo, 
+    redo,
+    clearCanvas
+  } = useCanvasStore();
+  
+  const { logout } = useAuth();
   const collaborationRef = useRef<ReturnType<typeof getCollaborationService> | null>(null);
-  const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [leftPanelOpen, setLeftPanelOpen] = useState(true);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
+  // Initialize user and collaboration on mount
   useEffect(() => {
-    // Initialize current user
-    const userId = uuidv4();
-    const userName = `User ${Math.floor(Math.random() * 1000)}`;
-    const userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
+    // Clear the canvas to ensure it's blank
+    clearCanvas();
+    
+    // Initialize current user with persistence
+    let userId = localStorage.getItem('user_id');
+    let userName = localStorage.getItem('user_name');
+    let userColor = localStorage.getItem('user_color');
+
+    // Generate new user identity only if not already stored
+    if (!userId || !userName || !userColor) {
+      userId = uuidv4();
+      userName = `User ${Math.floor(Math.random() * 1000)}`;
+      userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
+      
+      // Store in localStorage for persistence
+      localStorage.setItem('user_id', userId);
+      localStorage.setItem('user_name', userName);
+      localStorage.setItem('user_color', userColor);
+    }
 
     setCurrentUser({
       id: userId,
@@ -51,96 +77,22 @@ export default function Board() {
     // Initialize collaboration service
     const roomId = new URLSearchParams(window.location.search).get('room') || 'default';
     collaborationRef.current = getCollaborationService(roomId);
-    collaborationRef.current.connect();
+    
+    // Get auth token from localStorage and connect
+    const authToken = localStorage.getItem('auth_token');
+    collaborationRef.current.connect(authToken || undefined);
     
     // Make collaboration service globally available for store to use
     (window as any).__collaborationService = collaborationRef.current;
-    
-    // Auto-load last project from localStorage
-    const savedProjectId = localStorage.getItem('currentProjectId');
-    const savedProjectName = localStorage.getItem('currentProjectName');
-    if (savedProjectId && savedProjectName) {
-      setCurrentProject(savedProjectId, savedProjectName);
-      
-      // Fetch and load the project
-      fetch(`/api/projects/${savedProjectId}`)
-        .then(res => res.json())
-        .then(project => {
-          useCanvasStore.setState({
-            shapes: project.canvasState.shapes,
-            tiles: project.tileMap.tiles,
-            zoom: project.canvasState.zoom,
-            pan: project.canvasState.pan,
-            gridSize: project.canvasState.gridSize,
-          });
-          
-          // Sync loaded data to collaboration document
-          if ((window as any).__collaborationService) {
-            (window as any).__collaborationService.syncFromLocal();
-          }
-        })
-        .catch(err => {
-          console.error('Failed to auto-load project:', err);
-          // Clear invalid project from localStorage
-          localStorage.removeItem('currentProjectId');
-          localStorage.removeItem('currentProjectName');
-        });
-    }
 
     return () => {
+      console.log('Board.tsx: Cleanup function called - disconnecting collaboration service');
       if (collaborationRef.current) {
         collaborationRef.current.disconnect();
         (window as any).__collaborationService = null;
       }
     };
-  }, [setCurrentUser, setCurrentProject]);
-
-  // Auto-save when tiles or shapes change
-  useEffect(() => {
-    if (!currentProjectId) return;
-    
-    // Debounce auto-save to avoid too many requests
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-    
-    autoSaveTimeoutRef.current = setTimeout(async () => {
-      const state = useCanvasStore.getState();
-      const canvasState = {
-        shapes: state.shapes,
-        selectedIds: [],
-        tool: 'select' as const,
-        zoom: state.zoom,
-        pan: state.pan,
-        gridSize: state.gridSize,
-        gridVisible: true,
-        snapToGrid: false,
-      };
-
-      const tileMap = {
-        gridSize: state.gridSize,
-        tiles: state.tiles,
-      };
-
-      try {
-        await fetch(`/api/projects/${currentProjectId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ canvasState, tileMap }),
-          credentials: 'include',
-        });
-        console.log('Auto-saved project');
-      } catch (error) {
-        console.error('Auto-save failed:', error);
-      }
-    }, 1000); // Wait 1 second after last change before saving
-
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-      }
-    };
-  }, [tiles, shapes, currentProjectId]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -191,11 +143,9 @@ export default function Board() {
           setTool('tile-paint');
           break;
         case 'e':
-          if (!e.ctrlKey && !e.metaKey) {
-            setTool('tile-erase');
-          }
+          setTool('tile-erase');
           break;
-        case 'x':
+        case 'g':
           setTool('sprite');
           break;
       }
@@ -205,87 +155,95 @@ export default function Board() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [setTool, undo, redo]);
 
+  // Always render the blank board interface
   return (
-    <div className="h-screen w-full flex flex-col bg-background">
-      {/* Top Bar */}
-      <header className="flex items-center justify-between px-4 py-2 bg-card border-b border-card-border">
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold" data-testid="text-app-title">
-            Game Dev Board
-          </h1>
-          <span className="text-sm text-muted-foreground">
-            {useCanvasStore.getState().currentProjectName}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <ProjectManager />
-          <UserPresence />
-        </div>
-      </header>
-
-      {/* Toolbar */}
-      <Toolbar />
-
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden relative">
-        {/* Panel Toggle Buttons - always visible, higher z-index than panels */}
-        <div className="absolute top-2 left-2 z-30 flex gap-2">
-          <Button
-            size="icon"
-            variant="outline"
-            className="bg-card/80 backdrop-blur-sm shadow-lg"
-            onClick={() => setLeftPanelOpen(!leftPanelOpen)}
-            data-testid="button-toggle-left-panel"
-          >
-            <PanelLeft className="h-4 w-4" />
-          </Button>
-        </div>
-        
-        <div className="absolute top-2 right-2 z-30 flex gap-2">
-          <Button
-            size="icon"
-            variant="outline"
-            className="bg-card/80 backdrop-blur-sm shadow-lg"
-            onClick={() => setRightPanelOpen(!rightPanelOpen)}
-            data-testid="button-toggle-right-panel"
-          >
-            <PanelRight className="h-4 w-4" />
-          </Button>
-        </div>
-
-        {/* Left Sidebar */}
-        <aside className={cn(
-          "w-64 bg-card border-r border-card-border overflow-auto transition-all duration-300",
-          "absolute md:relative inset-y-0 left-0 z-20 md:z-auto shadow-lg md:shadow-none",
-          leftPanelOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0"
-        )}>
-          <div className="p-4 space-y-4 min-w-64">
-            <LayersPanel />
+    <LayerVisibilityProvider>
+      <div data-testid="main-board" className="h-screen w-screen bg-gray-900 flex flex-col overflow-hidden">
+        {/* Top Toolbar - Full Width */}
+        <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+              className="text-gray-300 hover:text-white hover:bg-gray-700"
+            >
+              <PanelLeft className="h-4 w-4" />
+            </Button>
+            <BoardManager />
+            <ProjectManager />
           </div>
-        </aside>
-
-        {/* Canvas */}
-        <main className="flex-1 min-w-0">
-          <Canvas />
-        </main>
-
-        {/* Right Sidebar */}
-        <aside className={cn(
-          "w-80 bg-card border-l border-card-border overflow-auto transition-all duration-300",
-          "absolute md:relative inset-y-0 right-0 z-20 md:z-auto shadow-lg md:shadow-none",
-          rightPanelOpen ? "translate-x-0" : "translate-x-full md:translate-x-0 md:w-0 md:border-l-0"
-        )}>
-          <div className="p-4 space-y-4 min-w-80">
-            <PropertiesPanel />
-            <TilesetPanel />
-            <SpritePanel />
+          
+          {/* Horizontal Toolbar with drawing tools only */}
+          <div className="flex-1 flex justify-center max-w-none overflow-hidden">
+            <div className="flex items-center justify-center">
+              <Toolbar />
+            </div>
           </div>
-        </aside>
+          
+          <div className="flex items-center gap-2">
+            <UserPresence />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="text-gray-300 hover:text-white hover:bg-gray-700"
+              title="Logout"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setRightPanelOpen(!rightPanelOpen)}
+              className="text-gray-300 hover:text-white hover:bg-gray-700"
+            >
+              <PanelRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Main content - canvas fills entire area, panels overlay */}
+        <div className="flex-1 relative overflow-hidden min-h-0">
+          {/* Canvas fills container */}
+          <div className="absolute inset-0">
+            <Canvas />
+          </div>
+
+          {/* Left overlay panel */}
+          <div
+            className={cn(
+              "absolute left-0 top-0 h-full bg-gray-800 border-r border-gray-700 transition-all duration-200",
+              leftPanelOpen ? "w-80 opacity-100 pointer-events-auto" : "w-80 opacity-0 pointer-events-none"
+            )}
+          >
+            <div className="h-full flex flex-col">
+              <div className="flex-1 overflow-y-auto">
+                <PropertiesPanel />
+                <LayersPanel />
+              </div>
+            </div>
+          </div>
+
+          {/* Right overlay panel */}
+          <div
+            className={cn(
+              "absolute right-0 top-0 h-full bg-gray-800 border-l border-gray-700 transition-all duration-200",
+              rightPanelOpen ? "w-80 opacity-100 pointer-events-auto" : "w-80 opacity-0 pointer-events-none"
+            )}
+          >
+            <div className="h-full flex flex-col">
+              <div className="flex-1 overflow-y-auto">
+                <TilesetPanel />
+                <SpritePanel />
+              </div>
+              <div className="flex-1">
+                <AiChat />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-      {/* AI Chat - Floating */}
-      <AiChat />
-    </div>
+    </LayerVisibilityProvider>
   );
 }

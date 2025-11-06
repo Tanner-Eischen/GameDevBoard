@@ -102,8 +102,17 @@ export function SpriteEditor({ onClose }: SpriteEditorProps) {
         frameWidth: formData.frameWidth,
         frameHeight: formData.frameHeight,
         animations,
+        advancedAnimations: [], // Initialize empty advanced animations
+        timelines: [], // Initialize empty timelines
         defaultAnimation,
         tags: formData.tags,
+        category: 'custom', // Default category for user-created sprites
+        metadata: {
+          version: '1.0.0',
+          description: `Custom sprite: ${formData.name}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       };
 
       // Update store
@@ -201,7 +210,7 @@ export function SpriteEditor({ onClose }: SpriteEditorProps) {
               </Button>
             </div>
             <div className="flex flex-wrap gap-1 mt-2">
-              {formData.tags.map((tag) => (
+              {formData.tags.map((tag: string) => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   {tag}
                   <button onClick={() => removeTag(tag)} className="ml-1">

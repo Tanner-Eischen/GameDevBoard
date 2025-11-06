@@ -14,12 +14,12 @@ export function PropertiesPanel() {
 
   if (selectedShapes.length === 0) {
     return (
-      <Card className="h-full">
+      <Card className="h-full bg-gray-800 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-sm">Properties</CardTitle>
+          <CardTitle className="text-sm text-gray-100">Properties</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-400">
             Select a shape to edit its properties
           </p>
         </CardContent>
@@ -59,10 +59,10 @@ export function PropertiesPanel() {
   };
 
   return (
-    <Card className="h-full overflow-auto">
+    <Card className="h-full overflow-y-hidden bg-gray-800 border-gray-700">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm">
+          <CardTitle className="text-sm text-gray-100">
             {multiSelect ? `${selectedShapes.length} shapes selected` : shape.type}
           </CardTitle>
           <div className="flex gap-1">
@@ -72,7 +72,7 @@ export function PropertiesPanel() {
               onClick={toggleLock}
               data-testid="button-lock"
               title={shape.metadata.locked ? 'Unlock' : 'Lock'}
-              className="h-7 w-7"
+              className="h-7 w-7 text-gray-300 hover:text-white hover:bg-gray-700"
             >
               {shape.metadata.locked ? (
                 <Lock className="h-3 w-3" />
@@ -86,7 +86,7 @@ export function PropertiesPanel() {
               onClick={handleDelete}
               data-testid="button-delete"
               title="Delete (Del)"
-              className="h-7 w-7 text-destructive hover:text-destructive"
+              className="h-7 w-7 text-red-400 hover:text-red-300 hover:bg-gray-700"
             >
               <Trash2 className="h-3 w-3" />
             </Button>
@@ -96,7 +96,7 @@ export function PropertiesPanel() {
       <CardContent className="space-y-4">
         {/* Transform */}
         <div className="space-y-3">
-          <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Label className="text-xs font-semibold uppercase tracking-wide text-gray-400">
             Transform
           </Label>
           <div className="grid grid-cols-2 gap-3">

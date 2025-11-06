@@ -60,8 +60,55 @@ function calculateAutoTileIndex(neighbors: NeighborConfig): number {
 }
 
 /**
+ * Determine if a tileset should use the special "ledge" bottom-row rule.
+ * Any tileset id starting with "ledge" (case-insensitive) qualifies.
+ */
+function isLedgeTileset(tilesetId: string): boolean {
+  return tilesetId.toLowerCase().startsWith("ledge");
+}
+
+/**
+ * Adjust neighbors for ledge tiles so that bottom-row outputs (indices 6,7,8)
+ * only occur when the influencing neighbors are of the same tileset.
+ * - Index 7 (bottom edge) requires the NORTH neighbor to be same tileset
+ * - Index 6 (bottom-left corner) requires NORTH and EAST to be same tileset
+ * - Index 8 (bottom-right corner) requires NORTH and WEST to be same tileset
+ */
+function applyLedgeBottomRowRule(
+  pos: { x: number; y: number },
+  tilesetId: string,
+  allTiles: Tile[],
+  neighborsAny: NeighborConfig,
+  candidateIndex: number
+): NeighborConfig {
+  // If not a ledge tileset or not a bottom-row result, return as-is
+  if (!isLedgeTileset(tilesetId) || (candidateIndex !== 6 && candidateIndex !== 7 && candidateIndex !== 8)) {
+    return neighborsAny;
+  }
+
+  const sameTileAt = (tx: number, ty: number) =>
+    allTiles.some(
+      (t) => t.x === tx && t.y === ty && t.layer === "terrain" && t.tilesetId === tilesetId
+    );
+
+  const adjusted: NeighborConfig = { ...neighborsAny };
+  // Always gate TOP by same-type for bottom-row results
+  adjusted.top = sameTileAt(pos.x, pos.y - 1);
+
+  // Gate side neighbors for corner variants
+  if (candidateIndex === 6) {
+    adjusted.right = sameTileAt(pos.x + 1, pos.y);
+  } else if (candidateIndex === 8) {
+    adjusted.left = sameTileAt(pos.x - 1, pos.y);
+  }
+
+  return adjusted;
+}
+
+/**
  * Get the neighbor configuration for a tile at the given position
- * For terrain-layer tiles, considers ANY terrain tile as a neighbor (seamless joins)
+ * For terrain-layer tiles, considers ONLY tiles from the same tileset as neighbors
+ * This produces clear edges when different terrain types meet.
  * For props-layer tiles, only considers tiles from the same tileset
  */
 function getNeighborConfig(
@@ -73,9 +120,9 @@ function getNeighborConfig(
 ): NeighborConfig {
   const hasTileAt = (tx: number, ty: number) => {
     if (layer === 'terrain') {
-      // For terrain tiles: treat ANY terrain tile as a neighbor (seamless joins between different terrain types)
+      // For terrain tiles: neighbors must be the SAME tileset to create edges at boundaries
       return tiles.some(
-        (t) => t.x === tx && t.y === ty && t.layer === 'terrain'
+        (t) => t.x === tx && t.y === ty && t.layer === 'terrain' && t.tilesetId === tilesetId
       );
     } else {
       // For props tiles: only consider tiles from the same tileset
@@ -135,8 +182,12 @@ export function applyAutoTiling(
       
       for (const tile of tilesAtPosition) {
         const key = `${pos.x},${pos.y},${tile.tilesetId}`;
-        const neighbors = getNeighborConfig(pos.x, pos.y, tile.tilesetId, allTiles, 'terrain');
-        const tileIndex = calculateAutoTileIndex(neighbors);
+        const neighborsAny = getNeighborConfig(pos.x, pos.y, tile.tilesetId, allTiles, 'terrain');
+        let candidateIndex = calculateAutoTileIndex(neighborsAny);
+
+        // Apply special rule for ledge tilesets' bottom row
+        const neighborsAdjusted = applyLedgeBottomRowRule(pos, tile.tilesetId, allTiles, neighborsAny, candidateIndex);
+        const tileIndex = calculateAutoTileIndex(neighborsAdjusted);
         
         tilesToUpdate.set(key, {
           x: pos.x,
@@ -150,8 +201,11 @@ export function applyAutoTiling(
       // If no tile at position but it's the center, add it
       if (tilesAtPosition.length === 0 && pos.x === newTile.x && pos.y === newTile.y) {
         const key = `${pos.x},${pos.y},${tilesetId}`;
-        const neighbors = getNeighborConfig(pos.x, pos.y, tilesetId, allTiles, 'terrain');
-        const tileIndex = calculateAutoTileIndex(neighbors);
+        const neighborsAny = getNeighborConfig(pos.x, pos.y, tilesetId, allTiles, 'terrain');
+        let candidateIndex = calculateAutoTileIndex(neighborsAny);
+
+        const neighborsAdjusted = applyLedgeBottomRowRule(pos, tilesetId, allTiles, neighborsAny, candidateIndex);
+        const tileIndex = calculateAutoTileIndex(neighborsAdjusted);
         
         tilesToUpdate.set(key, {
           x: pos.x,

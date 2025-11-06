@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Validation schemas for AI function arguments
 export const paintTerrainSchema = z.object({
-  tilesetName: z.enum(["Dirt Terrain", "Grass Terrain", "Water Terrain"]),
+  tilesetName: z.enum(["Dirt Terrain", "Grass Terrain", "Lake", "Water Terrain", "Sand Terrain", "Stone Terrain", "DirtPath"]),
   area: z.object({
     x: z.number(),
     y: z.number(),

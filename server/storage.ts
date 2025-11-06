@@ -2,18 +2,24 @@ import {
   type User,
   type InsertUser,
   type Project,
+  type ProjectWithBoards,
   type InsertProject,
+  type BoardData,
+  type InsertBoard,
   type TilesetData,
   type InsertTileset,
+  type TilesetType,
   type CanvasState,
   type TileMap,
 } from "@shared/schema";
+import { BUILT_IN_TILESETS, type BuiltInTileset } from "@shared/built-in-tilesets";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
   // Projects
@@ -23,9 +29,17 @@ export interface IStorage {
   updateProject(id: string, updates: Partial<InsertProject>): Promise<Project | undefined>;
   deleteProject(id: string): Promise<boolean>;
 
+  // Boards
+  getBoard(id: string): Promise<BoardData | undefined>;
+  getBoardsByProject(projectId: string): Promise<BoardData[]>;
+  createBoard(board: InsertBoard): Promise<BoardData>;
+  updateBoard(id: string, updates: Partial<InsertBoard>): Promise<BoardData | undefined>;
+  deleteBoard(id: string): Promise<boolean>;
+
   // Tilesets
   getTileset(id: string): Promise<TilesetData | undefined>;
   getAllTilesets(): Promise<TilesetData[]>;
+  getBuiltInTilesets(): Promise<TilesetData[]>;
   createTileset(tileset: InsertTileset): Promise<TilesetData>;
   updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined>;
   deleteTileset(id: string): Promise<boolean>;
@@ -34,61 +48,69 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private projects: Map<string, Project>;
+  private boards: Map<string, BoardData>;
   private tilesets: Map<string, TilesetData>;
 
   constructor() {
     this.users = new Map();
     this.projects = new Map();
+    this.boards = new Map();
     this.tilesets = new Map();
 
     // Add some demo tilesets for testing
     this.initializeDemoData();
   }
 
-  private initializeDemoData() {
-    // Create 3x3 demo tilesets from attached assets
-    // Each image is 50x50 pixels with 9 tiles of 16x16 pixels and 1px spacing
-    const dirtTileset: TilesetData = {
-      id: randomUUID(),
-      name: 'Dirt Terrain',
-      tileSize: 16,
-      spacing: 1,
-      imageUrl: '/attached_assets/dirt_3x3_1760825550695.png',
-      columns: 3,
-      rows: 3,
-      tilesetType: 'auto-tiling',
-      multiTileConfig: null,
-      createdAt: new Date(),
-    };
-    this.tilesets.set(dirtTileset.id, dirtTileset);
+  private async initializeDemoData() {
+    try {
+      // Initialize built-in tilesets
+      this.initializeBuiltInTilesets();
+      // Fix any existing tileset URLs with Windows backslashes
+      this.fixExistingTilesetUrls();
+      console.log('MemStorage initialized with built-in tilesets - ready for tileset uploads');
+    } catch (error) {
+      console.log('Demo data initialization skipped');
+    }
+  }
 
-    const grassTileset: TilesetData = {
-      id: randomUUID(),
-      name: 'Grass Terrain',
-      tileSize: 16,
-      spacing: 1,
-      imageUrl: '/attached_assets/grass_3x3_kenney_1760825550695.png',
-      columns: 3,
-      rows: 3,
-      tilesetType: 'auto-tiling',
-      multiTileConfig: null,
-      createdAt: new Date(),
-    };
-    this.tilesets.set(grassTileset.id, grassTileset);
+  private initializeBuiltInTilesets() {
+    console.log('Initializing built-in tilesets...');
+    BUILT_IN_TILESETS.forEach(builtInTileset => {
+      // Calculate columns and rows based on tileset type
+      let columns = 1;
+      let rows = 1;
+      
+      if (builtInTileset.tilesetType === 'auto-tiling') {
+         // Auto-tiling tilesets use 3x3 grids
+         columns = 3;
+         rows = 3;
+       } else if (builtInTileset.tilesetType === 'multi-tile' && builtInTileset.multiTileConfig) {
+        // Multi-tile objects use their configured dimensions
+        columns = builtInTileset.multiTileConfig.width;
+        rows = builtInTileset.multiTileConfig.height;
+      } else if (builtInTileset.tilesetType === 'single-tile') {
+        // Single tiles are 1x1
+        columns = 1;
+        rows = 1;
+      }
 
-    const waterTileset: TilesetData = {
-      id: randomUUID(),
-      name: 'Water Terrain',
-      tileSize: 16,
-      spacing: 1,
-      imageUrl: '/attached_assets/water_3x3_1760825550696.png',
-      columns: 3,
-      rows: 3,
-      tilesetType: 'auto-tiling',
-      multiTileConfig: null,
-      createdAt: new Date(),
-    };
-    this.tilesets.set(waterTileset.id, waterTileset);
+      const tileset: any = {
+        id: builtInTileset.id,
+        userId: 'built-in', // Special user ID for built-in tilesets
+        name: builtInTileset.name,
+        imageUrl: builtInTileset.imageUrl,
+        tileSize: builtInTileset.tileSize,
+        spacing: 1, // 1 pixel spacing for 50x50px images with 3x3 grid of 16x16px tiles
+        columns,
+        rows,
+        tilesetType: builtInTileset.tilesetType,
+        multiTileConfig: builtInTileset.multiTileConfig || null,
+        isPublic: true, // Built-in tilesets are public
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.tilesets.set(tileset.id, tileset);
+    });
   }
 
   // User methods
@@ -102,20 +124,44 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const user: any = { ...insertUser, id };
     this.users.set(id, user);
     return user;
   }
 
   // Project methods
-  async getProject(id: string): Promise<Project | undefined> {
-    return this.projects.get(id);
+  async getProject(id: string): Promise<ProjectWithBoards | undefined> {
+    const project = this.projects.get(id);
+    if (!project) return undefined;
+    
+    // Add boards to the project for backward compatibility
+    const projectBoards = await this.getBoardsByProject(id);
+    return {
+      ...project,
+      boards: projectBoards
+    } as ProjectWithBoards;
   }
 
-  async getAllProjects(): Promise<Project[]> {
-    return Array.from(this.projects.values());
+  async getAllProjects(): Promise<ProjectWithBoards[]> {
+    const projects = Array.from(this.projects.values());
+    const projectsWithBoards = await Promise.all(
+      projects.map(async (project) => {
+        const projectBoards = await this.getBoardsByProject(project.id);
+        return {
+          ...project,
+          boards: projectBoards
+        } as ProjectWithBoards;
+      })
+    );
+    return projectsWithBoards;
   }
 
   async createProject(insertProject: InsertProject): Promise<Project> {
@@ -148,11 +194,67 @@ export class MemStorage implements IStorage {
   }
 
   async deleteProject(id: string): Promise<boolean> {
+    // Also delete all boards for this project
+    const projectBoards = Array.from(this.boards.values()).filter(
+      board => board.projectId === id
+    );
+    projectBoards.forEach(board => this.boards.delete(board.id));
+    
     return this.projects.delete(id);
   }
 
-  // Tileset methods
+  // Board methods
+  async getBoard(id: string): Promise<BoardData | undefined> {
+    return this.boards.get(id);
+  }
+
+  async getBoardsByProject(projectId: string): Promise<BoardData[]> {
+    return Array.from(this.boards.values()).filter(
+      board => board.projectId === projectId
+    );
+  }
+
+  async createBoard(insertBoard: InsertBoard): Promise<BoardData> {
+    const id = randomUUID();
+    const now = new Date();
+    const board: any = {
+      id,
+      ...insertBoard,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.boards.set(id, board);
+    return board;
+  }
+
+  async updateBoard(
+    id: string,
+    updates: Partial<InsertBoard>
+  ): Promise<BoardData | undefined> {
+    const board = this.boards.get(id);
+    if (!board) return undefined;
+
+    const updatedBoard: any = {
+      ...board,
+      ...updates,
+      updatedAt: new Date(),
+    };
+    this.boards.set(id, updatedBoard);
+    return updatedBoard;
+  }
+
+  async deleteBoard(id: string): Promise<boolean> {
+    return this.boards.delete(id);
+  }
+
   async getTileset(id: string): Promise<TilesetData | undefined> {
+    // Check built-in tilesets first
+    const builtInTileset = Array.from(this.tilesets.values()).find(t => t.id === id && t.userId === 'built-in');
+    if (builtInTileset) {
+      return builtInTileset;
+    }
+    
+    // Then check user-uploaded tilesets
     return this.tilesets.get(id);
   }
 
@@ -160,14 +262,18 @@ export class MemStorage implements IStorage {
     return Array.from(this.tilesets.values());
   }
 
+  async getBuiltInTilesets(): Promise<TilesetData[]> {
+    return Array.from(this.tilesets.values()).filter(tileset => tileset.userId === 'built-in');
+  }
+
   async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
     const id = randomUUID();
-    const tileset: TilesetData = {
+    const tileset: any = {
       id,
       ...insertTileset,
       tileSize: insertTileset.tileSize ?? 32,
       spacing: insertTileset.spacing ?? 0,
-      tilesetType: insertTileset.tilesetType ?? 'auto-tiling',
+      tilesetType: (insertTileset.tilesetType ?? 'auto-tiling') as TilesetType,
       multiTileConfig: insertTileset.multiTileConfig ?? null,
       createdAt: new Date(),
     };
@@ -182,9 +288,10 @@ export class MemStorage implements IStorage {
     const tileset = this.tilesets.get(id);
     if (!tileset) return undefined;
 
-    const updatedTileset: TilesetData = {
+    const updatedTileset: any = {
       ...tileset,
       ...updates,
+      tilesetType: (updates.tilesetType ?? tileset.tilesetType) as TilesetType,
     };
     this.tilesets.set(id, updatedTileset);
     return updatedTileset;
@@ -193,48 +300,51 @@ export class MemStorage implements IStorage {
   async deleteTileset(id: string): Promise<boolean> {
     return this.tilesets.delete(id);
   }
+
+  // Fix existing tileset URLs that contain Windows backslashes
+  fixExistingTilesetUrls(): void {
+    console.log('Fixing existing tileset URLs with Windows backslashes...');
+    let fixedCount = 0;
+    
+    for (const [id, tileset] of this.tilesets.entries()) {
+      if (tileset.imageUrl && tileset.imageUrl.includes('%5C')) {
+        // Replace URL-encoded backslashes with forward slashes
+        const fixedUrl = tileset.imageUrl.replace(/%5C/g, '/');
+        tileset.imageUrl = fixedUrl;
+        this.tilesets.set(id, tileset);
+        fixedCount++;
+        console.log(`Fixed tileset "${tileset.name}" (${id}): ${tileset.imageUrl}`);
+      }
+    }
+    
+    console.log(`Fixed ${fixedCount} tileset URLs with Windows backslashes`);
+  }
 }
 
-import { db, users as usersTable, projects as projectsTable, tilesets as tilesetsTable } from "./db";
+import { db, users as usersTable, projects as projectsTable, boards as boardsTable, tilesets as tilesetsTable } from "./db";
 import { eq } from "drizzle-orm";
 
 export class DbStorage implements IStorage {
   constructor() {
-    this.initializeDemoData();
+    // Skip database initialization for now
+    console.log('DbStorage initialized (database features disabled)');
   }
 
   private async initializeDemoData() {
-    // Check if demo tilesets already exist
-    const existing = await this.getAllTilesets();
-    if (existing.length > 0) return;
+    try {
+      // Check if demo tilesets already exist
+      const existing = await this.getAllTilesets();
+      if (existing.length > 0) {
+        console.log(`Database already has ${existing.length} tileset(s)`);
+        return;
+      }
 
-    // Create 3x3 demo tilesets from attached assets
-    await this.createTileset({
-      name: 'Dirt Terrain',
-      tileSize: 16,
-      spacing: 1,
-      imageUrl: '/attached_assets/dirt_3x3_1760825550695.png',
-      columns: 3,
-      rows: 3,
-    });
-
-    await this.createTileset({
-      name: 'Grass Terrain',
-      tileSize: 16,
-      spacing: 1,
-      imageUrl: '/attached_assets/grass_3x3_kenney_1760825550695.png',
-      columns: 3,
-      rows: 3,
-    });
-
-    await this.createTileset({
-      name: 'Water Terrain',
-      tileSize: 16,
-      spacing: 1,
-      imageUrl: '/attached_assets/water_3x3_1760825550696.png',
-      columns: 3,
-      rows: 3,
-    });
+      console.log('DbStorage initialized - ready for tileset uploads');
+      // Note: Demo tilesets can be added here if you have tileset images
+      // Users can upload their own tilesets through the UI
+    } catch (error) {
+      console.log('Demo data initialization skipped:', error instanceof Error ? error.message : 'Unknown error');
+    }
   }
 
   // User methods
@@ -245,6 +355,11 @@ export class DbStorage implements IStorage {
 
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(usersTable).where(eq(usersTable.username, username));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email));
     return user;
   }
 
@@ -278,29 +393,133 @@ export class DbStorage implements IStorage {
   }
 
   async deleteProject(id: string): Promise<boolean> {
+    // Delete all boards for this project first (cascade delete)
+    await db.delete(boardsTable).where(eq(boardsTable.projectId, id));
+    
     const result = await db.delete(projectsTable).where(eq(projectsTable.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
+  // Board methods
+  async getBoard(id: string): Promise<BoardData | undefined> {
+    const [board] = await db.select().from(boardsTable).where(eq(boardsTable.id, id));
+    return board;
+  }
+
+  async getBoardsByProject(projectId: string): Promise<BoardData[]> {
+    return await db.select().from(boardsTable).where(eq(boardsTable.projectId, projectId));
+  }
+
+  async createBoard(insertBoard: InsertBoard): Promise<BoardData> {
+    const [board] = await db.insert(boardsTable).values(insertBoard as any).returning();
+    return board;
+  }
+
+  async updateBoard(id: string, updates: Partial<InsertBoard>): Promise<BoardData | undefined> {
+    const [board] = await db
+      .update(boardsTable)
+      .set({ ...updates, updatedAt: new Date() } as any)
+      .where(eq(boardsTable.id, id))
+      .returning();
+    return board;
+  }
+
+  async deleteBoard(id: string): Promise<boolean> {
+    const result = await db.delete(boardsTable).where(eq(boardsTable.id, id));
     return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Tileset methods
   async getTileset(id: string): Promise<TilesetData | undefined> {
+    // Check built-in tilesets first
+    const builtInTileset = this.getBuiltInTilesetsSync().find(t => t.id === id);
+    if (builtInTileset) {
+      return builtInTileset;
+    }
+    
+    // Then check database
     const [tileset] = await db.select().from(tilesetsTable).where(eq(tilesetsTable.id, id));
     return tileset;
   }
 
   async getAllTilesets(): Promise<TilesetData[]> {
-    return await db.select().from(tilesetsTable);
+    // Combine built-in tilesets with database tilesets
+    const builtInTilesets = this.getBuiltInTilesetsSync();
+    const dbTilesets = await db.select().from(tilesetsTable);
+    return [...builtInTilesets, ...dbTilesets];
+  }
+
+  async getBuiltInTilesets(): Promise<TilesetData[]> {
+    return this.getBuiltInTilesetsSync();
+  }
+
+  private getBuiltInTilesetsSync(): TilesetData[] {
+    return BUILT_IN_TILESETS.map(builtInTileset => {
+      // Calculate columns and rows based on tileset type
+      let columns = 1;
+      let rows = 1;
+      let multiTileConfig = null;
+      
+      if (builtInTileset.tilesetType === 'auto-tiling') {
+         // Auto-tiling tilesets use 3x3 grids
+         columns = 3;
+         rows = 3;
+       } else if (builtInTileset.tilesetType === 'multi-tile' && builtInTileset.multiTileConfig) {
+        // Multi-tile objects use their configured dimensions
+        columns = builtInTileset.multiTileConfig.width;
+        rows = builtInTileset.multiTileConfig.height;
+        
+        // Generate tiles array for MultiTileConfig
+        const tiles = [];
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < columns; x++) {
+            tiles.push({ x, y });
+          }
+        }
+        multiTileConfig = { tiles };
+      } else if (builtInTileset.tilesetType === 'single-tile') {
+        // Single tiles are 1x1
+        columns = 1;
+        rows = 1;
+      }
+
+      return {
+        id: builtInTileset.id,
+        userId: 'built-in',
+        name: builtInTileset.name,
+        imageUrl: builtInTileset.imageUrl,
+        tileSize: builtInTileset.tileSize,
+        spacing: 1, // 1 pixel spacing for 50x50px images with 3x3 grid of 16x16px tiles
+        columns,
+        rows,
+        tilesetType: builtInTileset.tilesetType,
+        multiTileConfig,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        isPublic: true,
+        tags: [], // Add empty tags array for built-in tilesets
+      };
+    });
   }
 
   async createTileset(insertTileset: InsertTileset): Promise<TilesetData> {
-    const [tileset] = await db.insert(tilesetsTable).values(insertTileset).returning();
+    const tilesetData: any = {
+      ...insertTileset,
+      tilesetType: (insertTileset.tilesetType ?? 'auto-tiling') as TilesetType,
+      multiTileConfig: insertTileset.multiTileConfig ?? null,
+    };
+    const [tileset] = await db.insert(tilesetsTable).values(tilesetData).returning();
     return tileset;
   }
 
   async updateTileset(id: string, updates: Partial<InsertTileset>): Promise<TilesetData | undefined> {
+    const updateData: any = { ...updates };
+    if (updates.tilesetType) {
+      updateData.tilesetType = updates.tilesetType as TilesetType;
+    }
     const [tileset] = await db
       .update(tilesetsTable)
-      .set(updates)
+      .set(updateData)
       .where(eq(tilesetsTable.id, id))
       .returning();
     return tileset;
@@ -312,5 +531,7 @@ export class DbStorage implements IStorage {
   }
 }
 
-// Use database storage instead of in-memory
-export const storage = new DbStorage();
+// Use database storage (set USE_MEMORY_STORAGE=true in .env to use in-memory storage for testing)
+export const storage = process.env.USE_MEMORY_STORAGE === 'true' 
+  ? new MemStorage() 
+  : new DbStorage();

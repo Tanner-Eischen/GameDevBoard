@@ -1,16 +1,22 @@
 import { useRef, useEffect, useState } from 'react';
-import { Stage, Layer, Rect, Circle, Line, RegularPolygon, Star, Image } from 'react-konva';
+import { Stage } from 'react-konva';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import type { Shape, Tile } from '@shared/schema';
 import Konva from 'konva';
 import { v4 as uuidv4 } from 'uuid';
-import { getTilesToUpdate } from '@/utils/autoTiling';
-import { SpriteAnimator } from './SpriteAnimator';
+import { getTilesToUpdate, getNeighborConfig, calculateAutoTileIndex } from '@/utils/autoTiling';
+import { getEnhancedTilesToUpdate, getCompatibleTilesToUpdate, debugAutoTiling } from '@/utils/enhancedAutoTiling';
+import { getCollaborationService } from '@/services/collaboration';
+import { useLayerVisibility } from '@/contexts/LayerVisibilityContext';
+import { CanvasRenderer } from './Canvas/CanvasRenderer';
+import { useCanvasEvents } from '../hooks/useCanvasEvents';
+import { GodotCanvas } from './GodotCanvas';
+import type { GodotProjectConfig } from '../types/godot';
 
 export function Canvas() {
-  const stageRef = useRef<Konva.Stage>(null);
-  const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
+  const { layerVisibility } = useLayerVisibility();
 
   const {
     shapes,
@@ -25,6 +31,10 @@ export function Canvas() {
     updateShape,
     selectShape,
     clearSelection,
+    selectMultipleShapes,
+    selectShapesInArea,
+    transformSelectedShapes,
+    removeShape,
     tiles,
     tilesets,
     selectedTileset,
@@ -42,6 +52,9 @@ export function Canvas() {
     addSprite,
     selectSprite,
     updateSprite,
+    users,
+    useGodotRendering,
+    godotProjectConfig,
   } = useCanvasStore();
 
   const [isDrawing, setIsDrawing] = useState(false);
@@ -49,26 +62,50 @@ export function Canvas() {
   const [currentShape, setCurrentShape] = useState<Shape | null>(null);
   const [lastPaintedGrid, setLastPaintedGrid] = useState<{ x: number; y: number } | null>(null);
   const [tilesetImages, setTilesetImages] = useState<Map<string, HTMLImageElement>>(new Map());
+  // Optional per-index images for tilesets that store individual tile URLs (tile-urls tag)
+  const [tilesetIndexImages, setTilesetIndexImages] = useState<Map<string, HTMLImageElement[]>>(new Map());
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectionStart, setSelectionStart] = useState<{ x: number; y: number } | null>(null);
+  const [selectionEnd, setSelectionEnd] = useState<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     const updateSize = () => {
-      if (containerRef.current) {
-        setStageSize({
-          width: containerRef.current.offsetWidth,
-          height: containerRef.current.offsetHeight,
-        });
-      }
+      if (!containerRef.current) return;
+      const el = containerRef.current;
+      const width = el.offsetWidth;
+      const height = el.offsetHeight;
+      setStageSize({ width, height });
     };
 
+    // Initial measurement
     updateSize();
+
+    // Observe container size changes (panel toggle, layout changes)
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        const { width, height } = entry.contentRect;
+        setStageSize({ width: Math.floor(width), height: Math.floor(height) });
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    // Fallback: window resize
     window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
   }, []);
 
   // Load tileset images when tilesets change
   useEffect(() => {
     const loadImages = async () => {
       const imageMap = new Map<string, HTMLImageElement>();
+      const indexImageMap = new Map<string, HTMLImageElement[]>();
       
       for (const tileset of tilesets) {
         if (tileset.imageUrl && !tilesetImages.has(tileset.id)) {
@@ -81,7 +118,7 @@ export function Canvas() {
             img.onerror = () => reject();
             img.src = tileset.imageUrl;
           }).catch(() => {
-            console.error(`Failed to load tileset image: ${tileset.name}`);
+            console.error(`Failed to load tileset image: ${tileset.imageUrl} (tileset: ${tileset.name})`);
           });
           
           if (img.complete && img.naturalWidth > 0) {
@@ -91,13 +128,77 @@ export function Canvas() {
           // Keep existing loaded image
           imageMap.set(tileset.id, tilesetImages.get(tileset.id)!);
         }
+
+        // Load individual per-index images if tileset includes tile-urls tag
+        // This supports 3x3 auto-tiling uploads with separate images
+        const tileUrlsTag = tileset.tags?.find(tag => tag.startsWith('tile-urls:'));
+        if (tileUrlsTag) {
+          try {
+            const urls = JSON.parse(tileUrlsTag.replace('tile-urls:', '')) as string[];
+            if (Array.isArray(urls) && urls.length > 0) {
+              const images: HTMLImageElement[] = [];
+              for (let i = 0; i < urls.length; i++) {
+                const url = urls[i];
+                const idxImg = new window.Image();
+                idxImg.crossOrigin = 'anonymous';
+                await new Promise<void>((resolve, reject) => {
+                  idxImg.onload = () => resolve();
+                  idxImg.onerror = () => reject();
+                  idxImg.src = url;
+                }).catch(() => {
+                  console.error(`Failed to load per-index image ${i} for tileset ${tileset.name}: ${url}`);
+                });
+                images[i] = idxImg;
+              }
+              if (images.length > 0) {
+                indexImageMap.set(tileset.id, images);
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to parse tile-urls tag for tileset', tileset.name, e);
+          }
+        } else if (tilesetIndexImages.has(tileset.id)) {
+          // Keep existing per-index images if no changes
+          indexImageMap.set(tileset.id, tilesetIndexImages.get(tileset.id)!);
+        }
       }
       
       setTilesetImages(imageMap);
+      setTilesetIndexImages(indexImageMap);
     };
     
     loadImages();
   }, [tilesets]);
+
+  // Keyboard event handlers for shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Delete selected shapes
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.length > 0) {
+        selectedIds.forEach(id => removeShape(id));
+        clearSelection();
+        e.preventDefault();
+      }
+      
+      // Select all shapes (Ctrl+A)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'a' && tool === 'select') {
+        const allShapeIds = shapes.map(shape => shape.id);
+        selectMultipleShapes(allShapeIds);
+        e.preventDefault();
+      }
+      
+      // Escape to clear selection
+      if (e.key === 'Escape') {
+        clearSelection();
+        setIsSelecting(false);
+        setSelectionStart(null);
+        setSelectionEnd(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedIds, shapes, tool, removeShape, clearSelection, selectMultipleShapes]);
 
   const snapToGridIfEnabled = (pos: { x: number; y: number }) => {
     if (!snapToGrid) return pos;
@@ -146,91 +247,263 @@ export function Canvas() {
       return;
     }
 
-    // Handle auto-tiling tilesets (existing logic)
-    // Calculate what tiles array will look like after removal
+    // Enhanced auto-tiling for removal
+    if (tileset?.tilesetType === 'auto-tiling' && useCanvasStore.getState().enhancedAutotilingEnabled) {
+      try {
+        const currentTiles = useCanvasStore.getState().tiles;
+        
+        // Use enhanced autotiling for removal (synchronous client-side calculation)
+        const updates = getEnhancedTilesToUpdate(
+          gridX,
+          gridY,
+          tileToRemove.tilesetId,
+          currentTiles,
+          'remove',
+          tileToRemove.layer as 'terrain' | 'props'
+        );
+
+        // Remove the original tile
+        removeTile(gridX, gridY, tileToRemove.layer);
+
+        // Apply enhanced updates for neighbors (if terrain layer)
+        if (tileToRemove.layer === 'terrain') {
+          const tilesToUpdate = updates.filter(update => 
+            !(update.x === gridX && update.y === gridY)
+          );
+          
+          const tilesToAdd = tilesToUpdate.map((update) => ({
+            x: update.x,
+            y: update.y,
+            tilesetId: update.tilesetId,
+            tileIndex: update.tileIndex,
+            layer: 'terrain' as const,
+          }));
+          
+          addTiles(tilesToAdd);
+        }
+        
+        return;
+      } catch (error) {
+        console.warn('Enhanced erase failed, using fallback:', error);
+        
+        // Fallback to existing erase logic
+        const tilesAfterRemoval = tiles.filter(
+          (t) => !(t.x === gridX && t.y === gridY)
+        );
+        const tilesToUpdate = getCompatibleTilesToUpdate(
+          gridX,
+          gridY,
+          tileToRemove.tilesetId,
+          tilesAfterRemoval,
+          false,
+          tileToRemove.layer as 'terrain' | 'props'
+        );
+        removeTile(gridX, gridY, tileToRemove.layer);
+        if (tileToRemove.layer === 'terrain') {
+          tilesToUpdate.forEach((update) => {
+            addTile({
+              x: update.x,
+              y: update.y,
+              tilesetId: update.tilesetId,
+              tileIndex: update.tileIndex,
+              layer: 'terrain',
+            });
+          });
+        }
+      }
+      return;
+    }
+
+    // Fallback: Simple removal for other types or if enhanced failed
     const tilesAfterRemoval = tiles.filter(
       (t) => !(t.x === gridX && t.y === gridY)
     );
-
-    // Calculate auto-tiling for surrounding tiles based on the state after removal
     const tilesToUpdate = getTilesToUpdate(
       gridX,
       gridY,
       tileToRemove.tilesetId,
       tilesAfterRemoval,
-      false, // don't include self since we're removing it
-      tileToRemove.layer // pass layer explicitly since tile will be gone from array
+      false,
+      tileToRemove.layer
     );
-
-    // Remove the tile from its layer
     removeTile(gridX, gridY, tileToRemove.layer);
-
-    // Then update all affected neighbor tiles with correct auto-tiling indices (only for terrain layer)
     if (tileToRemove.layer === 'terrain') {
       tilesToUpdate.forEach((update) => {
         addTile({
           x: update.x,
           y: update.y,
-          tilesetId: update.tilesetId, // Use tilesetId from update (supports cross-tileset updates)
+          tilesetId: update.tilesetId,
           tileIndex: update.tileIndex,
-          layer: 'terrain', // Auto-tiled neighbors are terrain
+          layer: 'terrain',
         });
       });
     }
   };
 
   const paintTilesAtPosition = (gridX: number, gridY: number) => {
-    if (!selectedTileset) return;
+    if (!selectedTileset || selectedTileIndex === undefined) return;
 
-    // Handle multi-tile objects (trees, etc.) - these go on the 'props' layer
+    const isAutoBrush = tool === 'auto-tile-paint';
+
+    // Handle multi-tile objects (trees, etc.) always on props
     if (selectedTileset.tilesetType === 'multi-tile' && selectedTileset.multiTileConfig) {
-      const tilesToAdd: Tile[] = [];
-      
-      // Place all tiles from the multi-tile configuration
+      const allTilesToAdd: Tile[] = [];
       selectedTileset.multiTileConfig.tiles.forEach((tilePos) => {
-        // Calculate tileIndex based on grid position: row * columns + col
         const tileIndex = tilePos.y * selectedTileset.columns + tilePos.x;
-        
-        tilesToAdd.push({
+        allTilesToAdd.push({
           x: gridX + tilePos.x,
           y: gridY + tilePos.y,
           tilesetId: selectedTileset.id,
           tileIndex: tileIndex,
-          layer: 'props', // Props layer for trees, flowers, etc.
+          layer: 'props' as const,
         });
       });
-      
-      // Add all tiles as a complete unit (no auto-tiling for multi-tile objects)
-      addTiles(tilesToAdd);
+      addTiles(allTilesToAdd);
       return;
     }
 
-    // Handle variant grid tilesets (grass variants) - no auto-tiling, just use selected index
-    if (selectedTileset.tilesetType === 'variant_grid') {
+    // Variant grid brush placement when brush size > 1
+    if (
+      selectedTileset.tilesetType === 'variant_grid' &&
+      (brushSize.width > 1 || brushSize.height > 1) &&
+      selectedTileset.variantGridConfig
+    ) {
+      const allTilesToAdd: Tile[] = [];
+      for (let dx = 0; dx < brushSize.width; dx++) {
+        for (let dy = 0; dy < brushSize.height; dy++) {
+          const x = gridX + dx;
+          const y = gridY + dy;
+          const variantX = dx % selectedTileset.variantGridConfig.width;
+          const variantY = dy % selectedTileset.variantGridConfig.height;
+          const variantIndex = variantY * selectedTileset.variantGridConfig.width + variantX;
+          const tileIndex = selectedTileIndex + variantIndex;
+          allTilesToAdd.push({ x, y, tilesetId: selectedTileset.id, tileIndex, layer: 'terrain' as const });
+        }
+      }
+      addTiles(allTilesToAdd);
+      return;
+    }
+
+    // Manual single-tile brush (default) — no auto-tiling updates
+    if (!isAutoBrush || selectedTileset.tilesetType !== 'auto-tiling') {
       const tilesToAdd: Tile[] = [];
-      
-      // Paint with the user's selected tile variant
       for (let dy = 0; dy < brushSize.height; dy++) {
         for (let dx = 0; dx < brushSize.width; dx++) {
           tilesToAdd.push({
             x: gridX + dx,
             y: gridY + dy,
             tilesetId: selectedTileset.id,
-            tileIndex: selectedTileIndex, // Use the exact tile the user selected
+            tileIndex: selectedTileIndex,
             layer: 'terrain',
           });
         }
       }
-      
       addTiles(tilesToAdd);
       return;
     }
 
-    // Handle auto-tiling tilesets (grass, dirt, water) - these go on the 'terrain' layer
-    // Collect all tiles to be added/updated
-    const tilesToAdd: Tile[] = [];
+    // Enhanced auto-tiling for terrain
+    const currentTiles = useCanvasStore.getState().tiles;
+    const enhancedAutotilingEnabled = useCanvasStore.getState().enhancedAutotilingEnabled;
+    const debugMode = process.env.NODE_ENV === 'development';
+    
+    // Try enhanced autotiling first (if enabled), fallback to existing logic
+    if (enhancedAutotilingEnabled) {
+      const allUpdates = new Map<string, Tile>();
 
-    // First, add all brush tiles with selected index
+      try {
+        // Process each brush position with enhanced autotiling
+        for (let dy = 0; dy < brushSize.height; dy++) {
+          for (let dx = 0; dx < brushSize.width; dx++) {
+            const tileX = gridX + dx;
+            const tileY = gridY + dy;
+
+            // Debug logging if in development
+            if (debugMode) {
+              debugAutoTiling(tileX, tileY, selectedTileset.id, currentTiles, 'terrain');
+            }
+
+            // Use enhanced autotiling system (synchronous client-side calculation)
+            const updates = getEnhancedTilesToUpdate(
+              tileX,
+              tileY,
+              selectedTileset.id,
+              currentTiles,
+              'add',
+              'terrain'
+            );
+
+            // Collect all updates, deduplicating by position
+            updates.forEach(update => {
+              const key = `${update.x},${update.y},${update.tilesetId}`;
+              allUpdates.set(key, {
+                x: update.x,
+                y: update.y,
+                tilesetId: update.tilesetId,
+                tileIndex: update.tileIndex,
+                layer: 'terrain' as const,
+              });
+            });
+          }
+        }
+
+        // Apply all updates at once
+        addTiles(Array.from(allUpdates.values()));
+        
+      } catch (error) {
+        console.warn('Enhanced autotiling failed, using fallback:', error);
+        
+        // Fallback to existing autotiling logic
+        const tilesToAdd: Tile[] = [];
+        for (let dy = 0; dy < brushSize.height; dy++) {
+          for (let dx = 0; dx < brushSize.width; dx++) {
+            tilesToAdd.push({
+              x: gridX + dx,
+              y: gridY + dy,
+              tilesetId: selectedTileset.id,
+              tileIndex: 4, // Default center tile
+              layer: 'terrain',
+            });
+          }
+        }
+
+        // Use existing autotiling logic
+        const autoTiledTiles = new Map<string, Tile>();
+        for (let dy = 0; dy < brushSize.height; dy++) {
+          for (let dx = 0; dx < brushSize.width; dx++) {
+            const tileX = gridX + dx;
+            const tileY = gridY + dy;
+
+            const updates = getCompatibleTilesToUpdate(
+              tileX,
+              tileY,
+              selectedTileset.id,
+              [...currentTiles, ...tilesToAdd],
+              true,
+              'terrain'
+            );
+
+            updates.forEach((update) => {
+              const key = `${update.x},${update.y},${update.tilesetId}`;
+              autoTiledTiles.set(key, {
+                x: update.x,
+                y: update.y,
+                tilesetId: update.tilesetId,
+                tileIndex: update.tileIndex,
+                layer: 'terrain',
+              });
+            });
+          }
+        }
+
+        addTiles(Array.from(autoTiledTiles.values()));
+      }
+      
+      return;
+    }
+    
+    // Fallback to existing autotiling logic
+    const tilesToAdd: Tile[] = [];
     for (let dy = 0; dy < brushSize.height; dy++) {
       for (let dx = 0; dx < brushSize.width; dx++) {
         tilesToAdd.push({
@@ -238,556 +511,113 @@ export function Canvas() {
           y: gridY + dy,
           tilesetId: selectedTileset.id,
           tileIndex: selectedTileIndex,
-          layer: 'terrain', // Terrain layer for grass, dirt, water
+          layer: 'terrain',
         });
       }
     }
 
-    // Simulate updated tiles array for auto-tiling calculation
-    // Only consider terrain-layer tiles for auto-tiling neighbor detection
-    const currentTiles = useCanvasStore.getState().tiles;
-    const terrainTiles = currentTiles.filter(t => t.layer === 'terrain');
-    const tileMap = new Map(terrainTiles.map(t => [`${t.x},${t.y}`, t]));
-    tilesToAdd.forEach(tile => {
-      tileMap.set(`${tile.x},${tile.y}`, tile);
+    const simulatedTiles = [...currentTiles];
+    tilesToAdd.forEach((newTile) => {
+      const existingIndex = simulatedTiles.findIndex(
+        (t) => t.x === newTile.x && t.y === newTile.y && t.layer === newTile.layer
+      );
+      if (existingIndex >= 0) simulatedTiles[existingIndex] = newTile;
+      else simulatedTiles.push(newTile);
     });
-    const simulatedTiles = Array.from(tileMap.values());
-
-    // Collect all tiles that need auto-tiling updates (using Map to avoid duplicates)
-    const autoTiledTiles = new Map<string, Tile>();
-
-    // Calculate auto-tiling for each painted tile and its neighbors
-    for (let dy = 0; dy < brushSize.height; dy++) {
-      for (let dx = 0; dx < brushSize.width; dx++) {
-        const tileX = gridX + dx;
-        const tileY = gridY + dy;
-
-        const updates = getTilesToUpdate(
-          tileX,
-          tileY,
-          selectedTileset.id,
-          simulatedTiles,
-          true,
-          'terrain' // explicitly pass layer for clarity
-        );
-
-        updates.forEach((update) => {
-          const key = `${update.x},${update.y},${update.tilesetId}`;
-          autoTiledTiles.set(key, {
-            x: update.x,
-            y: update.y,
-            tilesetId: update.tilesetId, // Use tilesetId from update (supports cross-tileset updates)
-            tileIndex: update.tileIndex,
-            layer: 'terrain', // Auto-tiled tiles are terrain
-          });
-        });
-      }
-    }
-
-    // Merge original brush tiles with auto-tiled results
-    // Start with all the auto-tiled updates
-    const finalTiles = new Map(autoTiledTiles);
     
-    // Ensure all original brush tiles are included (in case auto-tiling didn't cover them)
-    tilesToAdd.forEach(tile => {
-      const key = `${tile.x},${tile.y},${tile.tilesetId}`;
-      if (!finalTiles.has(key)) {
-        finalTiles.set(key, tile);
-      }
+    // Compute final index for each painted tile based on simulated neighbors
+    const finalTiles: Tile[] = tilesToAdd.map((tile) => {
+      const neighbors = getNeighborConfig(tile.x, tile.y, tile.tilesetId, simulatedTiles, 'terrain');
+      const tileIndex = calculateAutoTileIndex(neighbors);
+      return { ...tile, tileIndex };
     });
 
-    // Batch all tile additions into a single operation
-    addTiles(Array.from(finalTiles.values()));
+    addTiles(finalTiles);
   };
 
-  const handleMouseDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const pos = stage.getPointerPosition();
-    if (!pos) return;
-
-    const snappedPos = snapToGridIfEnabled({
-      x: (pos.x - pan.x) / zoom,
-      y: (pos.y - pan.y) / zoom,
-    });
-
-    // Handle sprite tool
-    if (tool === 'sprite' && selectedSpriteDefId) {
-      const spriteDef = spriteDefinitions.find(def => def.id === selectedSpriteDefId);
-      if (spriteDef) {
-        const newSprite = {
-          id: uuidv4(),
-          spriteId: spriteDef.id,
-          x: snappedPos.x,
-          y: snappedPos.y,
-          scale: 1,
-          rotation: 0,
-          currentAnimation: spriteDef.defaultAnimation,
-          flipX: false,
-          flipY: false,
-          layer: 1,
-          metadata: {
-            createdBy: currentUser?.id || 'local',
-            createdAt: Date.now(),
-            locked: false,
-          },
-        };
-        addSprite(newSprite);
-      }
-      return;
-    }
-
-    // Handle tile tools - allow painting over existing tiles and shapes
-    if (tool === 'tile-paint' && selectedTileset) {
-      const gridX = Math.floor(snappedPos.x / gridSize);
-      const gridY = Math.floor(snappedPos.y / gridSize);
-      
-      setIsPainting(true);
-      setLastPaintedGrid({ x: gridX, y: gridY });
-      paintTilesAtPosition(gridX, gridY);
-      return;
-    }
-
-    if (tool === 'tile-erase') {
-      const gridX = Math.floor(snappedPos.x / gridSize);
-      const gridY = Math.floor(snappedPos.y / gridSize);
-      
-      setIsPainting(true);
-      setLastPaintedGrid({ x: gridX, y: gridY });
-      eraseTilesAtPosition(gridX, gridY);
-      return;
-    }
-
-    // For shape tools, only respond to clicks on empty canvas
-    if (e.target !== e.target.getStage()) return;
-
-    if (tool === 'select') {
-      clearSelection();
-      return;
-    }
-
-    if (tool === 'pan') return;
-
-    // Create new shape
-    const newShape: Shape = {
-      id: uuidv4(),
-      type: tool === 'rectangle' ? 'rectangle' :
-            tool === 'circle' ? 'circle' :
-            tool === 'polygon' ? 'polygon' :
-            tool === 'star' ? 'star' :
-            'line',
-      transform: {
-        x: snappedPos.x,
-        y: snappedPos.y,
-        width: 0,
-        height: 0,
-        rotation: 0,
-        scaleX: 1,
-        scaleY: 1,
-      },
-      style: {
-        fill: tool === 'line' ? 'transparent' : '#3b82f6',
-        stroke: '#3b82f6',
-        strokeWidth: 2,
-        opacity: 1,
-      },
-      metadata: {
-        createdBy: currentUser?.id || 'local',
-        createdAt: Date.now(),
-        locked: false,
-        layer: 0,
-      },
-      points: tool === 'line' ? [0, 0, 0, 0] : undefined,
-    };
-
-    setCurrentShape(newShape);
-    setIsDrawing(true);
-  };
-
-  const handleMouseMove = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const pos = stage.getPointerPosition();
-    if (!pos) return;
-
-    const canvasPos = {
-      x: (pos.x - pan.x) / zoom,
-      y: (pos.y - pan.y) / zoom,
-    };
-
-    const snappedPos = snapToGridIfEnabled(canvasPos);
-
-    // Handle continuous tile painting while dragging
-    if (isPainting && tool === 'tile-paint' && selectedTileset) {
-      const gridX = Math.floor(snappedPos.x / gridSize);
-      const gridY = Math.floor(snappedPos.y / gridSize);
-
-      // Collect all grid cells to paint (deduplicated via Set)
-      const cellsToPaint = new Set<string>();
-
-      // Fill in all grid cells between last painted position and current position
-      if (lastPaintedGrid) {
-        const dx = gridX - lastPaintedGrid.x;
-        const dy = gridY - lastPaintedGrid.y;
-        const steps = Math.max(Math.abs(dx), Math.abs(dy));
-        
-        if (steps > 0) {
-          // Interpolate between last and current position to fill gaps
-          for (let i = 1; i <= steps; i++) {
-            const t = i / steps;
-            const interpX = Math.floor(lastPaintedGrid.x + dx * t);
-            const interpY = Math.floor(lastPaintedGrid.y + dy * t);
-            cellsToPaint.add(`${interpX},${interpY}`);
-          }
-        }
+  const handleShapeClick = (shapeId: string, multiSelect: boolean) => {
+    if (multiSelect) {
+      const currentSelection = [...selectedIds];
+      if (currentSelection.includes(shapeId)) {
+        // Remove from selection
+        selectMultipleShapes(currentSelection.filter(id => id !== shapeId));
       } else {
-        // First paint
-        cellsToPaint.add(`${gridX},${gridY}`);
+        // Add to selection
+        selectMultipleShapes([...currentSelection, shapeId]);
       }
-      
-      // Paint all unique cells
-      cellsToPaint.forEach(cell => {
-        const [x, y] = cell.split(',').map(Number);
-        paintTilesAtPosition(x, y);
-      });
-      
-      setLastPaintedGrid({ x: gridX, y: gridY });
-      return;
-    }
-
-    // Handle continuous tile erasing while dragging
-    if (isPainting && tool === 'tile-erase') {
-      const gridX = Math.floor(snappedPos.x / gridSize);
-      const gridY = Math.floor(snappedPos.y / gridSize);
-
-      // Collect all grid cells to erase with brush size
-      const cellsToErase = new Set<string>();
-
-      // Fill in all grid cells between last erased position and current position
-      if (lastPaintedGrid) {
-        const lastX = lastPaintedGrid.x;
-        const lastY = lastPaintedGrid.y;
-        const dx = gridX - lastX;
-        const dy = gridY - lastY;
-        const steps = Math.max(Math.abs(dx), Math.abs(dy));
-        
-        if (steps > 0) {
-          // Interpolate between last and current position to fill gaps
-          for (let i = 1; i <= steps; i++) {
-            const t = i / steps;
-            const interpX = Math.floor(lastX + dx * t);
-            const interpY = Math.floor(lastY + dy * t);
-            
-            // Add brush-sized area around each interpolated point
-            const halfBrushX = Math.floor(brushSize.width / 2);
-            const halfBrushY = Math.floor(brushSize.height / 2);
-            for (let by = -halfBrushY; by <= halfBrushY; by++) {
-              for (let bx = -halfBrushX; bx <= halfBrushX; bx++) {
-                const cellX = interpX + bx;
-                const cellY = interpY + by;
-                cellsToErase.add(`${cellX},${cellY}`);
-              }
-            }
-          }
-        }
-      } else {
-        // First erase - apply brush size
-        const halfBrushX = Math.floor(brushSize.width / 2);
-        const halfBrushY = Math.floor(brushSize.height / 2);
-        for (let by = -halfBrushY; by <= halfBrushY; by++) {
-          for (let bx = -halfBrushX; bx <= halfBrushX; bx++) {
-            const cellX = gridX + bx;
-            const cellY = gridY + by;
-            cellsToErase.add(`${cellX},${cellY}`);
-          }
-        }
-      }
-      
-      // Erase all unique cells
-      cellsToErase.forEach(cell => {
-        const [x, y] = cell.split(',').map(Number);
-        eraseTilesAtPosition(x, y);
-      });
-      
-      setLastPaintedGrid({ x: gridX, y: gridY });
-      return;
-    }
-
-    if (!isDrawing || !currentShape) return;
-
-    const width = snappedPos.x - currentShape.transform.x;
-    const height = snappedPos.y - currentShape.transform.y;
-
-    if (currentShape.type === 'line' && currentShape.points) {
-      setCurrentShape({
-        ...currentShape,
-        points: [0, 0, width, height],
-      });
     } else {
-      setCurrentShape({
-        ...currentShape,
-        transform: {
-          ...currentShape.transform,
-          width: Math.abs(width),
-          height: Math.abs(height),
-          x: width < 0 ? snappedPos.x : currentShape.transform.x,
-          y: height < 0 ? snappedPos.y : currentShape.transform.y,
-        },
-      });
+      // Single select
+      selectShape(shapeId, false);
     }
   };
 
-  const handleMouseUp = () => {
-    if (isDrawing && currentShape) {
-      // Only add shape if it has some size
-      const hasSize = currentShape.type === 'line'
-        ? currentShape.points && (Math.abs(currentShape.points[2]) > 5 || Math.abs(currentShape.points[3]) > 5)
-        : currentShape.transform.width > 5 || currentShape.transform.height > 5;
-
-      if (hasSize) {
-        addShape(currentShape);
-      }
-    }
-    
-    // Reset painting state
-    setIsPainting(false);
-    setLastPaintedGrid(null);
-    setIsDrawing(false);
-    setCurrentShape(null);
-  };
-
-  const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
-    e.evt.preventDefault();
-    const stage = stageRef.current;
-    if (!stage) return;
-
-    const scaleBy = 1.1;
-    const oldScale = zoom;
-    const newScale = e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-    // Get the center of the viewport
-    const centerX = stageSize.width / 2;
-    const centerY = stageSize.height / 2;
-
-    // Calculate world position of center before zoom
-    const worldPosBeforeZoom = {
-      x: (centerX - pan.x) / oldScale,
-      y: (centerY - pan.y) / oldScale,
+  const handleShapeDragEnd = (shapeId: string, position: { x: number; y: number }) => {
+    const existing = shapes.find(s => s.id === shapeId);
+    if (!existing) return;
+    const newTransform = {
+      ...existing.transform,
+      x: position.x,
+      y: position.y,
     };
-
-    // Calculate new pan to keep the center point in the same screen position
-    const newPan = {
-      x: centerX - worldPosBeforeZoom.x * newScale,
-      y: centerY - worldPosBeforeZoom.y * newScale,
-    };
-
-    useCanvasStore.setState({ zoom: newScale, pan: newPan });
+    updateShape(shapeId, { transform: newTransform });
   };
 
-  const handleStageDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
-    const stage = e.target as Konva.Stage;
-    useCanvasStore.setState({ 
-      pan: { x: stage.x(), y: stage.y() } 
+  const handleSpriteClick = (spriteId: string) => {
+    selectSprite(spriteId);
+  };
+
+  const handleSpriteDragEnd = (spriteId: string, position: { x: number; y: number }) => {
+    updateSprite(spriteId, {
+      x: position.x,
+      y: position.y,
     });
   };
 
-  const renderShape = (shape: Shape, isTemp = false) => {
-    const isSelected = selectedIds.includes(shape.id);
-    const commonProps = {
-      key: shape.id,
-      x: shape.transform.x,
-      y: shape.transform.y,
-      fill: shape.style.fill,
-      stroke: isSelected ? '#60a5fa' : shape.style.stroke,
-      strokeWidth: isSelected ? shape.style.strokeWidth + 1 : shape.style.strokeWidth,
-      opacity: shape.style.opacity,
-      rotation: shape.transform.rotation,
-      scaleX: shape.transform.scaleX,
-      scaleY: shape.transform.scaleY,
-      draggable: !isTemp && tool === 'select',
-      onClick: () => !isTemp && selectShape(shape.id, false),
-      onDragEnd: (e: Konva.KonvaEventObject<DragEvent>) => {
-        const target = e.target;
-        updateShape(shape.id, {
-          transform: {
-            ...shape.transform,
-            x: target.x(),
-            y: target.y(),
-          },
-        });
-      },
-    };
-
-    switch (shape.type) {
-      case 'rectangle':
-        return (
-          <Rect
-            {...commonProps}
-            width={shape.transform.width}
-            height={shape.transform.height}
-          />
-        );
-      case 'circle':
-        return (
-          <Circle
-            {...commonProps}
-            radius={Math.max(shape.transform.width, shape.transform.height) / 2}
-          />
-        );
-      case 'polygon':
-        return (
-          <RegularPolygon
-            {...commonProps}
-            sides={6}
-            radius={Math.max(shape.transform.width, shape.transform.height) / 2}
-          />
-        );
-      case 'star':
-        return (
-          <Star
-            {...commonProps}
-            numPoints={5}
-            innerRadius={Math.max(shape.transform.width, shape.transform.height) / 4}
-            outerRadius={Math.max(shape.transform.width, shape.transform.height) / 2}
-          />
-        );
-      case 'line':
-        return (
-          <Line
-            {...commonProps}
-            points={shape.points || [0, 0, 100, 100]}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  const renderGrid = () => {
-    if (!gridVisible) return null;
-
-    const lines: JSX.Element[] = [];
-    const padding = 2000;
-    const startX = Math.floor((-pan.x / zoom - padding) / gridSize) * gridSize;
-    const endX = Math.ceil((-pan.x / zoom + stageSize.width / zoom + padding) / gridSize) * gridSize;
-    const startY = Math.floor((-pan.y / zoom - padding) / gridSize) * gridSize;
-    const endY = Math.ceil((-pan.y / zoom + stageSize.height / zoom + padding) / gridSize) * gridSize;
-
-    for (let x = startX; x <= endX; x += gridSize) {
-      lines.push(
-        <Line
-          key={`v-${x}`}
-          points={[x, startY, x, endY]}
-          stroke="hsl(var(--canvas-grid))"
-          strokeWidth={0.5 / zoom}
-          listening={false}
-        />
-      );
-    }
-
-    for (let y = startY; y <= endY; y += gridSize) {
-      lines.push(
-        <Line
-          key={`h-${y}`}
-          points={[startX, y, endX, y]}
-          stroke="hsl(var(--canvas-grid))"
-          strokeWidth={0.5 / zoom}
-          listening={false}
-        />
-      );
-    }
-
-    return lines;
-  };
-
-  const renderTiles = () => {
-    // Sort tiles by layer: terrain first, then props on top
-    const sortedTiles = [...tiles].sort((a, b) => {
-      if (a.layer === 'terrain' && b.layer === 'props') return -1;
-      if (a.layer === 'props' && b.layer === 'terrain') return 1;
-      return 0;
-    });
-
-    return sortedTiles.map((tile, index) => {
-      // Look up the tileset by tilesetId
-      const tileset = tilesets.find((ts) => ts.id === tile.tilesetId);
-      if (!tileset) return null;
-
-      // Get the loaded image for this tileset
-      const image = tilesetImages.get(tileset.id);
-      if (!image) {
-        // Fallback to colored rectangle while image is loading
-        return (
-          <Rect
-            key={`tile-${index}`}
-            x={tile.x * gridSize}
-            y={tile.y * gridSize}
-            width={gridSize}
-            height={gridSize}
-            fill="#6366f1"
-            opacity={0.3}
-            listening={false}
-          />
-        );
-      }
-
-      // Calculate the position in the tileset image accounting for spacing
-      // For a 3x3 grid with spacing, each tile starts at: col * (tileSize + spacing)
-      const col = tile.tileIndex % tileset.columns;
-      const row = Math.floor(tile.tileIndex / tileset.columns);
-      const spacing = tileset.spacing || 0;
-      const tileX = col * (tileset.tileSize + spacing);
-      const tileY = row * (tileset.tileSize + spacing);
-
-      return (
-        <Image
-          key={`tile-${index}`}
-          image={image}
-          x={tile.x * gridSize}
-          y={tile.y * gridSize}
-          width={gridSize}
-          height={gridSize}
-          crop={{
-            x: tileX,
-            y: tileY,
-            width: tileset.tileSize,
-            height: tileset.tileSize,
-          }}
-          listening={false}
-        />
-      );
-    });
-  };
-
-  const renderSprites = () => {
-    return sprites.map((sprite) => {
-      const spriteDef = spriteDefinitions.find(def => def.id === sprite.spriteId);
-      if (!spriteDef) return null;
-
-      return (
-        <SpriteAnimator
-          key={sprite.id}
-          sprite={sprite}
-          definition={spriteDef}
-          isSelected={selectedSpriteId === sprite.id}
-          isPreviewing={animationPreview}
-          onClick={() => selectSprite(sprite.id)}
-          onDragEnd={(e) => {
-            const node = e.target;
-            updateSprite(sprite.id, {
-              x: node.x(),
-              y: node.y(),
-            });
-          }}
-        />
-      );
-    });
-  };
+  // Use the extracted canvas events hook
+  const {
+    stageRef,
+    handleMouseDown,
+    handleMouseMove,
+    handleMouseUp,
+    handleWheel,
+    handleStageDragEnd,
+  } = useCanvasEvents({
+    tool,
+    zoom,
+    pan,
+    gridSize,
+    gridSnap: snapToGrid,
+    selectedIds,
+    selectedTileset,
+    selectedTileIndex,
+    selectedSpriteDefId,
+    shapes,
+    tiles,
+    sprites,
+    spriteDefinitions,
+    currentUser,
+    setCurrentShape,
+    setIsDrawing,
+    setIsSelecting,
+    setSelectionStart,
+    setSelectionEnd,
+    setIsPainting,
+    setLastPaintedGrid,
+    addShape,
+    addSprite,
+    addTiles,
+    clearSelection,
+    selectShape,
+    selectMultipleShapes,
+    updateShape,
+    snapToGridIfEnabled,
+    paintTilesAtPosition,
+    eraseTilesAtPosition,
+  });
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-canvas">
+    <div ref={containerRef} className="w-full h-full bg-canvas relative">
+      {/* Konva Stage - Main canvas rendering */}
       <Stage
         ref={stageRef}
         width={stageSize.width}
@@ -803,14 +633,77 @@ export function Canvas() {
         onDragEnd={handleStageDragEnd}
         draggable={tool === 'pan'}
       >
-        <Layer>
-          {renderGrid()}
-          {renderTiles()}
-          {shapes.map((shape) => renderShape(shape))}
-          {renderSprites()}
-          {currentShape && renderShape(currentShape, true)}
-        </Layer>
+        <CanvasRenderer
+          // Grid props
+          gridVisible={gridVisible}
+          gridSize={gridSize}
+          zoom={zoom}
+          pan={pan}
+          stageSize={stageSize}
+          
+          // Tile props
+          tiles={tiles}
+          tilesets={tilesets}
+          tilesetImages={tilesetImages}
+          tilesetIndexImages={tilesetIndexImages}
+          layerVisibility={layerVisibility}
+          
+          // Shape props
+          shapes={shapes}
+          selectedIds={selectedIds}
+          currentShape={currentShape}
+          tool={tool}
+          
+          // Sprite props
+          sprites={sprites}
+          spriteDefinitions={spriteDefinitions}
+          selectedSpriteId={selectedSpriteId}
+          animationPreview={animationPreview}
+          
+          // Selection props
+          isSelecting={isSelecting}
+          selectionStart={selectionStart}
+          selectionEnd={selectionEnd}
+          
+          // User presence props
+          users={users}
+          currentUser={currentUser}
+          
+          // Event handlers
+          onShapeClick={handleShapeClick}
+          onShapeDragEnd={handleShapeDragEnd}
+          onSpriteClick={handleSpriteClick}
+          onSpriteDragEnd={handleSpriteDragEnd}
+          onShapeTransform={updateShape}
+          onMultiTransform={transformSelectedShapes}
+        />
       </Stage>
+      
+      {/* Godot Canvas Layer - Overlay for Godot rendering */}
+      {useGodotRendering && godotProjectConfig && (
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{ zIndex: 10 }}
+        >
+          <GodotCanvas
+            projectConfig={godotProjectConfig}
+            width={stageSize.width}
+            height={stageSize.height}
+            className="pointer-events-auto"
+            autoResize={false}
+            onReady={() => {
+              console.log('[Canvas] Godot layer is ready');
+            }}
+            onMessage={(message) => {
+              console.log('[Canvas] Message from Godot:', message);
+              // Handle Godot messages here
+            }}
+            onError={(error) => {
+              console.error('[Canvas] Godot error:', error);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
